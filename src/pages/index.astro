@@ -1,17 +1,149 @@
 ---
+import MainLayout from '../layouts/MainLayout.astro';
+import CategoryCard from '../components/home/CategoryCard.astro';
+import ToolCard from '../components/home/ToolCard.astro';
 
+const tools = [
+  {
+    title: "SVG Viewer & Validator",
+    description: "Preview any SVG and catch invalid markup before you ship it.",
+    href: "/svg-tools/svg-viewer/",
+    badgeColor: "blue",
+    iconPath: "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z M12 15a3 3 0 100-6 3 3 0 000 6z",
+  },
+  {
+    title: "SVG Code Editor",
+    description: "Edit, validate and pretty-print SVG code in real time.",
+    href: "/svg-tools/svg-editor/",
+    badgeColor: "indigo",
+    iconPath: "M8 6L2 12l6 6 M16 6l6 6-6 6",
+  },
+  {
+    title: "SVG ViewBox Fixer",
+    description: "Fix missing or broken viewBox attributes automatically.",
+    href: "/svg-tools/viewbox-fixer/",
+    badgeColor: "purple",
+    iconPath: "M4 4h16v16H4z M4 9h16 M9 4v16",
+  },
+  {
+    title: "SVG Palette Extractor",
+    description: "Extract beautiful color palettes from any SVG image.",
+    href: "/svg-tools/palette-extractor/",
+    badgeColor: "amber",
+    iconPath: "M12 2a10 10 0 100 20 2 2 0 001-3.73A2 2 0 0114 16a2 2 0 012-2h1.5a3.5 3.5 0 003.5-3.5C21 6 17 2 12 2z M7.5 12a1.5 1.5 0 100-3 1.5 1.5 0 000 3z M9.5 8a1.5 1.5 0 100-3 1.5 1.5 0 000 3z M14.5 7.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z",
+  },
+  {
+    title: "SVG to CSS Data URI",
+    description: "Convert SVGs into inline CSS-ready data URIs instantly.",
+    href: "/developer-tools/svg-to-css-data-uri/",
+    badgeColor: "teal",
+    iconPath: "M4 4l4 4-4 4 M20 20l-4-4 4-4 M13 4l-2 16",
+  },
+  {
+    title: "Image to Tailwind Palette",
+    description: "Turn any image into a ready-to-use Tailwind color palette.",
+    href: "/developer-tools/image-to-tailwind-palette/",
+    badgeColor: "green",
+    iconPath: "M3 3h18v18H3z M8.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3z M21 15l-5-5L5 21",
+  },
+];
+
+const categories = [
+  {
+    title: "SVG & Design Tools",
+    description: "Edit, optimize, convert and inspect SVG files.",
+    href: "/svg-tools/",
+    badgeColor: "teal",
+    iconPath: "M12 19l7-7 3 3-7 7-3-3z M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z M2 2l7.586 7.586 M11 13a2 2 0 104 0 2 2 0 00-4 0z",
+  },
+  {
+    title: "Developer Utilities",
+    description: "Generate configs, minify code, and speed up workflows.",
+    href: "/developer-tools/",
+    badgeColor: "purple",
+    iconPath: "M8 6L2 12l6 6 M16 6l6 6-6 6",
+  },
+  {
+    title: "Technical SEO Tools",
+    description: "Check metadata, redirects, robots.txt and more.",
+    href: "/seo-tools/",
+    badgeColor: "green",
+    iconPath: "M11 19a8 8 0 100-16 8 8 0 000 16z M21 21l-4.35-4.35",
+  },
+];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<MainLayout>
+
+  <!-- Hero -->
+  <section class="mx-auto max-w-6xl px-4 py-20 text-center">
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
+      Powerful web tools. Zero installs.
+    </span>
+
+    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">
+      Edit SVGs. Build Faster.
+      <span class="text-brand-600"> Fix Technical SEO.</span>
+    </h1>
+
+    <p class="mx-auto mt-4 max-w-xl text-slate-600">
+      A privacy first toolkit for designers, developers, and website owners. Edit SVG files, generate website configs, and run technical SEO checks, right in your browser.
+    </p>
+
+    <div class="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
+      <a href="/svg-tools/svg-editor/"
+        class="rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+      >
+        Try SVG Editor
+      </a>
+      <a href="/tools/"
+        class="rounded-lg border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-500 hover:text-brand-600"
+      >
+        Explore All Tools
+      </a>
+    </div>
+
+    <p class="mt-6 text-xs text-slate-500">
+      No signup for basic tools &middot; Browser based &middot; Fast exports
+    </p>
+  </section>
+
+  <!-- Explore by Category -->
+  <section class="mx-auto max-w-6xl px-4 py-20">
+    <div class="mb-12 max-w-xl">
+      <span class="text-xs font-semibold uppercase tracking-wider text-brand-500">
+        By category
+      </span>
+      <h2 class="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
+        Explore the toolkit
+      </h2>
+      <p class="mt-3 text-slate-600">
+        Every tool runs client-side, nothing you upload ever leaves your browser.
+      </p>
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {categories.map((category) => <CategoryCard {...category} />)}
+    </div>
+  </section>
+
+  <!-- Popular Tools -->
+  <section class="mx-auto max-w-6xl px-4 py-20">
+    <div class="mb-12 max-w-xl">
+      <span class="text-xs font-semibold uppercase tracking-wider text-brand-500">
+        Launch batch
+      </span>
+      <h2 class="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
+        Popular tools
+      </h2>
+      <p class="mt-3 text-slate-600">
+        Six tools to start with — more added as the toolkit grows.
+      </p>
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {tools.map((tool) => <ToolCard {...tool} />)}
+    </div>
+  </section>
+
+</MainLayout>

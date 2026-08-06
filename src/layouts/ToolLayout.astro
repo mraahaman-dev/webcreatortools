@@ -1,0 +1,127 @@
+---
+import MainLayout from './MainLayout.astro';
+
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  title: string;           // e.g. "SVG Code Editor"
+  description: string;     // meta description, 150–160 chars ideally
+  category: string;        // e.g. "SVG & Design Tools"
+  categorySlug: string;    // e.g. "svg-tools"
+  toolSlug: string;        // e.g. "svg-editor"
+  faqs?: FAQItem[];
+}
+
+const {
+  title,
+  description,
+  category,
+  categorySlug,
+  toolSlug,
+  faqs = [],
+} = Astro.props;
+
+const siteUrl = "https://webcreatortools.com"; // update once domain is live
+const pageUrl = `${siteUrl}/${categorySlug}/${toolSlug}/`;
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: title,
+  description,
+  applicationCategory: "DeveloperApplication",
+  operatingSystem: "Any (browser-based)",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  url: pageUrl,
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+    { "@type": "ListItem", position: 2, name: category, item: `${siteUrl}/${categorySlug}/` },
+    { "@type": "ListItem", position: 3, name: title, item: pageUrl },
+  ],
+};
+
+const faqSchema = faqs.length > 0 ? {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer,
+    },
+  })),
+} : null;
+---
+
+<MainLayout title={`${title} — WebCreator Tools`} description={description}>
+
+  <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  {faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
+
+  <!-- Breadcrumb (visible) -->
+  <nav class="mx-auto max-w-6xl px-4 pt-6 text-sm text-slate-500" aria-label="Breadcrumb">
+    <ol class="flex flex-wrap items-center gap-1.5">
+      <li><a href="/" class="hover:text-brand-600">Home</a></li>
+      <li aria-hidden="true">/</li>
+      <li><a href={`/${categorySlug}/`} class="hover:text-brand-600">{category}</a></li>
+      <li aria-hidden="true">/</li>
+      <li class="text-slate-900">{title}</li>
+    </ol>
+  </nav>
+
+  <!-- Page heading -->
+  <header class="mx-auto max-w-6xl px-4 pt-6">
+    <h1 class="text-3xl font-bold text-slate-900 sm:text-4xl">{title}</h1>
+    <p class="mt-3 max-w-2xl text-slate-600">{description}</p>
+  </header>
+
+  <!-- Tool widget slot -->
+  <section class="mx-auto max-w-6xl px-4 py-10">
+    <slot />
+  </section>
+
+  <!-- Written content slot (150–300 words, SEO requirement) -->
+  <section class="mx-auto max-w-6xl px-4 py-10">
+    <slot name="content" />
+  </section>
+
+  <!-- FAQ -->
+  {faqs.length > 0 && (
+    <section class="mx-auto max-w-6xl px-4 py-10">
+      <h2 class="text-2xl font-bold text-slate-900">Frequently asked questions</h2>
+      <div class="mt-6 divide-y divide-slate-200 border-t border-slate-200">
+        {faqs.map((faq) => (
+          <details class="group py-4">
+            <summary class="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-slate-900">
+              {faq.question}
+              <svg class="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-45" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3v10M3 8h10" stroke-linecap="round" />
+              </svg>
+            </summary>
+            <p class="mt-2 text-sm leading-relaxed text-slate-600">{faq.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Related tools slot (optional, filled per-page later) -->
+  <section class="mx-auto max-w-6xl px-4 py-10">
+    <slot name="related" />
+  </section>
+
+</MainLayout>

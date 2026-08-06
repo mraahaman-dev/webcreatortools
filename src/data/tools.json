@@ -1,0 +1,115 @@
+[
+  {
+    "slug": "svg-editor",
+    "category": "svg-tools",
+    "title": "SVG Code Editor",
+    "description": "Edit, validate, and pretty print SVG code in real time, right in your browser. No uploads, no signup required.",
+    "badgeColor": "indigo",
+    "iconPath": "M8 6L2 12l6 6 M16 6l6 6-6 6",
+    "content": [
+      "SVG files are just text under the hood, which means they can be edited directly without any design software. This tool gives you a live code editor for SVG markup, so you can tweak paths, adjust colors, fix broken attributes, or clean up messy export code from design tools.",
+      "Everything runs client side. When you paste or upload an SVG, it stays in your browser's memory only. Nothing is sent to a server, logged, or stored, which makes this a safe option for working with client files or anything you would rather not upload to a third party service.",
+      "Once you are happy with your changes, you can copy the cleaned up code or export it directly for use in a website, a React component, or a design file."
+    ],
+    "faqs": [
+      {
+        "question": "Is my SVG file uploaded to a server?",
+        "answer": "No. This editor runs entirely in your browser. Your file never leaves your device, and nothing is stored or transmitted."
+      },
+      {
+        "question": "What can I edit in an SVG with this tool?",
+        "answer": "You can view and modify the raw SVG code, adjust fill and stroke colors, and export a cleaned up version ready for use on the web."
+      },
+      {
+        "question": "Does this work on mobile?",
+        "answer": "Yes, the editor is fully responsive and works in any modern browser, including on phones and tablets."
+      }
+    ]
+  },
+  {
+    "slug": "svg-viewer",
+    "category": "svg-tools",
+    "title": "SVG Viewer & Validator",
+    "description": "Preview any SVG and catch invalid markup before you ship it.",
+    "badgeColor": "blue",
+    "iconPath": "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z M12 15a3 3 0 100-6 3 3 0 000 6z",
+    "content": [
+      "This tool loads an SVG and renders it exactly as a browser would, while also checking the underlying markup for common errors like missing attributes or malformed paths.",
+      "Use it to quickly sanity check an SVG before dropping it into production, especially ones exported from design tools that sometimes leave broken references behind."
+    ],
+    "faqs": [
+      {
+        "question": "What does validation actually check?",
+        "answer": "It checks for well formed XML, missing required attributes, and common issues that cause SVGs to render incorrectly across browsers."
+      }
+    ]
+  },
+  {
+    "slug": "viewbox-fixer",
+    "category": "svg-tools",
+    "title": "SVG ViewBox Fixer",
+    "description": "Fix missing or broken viewBox attributes automatically.",
+    "badgeColor": "purple",
+    "iconPath": "M4 4h16v16H4z M4 9h16 M9 4v16",
+    "content": [
+      "A missing or incorrect viewBox is one of the most common reasons an SVG looks fine in one place and broken in another. This tool detects the issue and generates a corrected viewBox based on the SVG's actual content."
+    ],
+    "faqs": [
+      {
+        "question": "Why does my SVG look different sizes in different places?",
+        "answer": "This usually happens when the viewBox attribute is missing or does not match the SVG's actual dimensions, which affects how it scales in different containers."
+      }
+    ]
+  },
+  {
+    "slug": "palette-extractor",
+    "category": "svg-tools",
+    "title": "SVG Palette Extractor",
+    "description": "Extract beautiful color palettes from any SVG image.",
+    "badgeColor": "amber",
+    "iconPath": "M12 2a10 10 0 100 20 2 2 0 001-3.73A2 2 0 0114 16a2 2 0 012-2h1.5a3.5 3.5 0 003.5-3.5C21 6 17 2 12 2z M7.5 12a1.5 1.5 0 100-3 1.5 1.5 0 000 3z M9.5 8a1.5 1.5 0 100-3 1.5 1.5 0 000 3z M14.5 7.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z",
+    "content": [
+      "This tool scans an SVG's fill and stroke colors and pulls them into a clean palette you can copy as hex codes, ready to reuse in a design system or a Tailwind config."
+    ],
+    "faqs": [
+      {
+        "question": "Does it work with gradients?",
+        "answer": "Yes, gradient stop colors are detected and included in the extracted palette alongside solid fills and strokes."
+      }
+    ]
+  },
+  {
+    "slug": "svg-to-css-data-uri",
+    "category": "developer-tools",
+    "title": "SVG to CSS Data URI",
+    "description": "Convert SVGs into inline CSS ready data URIs instantly.",
+    "badgeColor": "teal",
+    "iconPath": "M4 4l4 4-4 4 M20 20l-4-4 4-4 M13 4l-2 16",
+    "content": [
+      "Inlining small SVGs as CSS data URIs avoids an extra network request, which can help with performance for icons and small decorative graphics. This tool handles the encoding and escaping for you."
+    ],
+    "faqs": [
+      {
+        "question": "When should I inline an SVG instead of linking to a file?",
+        "answer": "Inlining works well for small, frequently used icons where saving a network request matters more than browser caching the file separately."
+      }
+    ]
+  },
+  {
+    "slug": "image-to-tailwind-palette",
+    "category": "developer-tools",
+    "title": "Image to Tailwind Palette",
+    "description": "Turn any image into a ready to use Tailwind color palette.",
+    "badgeColor": "green",
+    "iconPath": "M3 3h18v18H3z M8.5 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3z M21 15l-5-5L5 21",
+    "content": [
+      "Upload an image and this tool identifies its dominant colors, then formats them as a Tailwind CSS theme block you can paste directly into your project."
+    ],
+    "faqs": [
+      {
+        "question": "What image formats are supported?",
+        "answer": "PNG, JPG, and WebP are all supported, since the tool works directly with pixel data in the browser."
+      }
+    ]
+  }
+]

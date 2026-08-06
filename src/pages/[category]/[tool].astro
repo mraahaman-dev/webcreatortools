@@ -1,0 +1,43 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import toolsData from '../../data/tools.json';
+import categoriesData from '../../data/categories.json';
+import SvgEditorWidget from '../../components/tools/SvgEditorWidget.astro';
+import ComingSoonWidget from '../../components/tools/ComingSoonWidget.astro';
+
+export function getStaticPaths() {
+  return toolsData.map((tool) => ({
+    params: { category: tool.category, tool: tool.slug },
+    props: { tool },
+  }));
+}
+
+const { tool } = Astro.props;
+const category = categoriesData.find((c) => c.slug === tool.category);
+
+// Map each tool slug to its real widget component.
+// Any tool not listed here falls back to ComingSoonWidget.
+const widgets: Record<string, any> = {
+  "svg-editor": SvgEditorWidget,
+};
+
+const Widget = widgets[tool.slug] ?? ComingSoonWidget;
+---
+
+<ToolLayout
+  title={tool.title}
+  description={tool.description}
+  category={category.title}
+  categorySlug={category.slug}
+  toolSlug={tool.slug}
+  faqs={tool.faqs}
+>
+  <Widget />
+
+  <Fragment slot="content">
+    <h2 class="text-2xl font-bold text-slate-900">About the {tool.title}</h2>
+    {tool.content.map((paragraph: string) => (
+      <p class="mt-4 text-slate-600 leading-relaxed">{paragraph}</p>
+    ))}
+  </Fragment>
+</ToolLayout>

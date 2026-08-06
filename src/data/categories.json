@@ -1,0 +1,17 @@
+[
+  {
+    "slug": "svg-tools",
+    "title": "SVG & Design Tools",
+    "description": "Edit, optimize, convert and inspect SVG files."
+  },
+  {
+    "slug": "developer-tools",
+    "title": "Developer Utilities",
+    "description": "Generate configs, minify code, and speed up workflows."
+  },
+  {
+    "slug": "seo-tools",
+    "title": "Technical SEO Tools",
+    "description": "Check metadata, redirects, robots.txt and more."
+  }
+]
