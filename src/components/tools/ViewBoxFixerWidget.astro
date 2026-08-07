@@ -1,0 +1,239 @@
+<div class="viewbox-fixer" data-viewbox-fixer>
+  <!-- Toolbar -->
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Upload SVG
+      <input type="file" accept=".svg,image/svg+xml" class="hidden" data-file-input />
+    </label>
+
+    <button type="button" data-fix-btn
+      class="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700">
+      Fix viewBox
+    </button>
+
+    <button type="button" data-copy-btn
+      class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Copy code
+    </button>
+
+    <button type="button" data-download-btn
+      class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Download SVG
+    </button>
+
+    <button type="button" data-clear-btn
+      class="ml-auto rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-600">
+      Clear
+    </button>
+  </div>
+
+  <!-- Code + Preview -->
+  <div class="grid overflow-hidden border border-b-0 border-slate-200 md:grid-cols-2">
+    <div class="border-b border-slate-200 md:border-b-0 md:border-r">
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        Code
+      </div>
+      <textarea
+        data-code-input
+        spellcheck="false"
+        class="h-72 w-full resize-none border-0 bg-white p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-200"
+        placeholder="Paste your SVG code here, or upload a file above"
+      ><svg xmlns="http://www.w3.org/2000/svg" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+  <path d="M6 38 L18 14 L28 30 L34 20 L42 38 Z" />
+</svg></textarea>
+    </div>
+    <div>
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        Preview
+      </div>
+      <div
+        data-preview
+        class="flex h-72 items-center justify-center overflow-auto bg-[repeating-conic-gradient(#f1f5f9_0%_25%,white_0%_50%)] bg-[length:20px_20px] p-4"
+      >
+        <span class="text-sm text-slate-400">Nothing to preview yet</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">viewBox status</h3>
+    <div data-status class="text-sm text-slate-500">Paste or upload an SVG to check its viewBox.</div>
+  </div>
+</div>
+
+<script>
+  function initViewBoxFixer(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]")!;
+    const codeInput = root.querySelector<HTMLTextAreaElement>("[data-code-input]")!;
+    const preview = root.querySelector<HTMLDivElement>("[data-preview]")!;
+    const status = root.querySelector<HTMLDivElement>("[data-status]")!;
+    const fixBtn = root.querySelector<HTMLButtonElement>("[data-fix-btn]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+    const downloadBtn = root.querySelector<HTMLButtonElement>("[data-download-btn]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+
+    function escapeHtml(text: string): string {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderPreview() {
+      const code = codeInput.value.trim();
+
+      if (!code) {
+        preview.innerHTML = '<span class="text-sm text-slate-400">Nothing to preview yet</span>';
+        status.innerHTML = "Paste or upload an SVG to check its viewBox.";
+        return;
+      }
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, "image/svg+xml");
+      const hasParseError = !!doc.querySelector("parsererror");
+
+      if (hasParseError || doc.documentElement.nodeName !== "svg") {
+        preview.innerHTML = '<span class="text-sm text-red-500">Cannot render, check that your SVG code is valid</span>';
+        status.innerHTML = '<span class="text-red-500">This SVG could not be parsed, so its viewBox cannot be checked.</span>';
+        return;
+      }
+
+      const svgEl = doc.documentElement.cloneNode(true) as SVGElement;
+      svgEl.setAttribute("class", "max-h-full max-w-full");
+      preview.innerHTML = "";
+      preview.appendChild(svgEl);
+
+      const root = doc.documentElement;
+      const hasViewBox = root.hasAttribute("viewBox");
+
+      if (hasViewBox) {
+        status.innerHTML = `
+          <div class="flex items-start gap-2">
+            <svg class="h-4 w-4 shrink-0 text-green-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div>
+              <span class="font-medium text-slate-800">This SVG already has a viewBox</span>
+              <p class="text-slate-500">Current value: ${escapeHtml(root.getAttribute("viewBox") || "")}</p>
+            </div>
+          </div>`;
+      } else {
+        status.innerHTML = `
+          <div class="flex items-start gap-2">
+            <svg class="h-4 w-4 shrink-0 text-amber-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v4M8 11.5v.01" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5"/></svg>
+            <div>
+              <span class="font-medium text-slate-800">No viewBox found</span>
+              <p class="text-slate-500">Click Fix viewBox to calculate one from this SVG's actual content.</p>
+            </div>
+          </div>`;
+      }
+    }
+
+    function fixViewBox() {
+      const code = codeInput.value.trim();
+      if (!code) return;
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, "image/svg+xml");
+      const hasParseError = !!doc.querySelector("parsererror");
+
+      if (hasParseError || doc.documentElement.nodeName !== "svg") {
+        status.innerHTML = '<span class="text-red-500">Cannot calculate a viewBox for invalid SVG markup. Fix the syntax first.</span>';
+        return;
+      }
+
+      // getBBox() only returns real values once the element is attached to the DOM,
+      // so render it off-screen, measure it, then remove it.
+      const svgEl = doc.documentElement.cloneNode(true) as SVGSVGElement;
+      svgEl.style.position = "absolute";
+      svgEl.style.visibility = "hidden";
+      svgEl.style.width = "auto";
+      svgEl.style.height = "auto";
+      document.body.appendChild(svgEl);
+
+      let bbox: DOMRect;
+      try {
+        bbox = svgEl.getBBox();
+      } catch {
+        document.body.removeChild(svgEl);
+        status.innerHTML = '<span class="text-red-500">Could not measure this SVG\'s content. It may be empty.</span>';
+        return;
+      }
+      document.body.removeChild(svgEl);
+
+      if (bbox.width === 0 && bbox.height === 0) {
+        status.innerHTML = '<span class="text-red-500">This SVG appears to have no visible content to measure.</span>';
+        return;
+      }
+
+      // Add a small padding so strokes at the very edge are not clipped.
+      const padding = Math.max(bbox.width, bbox.height) * 0.02;
+      const x = round(bbox.x - padding);
+      const y = round(bbox.y - padding);
+      const width = round(bbox.width + padding * 2);
+      const height = round(bbox.height + padding * 2);
+      const newViewBox = `${x} ${y} ${width} ${height}`;
+
+      const originalHadViewBox = doc.documentElement.hasAttribute("viewBox");
+      doc.documentElement.setAttribute("viewBox", newViewBox);
+
+      const serializer = new XMLSerializer();
+      codeInput.value = serializer.serializeToString(doc.documentElement);
+
+      status.innerHTML = `
+        <div class="flex items-start gap-2">
+          <svg class="h-4 w-4 shrink-0 text-green-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>
+            <span class="font-medium text-slate-800">${originalHadViewBox ? "viewBox recalculated" : "viewBox added"}</span>
+            <p class="text-slate-500">New value: ${escapeHtml(newViewBox)}, calculated from this SVG's actual rendered content.</p>
+          </div>
+        </div>`;
+
+      renderPreview();
+    }
+
+    function round(n: number): number {
+      return Math.round(n * 100) / 100;
+    }
+
+    codeInput.addEventListener("input", renderPreview);
+    renderPreview();
+
+    fixBtn.addEventListener("click", fixViewBox);
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        codeInput.value = String(reader.result ?? "");
+        renderPreview();
+      };
+      reader.readAsText(file);
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      if (!codeInput.value) return;
+      await navigator.clipboard.writeText(codeInput.value);
+      const original = copyBtn.textContent;
+      copyBtn.textContent = "Copied";
+      setTimeout(() => (copyBtn.textContent = original), 1500);
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      if (!codeInput.value.trim()) return;
+      const blob = new Blob([codeInput.value], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "fixed.svg";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      codeInput.value = "";
+      renderPreview();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-viewbox-fixer]").forEach(initViewBoxFixer);
+</script>

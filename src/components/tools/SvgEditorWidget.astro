@@ -1,3 +1,327 @@
-<div class="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-  <p class="text-slate-500">SVG editor widget coming soon.</p>
+<div class="svg-editor" data-svg-editor>
+  <!-- Toolbar -->
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Upload SVG
+      <input type="file" accept=".svg,image/svg+xml" class="hidden" data-file-input />
+    </label>
+
+    <button type="button" data-library-btn
+      class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Browse icons
+    </button>
+
+    <button type="button" data-format-btn
+      class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Format code
+    </button>
+
+    <button type="button" data-copy-btn
+      class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Copy code
+    </button>
+
+    <button type="button" data-download-btn
+      class="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700">
+      Download SVG
+    </button>
+
+    <button type="button" data-download-png-btn
+      class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Download PNG
+    </button>
+
+    <button type="button" data-copy-datauri-btn
+      class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Copy Data URI
+    </button>
+
+    <button type="button" data-clear-btn
+      class="ml-auto rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-600">
+      Clear
+    </button>
+  </div>
+
+  <!-- Icon library drawer, hidden by default -->
+  <div data-library-panel hidden class="border border-b-0 border-slate-200 bg-white p-4">
+    <input
+      type="text"
+      data-library-search
+      placeholder="Search icons"
+      class="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+    />
+    <div data-library-grid class="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8"></div>
+    <p class="mt-3 text-xs text-slate-400">
+      Starter set, free to use and modify. Add more by pasting SVG path data from an openly licensed set such as Lucide or Heroicons.
+    </p>
+  </div>
+
+  <!-- Editor + Preview -->
+  <div class="grid overflow-hidden rounded-b-2xl border border-slate-200 md:grid-cols-2">
+    <div class="border-b border-slate-200 md:border-b-0 md:border-r">
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        Code
+      </div>
+      <textarea
+        data-code-input
+        spellcheck="false"
+        class="h-96 w-full resize-none border-0 bg-white p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-200"
+        placeholder="Paste your SVG code here, or upload a file above"
+      ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M6 38 L18 14 L28 30 L34 20 L42 38 Z" />
+</svg></textarea>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        <span>Preview</span>
+        <span data-status class="normal-case text-slate-400"></span>
+      </div>
+      <div
+        data-preview
+        class="flex h-96 items-center justify-center overflow-auto bg-[repeating-conic-gradient(#f1f5f9_0%_25%,white_0%_50%)] bg-[length:20px_20px] p-4"
+      >
+        <span class="text-sm text-slate-400">Nothing to preview yet</span>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+  import iconLibrary from "../../data/icon-library.json";
+
+  interface IconElement {
+    tag: string;
+    [attr: string]: string;
+  }
+
+  interface IconDefinition {
+    id: string;
+    name: string;
+    tags: string[];
+    viewBox: string;
+    elements: IconElement[];
+  }
+
+  function buildIconSvgString(icon: IconDefinition): string {
+    const inner = icon.elements
+      .map((el) => {
+        const { tag, ...attrs } = el;
+        const attrString = Object.entries(attrs)
+          .map(([key, value]) => `${key}="${value}"`)
+          .join(" ");
+        return `<${tag} ${attrString} />`;
+      })
+      .join("\n  ");
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">\n  ${inner}\n</svg>`;
+  }
+
+  function initSvgEditor(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]")!;
+    const codeInput = root.querySelector<HTMLTextAreaElement>("[data-code-input]")!;
+    const preview = root.querySelector<HTMLDivElement>("[data-preview]")!;
+    const status = root.querySelector<HTMLSpanElement>("[data-status]")!;
+    const formatBtn = root.querySelector<HTMLButtonElement>("[data-format-btn]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+    const downloadBtn = root.querySelector<HTMLButtonElement>("[data-download-btn]")!;
+    const downloadPngBtn = root.querySelector<HTMLButtonElement>("[data-download-png-btn]")!;
+    const copyDataUriBtn = root.querySelector<HTMLButtonElement>("[data-copy-datauri-btn]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+    const libraryBtn = root.querySelector<HTMLButtonElement>("[data-library-btn]")!;
+    const libraryPanel = root.querySelector<HTMLDivElement>("[data-library-panel]")!;
+    const librarySearch = root.querySelector<HTMLInputElement>("[data-library-search]")!;
+    const libraryGrid = root.querySelector<HTMLDivElement>("[data-library-grid]")!;
+
+    function renderPreview() {
+      const code = codeInput.value.trim();
+
+      if (!code) {
+        preview.innerHTML = '<span class="text-sm text-slate-400">Nothing to preview yet</span>';
+        status.textContent = "";
+        return;
+      }
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, "image/svg+xml");
+      const parseError = doc.querySelector("parsererror");
+
+      if (parseError || doc.documentElement.nodeName !== "svg") {
+        status.textContent = "Invalid SVG";
+        status.className = "normal-case text-red-500";
+        return;
+      }
+
+      const svgEl = doc.documentElement;
+      svgEl.setAttribute("class", "max-h-full max-w-full");
+      preview.innerHTML = "";
+      preview.appendChild(svgEl);
+
+      const sizeKb = (new Blob([code]).size / 1024).toFixed(1);
+      status.textContent = `Valid, ${sizeKb} KB`;
+      status.className = "normal-case text-green-600";
+    }
+
+    function renderLibraryGrid(filter: string) {
+      const query = filter.trim().toLowerCase();
+      const matches = (iconLibrary as IconDefinition[]).filter((icon) => {
+        if (!query) return true;
+        return icon.name.toLowerCase().includes(query) || icon.tags.some((tag) => tag.includes(query));
+      });
+
+      libraryGrid.innerHTML = "";
+
+      if (matches.length === 0) {
+        libraryGrid.innerHTML = '<p class="col-span-full text-sm text-slate-400">No icons match that search</p>';
+        return;
+      }
+
+      matches.forEach((icon) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.title = icon.name;
+        btn.className =
+          "flex flex-col items-center gap-1 rounded-lg border border-slate-200 p-2 hover:border-brand-400 hover:bg-brand-50";
+        btn.innerHTML = `
+          <svg viewBox="${icon.viewBox}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-slate-600">
+            ${icon.elements.map((el) => {
+              const { tag, ...attrs } = el;
+              const attrString = Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(" ");
+              return `<${tag} ${attrString} />`;
+            }).join("")}
+          </svg>
+          <span class="text-[10px] text-slate-500">${icon.name}</span>
+        `;
+
+        btn.addEventListener("click", () => {
+          codeInput.value = buildIconSvgString(icon);
+          renderPreview();
+          libraryPanel.hidden = true;
+        });
+
+        libraryGrid.appendChild(btn);
+      });
+    }
+
+    codeInput.addEventListener("input", renderPreview);
+    renderPreview();
+
+    libraryBtn.addEventListener("click", () => {
+      libraryPanel.hidden = !libraryPanel.hidden;
+      if (!libraryPanel.hidden) renderLibraryGrid(librarySearch.value);
+    });
+
+    librarySearch.addEventListener("input", () => renderLibraryGrid(librarySearch.value));
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        codeInput.value = String(reader.result ?? "");
+        renderPreview();
+      };
+      reader.readAsText(file);
+    });
+
+    formatBtn.addEventListener("click", () => {
+      const code = codeInput.value.trim();
+      if (!code) return;
+
+      const withBreaks = code.replace(/></g, ">\n<");
+      const lines = withBreaks.split("\n");
+      let depth = 0;
+      const formatted = lines
+        .map((line) => {
+          const trimmed = line.trim();
+          if (/^<\//.test(trimmed)) depth = Math.max(depth - 1, 0);
+          const indented = "  ".repeat(depth) + trimmed;
+          if (/^<[^/!][^>]*[^/]>$/.test(trimmed) && !/^<[^>]+\/>$/.test(trimmed)) depth += 1;
+          return indented;
+        })
+        .join("\n");
+
+      codeInput.value = formatted;
+      renderPreview();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      if (!codeInput.value) return;
+      await navigator.clipboard.writeText(codeInput.value);
+      const original = copyBtn.textContent;
+      copyBtn.textContent = "Copied";
+      setTimeout(() => (copyBtn.textContent = original), 1500);
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      if (!codeInput.value.trim()) return;
+      const blob = new Blob([codeInput.value], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "edited.svg";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      codeInput.value = "";
+      renderPreview();
+    });
+
+    downloadPngBtn.addEventListener("click", () => {
+      const code = codeInput.value.trim();
+      if (!code) return;
+
+      const svgBlob = new Blob([code], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+
+      img.onload = () => {
+        const width = img.naturalWidth || 512;
+        const height = img.naturalHeight || 512;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, width, height);
+        URL.revokeObjectURL(url);
+
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const pngUrl = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = pngUrl;
+          a.download = "edited.png";
+          a.click();
+          URL.revokeObjectURL(pngUrl);
+        }, "image/png");
+      };
+
+      img.onerror = () => {
+        status.textContent = "Could not render PNG, check your SVG code";
+        status.className = "normal-case text-red-500";
+        URL.revokeObjectURL(url);
+      };
+
+      img.src = url;
+    });
+
+    copyDataUriBtn.addEventListener("click", async () => {
+      const code = codeInput.value.trim();
+      if (!code) return;
+
+      const base64 = btoa(unescape(encodeURIComponent(code)));
+      const dataUri = `data:image/svg+xml;base64,${base64}`;
+
+      await navigator.clipboard.writeText(dataUri);
+      const original = copyDataUriBtn.textContent;
+      copyDataUriBtn.textContent = "Copied";
+      setTimeout(() => (copyDataUriBtn.textContent = original), 1500);
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-svg-editor]").forEach(initSvgEditor);
+</script>

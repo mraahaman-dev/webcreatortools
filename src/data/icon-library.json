@@ -1,0 +1,62 @@
+[
+  { "id": "home", "name": "Home", "tags": ["house", "start"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "path", "d": "M3 11l9-8 9 8" },
+      { "tag": "path", "d": "M5 10v10h5v-6h4v6h5V10" }
+    ] },
+  { "id": "user", "name": "User", "tags": ["person", "account", "profile"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "circle", "cx": "12", "cy": "8", "r": "4" },
+      { "tag": "path", "d": "M4 21c0-4.4 3.6-6 8-6s8 1.6 8 6" }
+    ] },
+  { "id": "heart", "name": "Heart", "tags": ["love", "favorite", "like"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "path", "d": "M12 21s-7.5-4.6-10-9C0.4 8.6 2 4 6.5 4 9 4 11 6 12 7c1-1 3-3 5.5-3C22 4 23.6 8.6 22 12c-2.5 4.4-10 9-10 9z" }
+    ] },
+  { "id": "star", "name": "Star", "tags": ["favorite", "rating"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "path", "d": "M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z" }
+    ] },
+  { "id": "mail", "name": "Mail", "tags": ["email", "message"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "rect", "x": "3", "y": "5", "width": "18", "height": "14", "rx": "2" },
+      { "tag": "path", "d": "M3 7l9 6 9-6" }
+    ] },
+  { "id": "search", "name": "Search", "tags": ["find", "magnifier"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "circle", "cx": "10", "cy": "10", "r": "6" },
+      { "tag": "path", "d": "M20 20l-5.2-5.2" }
+    ] },
+  { "id": "settings", "name": "Settings", "tags": ["gear", "options", "preferences"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "circle", "cx": "12", "cy": "12", "r": "3" },
+      { "tag": "path", "d": "M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" }
+    ] },
+  { "id": "download", "name": "Download", "tags": ["save", "export"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "path", "d": "M12 3v12" },
+      { "tag": "path", "d": "M7 10l5 5 5-5" },
+      { "tag": "path", "d": "M4 21h16" }
+    ] },
+  { "id": "upload", "name": "Upload", "tags": ["import"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "path", "d": "M12 21V9" },
+      { "tag": "path", "d": "M7 14l5-5 5 5" },
+      { "tag": "path", "d": "M4 3h16" }
+    ] },
+  { "id": "trash", "name": "Trash", "tags": ["delete", "remove"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "path", "d": "M4 7h16" },
+      { "tag": "path", "d": "M9 7V4h6v3" },
+      { "tag": "path", "d": "M6 7l1 13h10l1-13" }
+    ] },
+  { "id": "check", "name": "Check", "tags": ["done", "success", "confirm"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "path", "d": "M4 12l6 6 10-12" }
+    ] },
+  { "id": "arrow-right", "name": "Arrow Right", "tags": ["next", "forward"], "viewBox": "0 0 24 24",
+    "elements": [
+      { "tag": "path", "d": "M4 12h16" },
+      { "tag": "path", "d": "M14 6l6 6-6 6" }
+    ] }
+]

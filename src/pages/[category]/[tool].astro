@@ -3,6 +3,11 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 import toolsData from '../../data/tools.json';
 import categoriesData from '../../data/categories.json';
 import SvgEditorWidget from '../../components/tools/SvgEditorWidget.astro';
+import SvgViewerWidget from '../../components/tools/SvgViewerWidget.astro';
+import ViewBoxFixerWidget from '../../components/tools/ViewBoxFixerWidget.astro';
+import PaletteExtractorWidget from '../../components/tools/PaletteExtractorWidget.astro';
+import CssDataUriWidget from '../../components/tools/CssDataUriWidget.astro';
+import ImageToTailwindWidget from '../../components/tools/ImageToTailwindWidget.astro';
 import ComingSoonWidget from '../../components/tools/ComingSoonWidget.astro';
 
 export function getStaticPaths() {
@@ -19,6 +24,11 @@ const category = categoriesData.find((c) => c.slug === tool.category);
 // Any tool not listed here falls back to ComingSoonWidget.
 const widgets: Record<string, any> = {
   "svg-editor": SvgEditorWidget,
+  "svg-viewer": SvgViewerWidget,
+  "viewbox-fixer": ViewBoxFixerWidget,
+  "palette-extractor": PaletteExtractorWidget,
+  "svg-to-css-data-uri": CssDataUriWidget,
+  "image-to-tailwind-palette": ImageToTailwindWidget,
 };
 
 const Widget = widgets[tool.slug] ?? ComingSoonWidget;
@@ -31,13 +41,14 @@ const Widget = widgets[tool.slug] ?? ComingSoonWidget;
   categorySlug={category.slug}
   toolSlug={tool.slug}
   faqs={tool.faqs}
+  howTo={tool.howTo}
 >
   <Widget />
 
   <Fragment slot="content">
     <h2 class="text-2xl font-bold text-slate-900">About the {tool.title}</h2>
-    {tool.content.map((paragraph: string) => (
-      <p class="mt-4 text-slate-600 leading-relaxed">{paragraph}</p>
+    {tool.content.map((section: string) => (
+      <div set:html={section} />
     ))}
   </Fragment>
 </ToolLayout>

@@ -1,0 +1,233 @@
+<div class="palette-extractor" data-palette-extractor>
+  <!-- Toolbar -->
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Upload SVG
+      <input type="file" accept=".svg,image/svg+xml" class="hidden" data-file-input />
+    </label>
+    <button type="button" data-clear-btn
+      class="ml-auto rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-600">
+      Clear
+    </button>
+  </div>
+
+  <!-- Code + Preview -->
+  <div class="grid overflow-hidden border border-b-0 border-slate-200 md:grid-cols-2">
+    <div class="border-b border-slate-200 md:border-b-0 md:border-r">
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        Code
+      </div>
+      <textarea
+        data-code-input
+        spellcheck="false"
+        class="h-64 w-full resize-none border-0 bg-white p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-200"
+        placeholder="Paste your SVG code here, or upload a file above"
+      ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <path fill="#4F46E5" d="M6 38 L18 14 L28 30 L34 20 L42 38 Z" />
+  <circle cx="14" cy="10" r="4" fill="#22C55E" />
+</svg></textarea>
+    </div>
+    <div>
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        Preview
+      </div>
+      <div
+        data-preview
+        class="flex h-64 items-center justify-center overflow-auto bg-[repeating-conic-gradient(#f1f5f9_0%_25%,white_0%_50%)] bg-[length:20px_20px] p-4"
+      >
+        <span class="text-sm text-slate-400">Nothing to preview yet</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Extracted palette -->
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Extracted colors</h3>
+    <div data-extracted class="flex flex-wrap gap-3">
+      <span class="text-sm text-slate-400">Paste or upload an SVG to extract its colors.</span>
+    </div>
+  </div>
+
+  <!-- Preset palettes -->
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Preset palettes</h3>
+    <div data-presets class="grid gap-3 sm:grid-cols-2"></div>
+  </div>
+</div>
+
+<script>
+  import presetPalettes from "../../data/preset-palettes.json";
+
+  function initPaletteExtractor(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]")!;
+    const codeInput = root.querySelector<HTMLTextAreaElement>("[data-code-input]")!;
+    const preview = root.querySelector<HTMLDivElement>("[data-preview]")!;
+    const extracted = root.querySelector<HTMLDivElement>("[data-extracted]")!;
+    const presetsEl = root.querySelector<HTMLDivElement>("[data-presets]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+
+    function isValidColor(value: string): boolean {
+      if (!value || value === "none" || value === "currentColor" || value.startsWith("url(")) return false;
+      const test = new Option().style;
+      test.color = value;
+      return test.color !== "";
+    }
+
+    async function copyToClipboard(text: string, el: HTMLElement) {
+      await navigator.clipboard.writeText(text);
+      const original = el.textContent;
+      el.textContent = "Copied";
+      setTimeout(() => (el.textContent = original), 1200);
+    }
+
+    function swatchButton(color: string): HTMLButtonElement {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "flex flex-col items-center gap-1.5 rounded-lg border border-slate-200 p-2 hover:border-brand-400";
+      btn.innerHTML = `
+        <span class="block h-10 w-10 rounded-md border border-slate-200" style="background-color: ${color}"></span>
+        <span class="font-mono text-xs text-slate-600">${color}</span>
+      `;
+      const label = btn.querySelector("span:last-child") as HTMLElement;
+      btn.addEventListener("click", () => copyToClipboard(color, label));
+      return btn;
+    }
+
+    function extractColors(doc: Document): string[] {
+      const found = new Set<string>();
+      const colorAttrs = ["fill", "stroke", "stop-color"];
+
+      doc.querySelectorAll("*").forEach((el) => {
+        colorAttrs.forEach((attr) => {
+          const value = el.getAttribute(attr);
+          if (value && isValidColor(value)) found.add(value.toLowerCase());
+        });
+
+        const style = el.getAttribute("style");
+        if (style) {
+          colorAttrs.forEach((attr) => {
+            const match = style.match(new RegExp(`${attr}\\s*:\\s*([^;]+)`));
+            if (match && isValidColor(match[1].trim())) found.add(match[1].trim().toLowerCase());
+          });
+        }
+      });
+
+      return Array.from(found);
+    }
+
+    function renderAll() {
+      const code = codeInput.value.trim();
+
+      if (!code) {
+        preview.innerHTML = '<span class="text-sm text-slate-400">Nothing to preview yet</span>';
+        extracted.innerHTML = '<span class="text-sm text-slate-400">Paste or upload an SVG to extract its colors.</span>';
+        return;
+      }
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, "image/svg+xml");
+      const hasParseError = !!doc.querySelector("parsererror");
+
+      if (hasParseError || doc.documentElement.nodeName !== "svg") {
+        preview.innerHTML = '<span class="text-sm text-red-500">Cannot render, check that your SVG code is valid</span>';
+        extracted.innerHTML = '<span class="text-sm text-red-500">Cannot extract colors from invalid SVG markup.</span>';
+        return;
+      }
+
+      const svgEl = doc.documentElement.cloneNode(true) as SVGElement;
+      svgEl.setAttribute("class", "max-h-full max-w-full");
+      preview.innerHTML = "";
+      preview.appendChild(svgEl);
+
+      const colors = extractColors(doc);
+      extracted.innerHTML = "";
+
+      if (colors.length === 0) {
+        extracted.innerHTML = '<span class="text-sm text-slate-400">No explicit fill, stroke, or stop-color values found in this SVG.</span>';
+        return;
+      }
+
+      colors.forEach((color) => extracted.appendChild(swatchButton(color)));
+    }
+
+    function applyPalette(colors: string[]) {
+      const code = codeInput.value.trim();
+      if (!code) return;
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, "image/svg+xml");
+      if (doc.querySelector("parsererror") || doc.documentElement.nodeName !== "svg") return;
+
+      const existingColors = extractColors(doc);
+      if (existingColors.length === 0) return;
+
+      // Map each existing distinct color to a palette color, cycling if there are more colors than the palette has.
+      const colorMap = new Map<string, string>();
+      existingColors.forEach((color, i) => colorMap.set(color, colors[i % colors.length]));
+
+      doc.querySelectorAll("*").forEach((el) => {
+        ["fill", "stroke", "stop-color"].forEach((attr) => {
+          const value = el.getAttribute(attr);
+          if (value && colorMap.has(value.toLowerCase())) {
+            el.setAttribute(attr, colorMap.get(value.toLowerCase())!);
+          }
+        });
+      });
+
+      const serializer = new XMLSerializer();
+      codeInput.value = serializer.serializeToString(doc.documentElement);
+      renderAll();
+    }
+
+    function renderPresets() {
+      presetsEl.innerHTML = "";
+      presetPalettes.forEach((palette: { name: string; colors: string[] }) => {
+        const card = document.createElement("div");
+        card.className = "rounded-lg border border-slate-200 p-3";
+        card.innerHTML = `
+          <div class="mb-2 flex items-center justify-between">
+            <span class="text-sm font-medium text-slate-800">${palette.name}</span>
+            <button type="button" data-apply class="text-xs font-medium text-brand-600 hover:underline">Apply to SVG</button>
+          </div>
+          <div class="flex gap-1.5"></div>
+        `;
+
+        const swatchRow = card.querySelector("div.flex.gap-1\\.5")!;
+        palette.colors.forEach((color) => {
+          const swatch = document.createElement("button");
+          swatch.type = "button";
+          swatch.title = color;
+          swatch.className = "h-7 w-7 rounded-md border border-slate-200";
+          swatch.style.backgroundColor = color;
+          swatch.addEventListener("click", () => copyToClipboard(color, swatch));
+          swatchRow.appendChild(swatch);
+        });
+
+        card.querySelector("[data-apply]")!.addEventListener("click", () => applyPalette(palette.colors));
+        presetsEl.appendChild(card);
+      });
+    }
+
+    codeInput.addEventListener("input", renderAll);
+    renderAll();
+    renderPresets();
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        codeInput.value = String(reader.result ?? "");
+        renderAll();
+      };
+      reader.readAsText(file);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      codeInput.value = "";
+      renderAll();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-palette-extractor]").forEach(initPaletteExtractor);
+</script>

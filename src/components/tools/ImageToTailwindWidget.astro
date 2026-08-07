@@ -1,0 +1,284 @@
+<div class="image-to-tailwind" data-image-to-tailwind>
+  <!-- Toolbar -->
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Upload image
+      <input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" data-file-input />
+    </label>
+    <span data-file-name class="text-sm text-slate-400">No image selected</span>
+    <button type="button" data-clear-btn
+      class="ml-auto rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-600">
+      Clear
+    </button>
+  </div>
+
+  <!-- Image preview -->
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <div
+      data-preview
+      class="flex h-48 items-center justify-center overflow-hidden rounded-lg bg-[repeating-conic-gradient(#f1f5f9_0%_25%,white_0%_50%)] bg-[length:20px_20px]"
+    >
+      <span class="text-sm text-slate-400">Upload an image to extract its dominant colors</span>
+    </div>
+    <canvas data-canvas class="hidden"></canvas>
+  </div>
+
+  <!-- Extracted palette with shade scales -->
+  <div data-palette-section class="hidden border border-b-0 border-slate-200 bg-white p-5">
+    <h3 class="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Dominant colors and shade scales</h3>
+    <div data-palette-list class="space-y-5"></div>
+  </div>
+
+  <!-- Output -->
+  <div data-output-section class="hidden rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Tailwind v4 @theme snippet</h3>
+      <button type="button" data-copy-theme class="text-xs font-medium text-brand-600 hover:underline">Copy</button>
+    </div>
+    <pre data-theme-output class="max-h-72 overflow-auto rounded-lg bg-slate-50 p-3 font-mono text-xs text-slate-700"></pre>
+  </div>
+</div>
+
+<script>
+  interface PaletteColor {
+    name: string;
+    hex: string;
+  }
+
+  const SHADE_STEPS: { step: number; lightness: number }[] = [
+    { step: 50, lightness: 97 },
+    { step: 100, lightness: 94 },
+    { step: 200, lightness: 86 },
+    { step: 300, lightness: 77 },
+    { step: 400, lightness: 66 },
+    { step: 500, lightness: 56 },
+    { step: 600, lightness: 47 },
+    { step: 700, lightness: 39 },
+    { step: 800, lightness: 32 },
+    { step: 900, lightness: 26 },
+    { step: 950, lightness: 15 },
+  ];
+
+  function initImageToTailwind(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]")!;
+    const fileName = root.querySelector<HTMLSpanElement>("[data-file-name]")!;
+    const preview = root.querySelector<HTMLDivElement>("[data-preview]")!;
+    const canvas = root.querySelector<HTMLCanvasElement>("[data-canvas]")!;
+    const paletteSection = root.querySelector<HTMLDivElement>("[data-palette-section]")!;
+    const paletteList = root.querySelector<HTMLDivElement>("[data-palette-list]")!;
+    const outputSection = root.querySelector<HTMLDivElement>("[data-output-section]")!;
+    const themeOutput = root.querySelector<HTMLPreElement>("[data-theme-output]")!;
+    const copyThemeBtn = root.querySelector<HTMLButtonElement>("[data-copy-theme]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+
+    let currentColors: PaletteColor[] = [];
+
+    function rgbToHex(r: number, g: number, b: number): string {
+      return "#" + [r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("");
+    }
+
+    function hexToHsl(hex: string): { h: number; s: number; l: number } {
+      const r = parseInt(hex.slice(1, 3), 16) / 255;
+      const g = parseInt(hex.slice(3, 5), 16) / 255;
+      const b = parseInt(hex.slice(5, 7), 16) / 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h = 0;
+      let s = 0;
+      const l = (max + min) / 2;
+      const d = max - min;
+
+      if (d !== 0) {
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h *= 60;
+      }
+      return { h, s: s * 100, l: l * 100 };
+    }
+
+    function hslToHex(h: number, s: number, l: number): string {
+      s /= 100;
+      l /= 100;
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+      const m = l - c / 2;
+      let r = 0, g = 0, b = 0;
+
+      if (h < 60) { r = c; g = x; b = 0; }
+      else if (h < 120) { r = x; g = c; b = 0; }
+      else if (h < 180) { r = 0; g = c; b = x; }
+      else if (h < 240) { r = 0; g = x; b = c; }
+      else if (h < 300) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+
+      const toByte = (v: number) => Math.round((v + m) * 255);
+      return rgbToHex(toByte(r), toByte(g), toByte(b));
+    }
+
+    function generateShadeScale(baseHex: string): { step: number; hex: string }[] {
+      const { h, s } = hexToHsl(baseHex);
+      // Slightly reduce saturation at the very light and very dark ends,
+      // which keeps generated scales closer to how Tailwind's own palettes look.
+      return SHADE_STEPS.map(({ step, lightness }) => {
+        const distanceFromMid = Math.abs(lightness - 56) / 56;
+        const adjustedSat = Math.max(s * (1 - distanceFromMid * 0.25), 10);
+        return { step, hex: hslToHex(h, adjustedSat, lightness) };
+      });
+    }
+
+    function extractDominantColors(ctx: CanvasRenderingContext2D, width: number, height: number): string[] {
+      const { data } = ctx.getImageData(0, 0, width, height);
+      const buckets = new Map<string, { count: number; r: number; g: number; b: number }>();
+
+      // Sample every 4th pixel for speed, skip mostly-transparent pixels,
+      // and quantize each channel to reduce near-duplicate colors being counted separately.
+      for (let i = 0; i < data.length; i += 16) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        if (a < 128) continue;
+
+        const qr = Math.round(r / 24) * 24;
+        const qg = Math.round(g / 24) * 24;
+        const qb = Math.round(b / 24) * 24;
+        const key = `${qr},${qg},${qb}`;
+
+        const existing = buckets.get(key);
+        if (existing) {
+          existing.count++;
+        } else {
+          buckets.set(key, { count: 1, r: qr, g: qg, b: qb });
+        }
+      }
+
+      const sorted = Array.from(buckets.values()).sort((a, b) => b.count - a.count);
+
+      // Skip near-white and near-black buckets when better candidates exist,
+      // since backgrounds often dominate by pixel count but are rarely the useful brand color.
+      const filtered = sorted.filter((c) => {
+        const { l } = hexToHsl(rgbToHex(c.r, c.g, c.b));
+        return l > 8 && l < 95;
+      });
+
+      const pool = filtered.length >= 6 ? filtered : sorted;
+      return pool.slice(0, 6).map((c) => rgbToHex(c.r, c.g, c.b));
+    }
+
+    function renderThemeOutput() {
+      const lines = ["@theme {"];
+      currentColors.forEach((color) => {
+        const scale = generateShadeScale(color.hex);
+        scale.forEach(({ step, hex }) => {
+          lines.push(`  --color-${color.name}-${step}: ${hex};`);
+        });
+      });
+      lines.push("}");
+      themeOutput.textContent = lines.join("\n");
+    }
+
+    function renderPalette(colors: string[]) {
+      currentColors = colors.map((hex, i) => ({ name: `color-${i + 1}`, hex }));
+      paletteList.innerHTML = "";
+
+      currentColors.forEach((color, index) => {
+        const scale = generateShadeScale(color.hex);
+        const row = document.createElement("div");
+        row.className = "space-y-2";
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="h-6 w-6 shrink-0 rounded-md border border-slate-200" style="background-color: ${color.hex}"></span>
+            <input type="text" value="${color.name}" data-name-input
+              class="w-32 rounded-md border border-slate-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200" />
+            <span class="font-mono text-xs text-slate-500">${color.hex}</span>
+          </div>
+          <div class="flex overflow-hidden rounded-lg border border-slate-200"></div>
+        `;
+
+        const scaleRow = row.querySelector("div.flex.overflow-hidden")!;
+        scale.forEach(({ step, hex }) => {
+          const swatch = document.createElement("button");
+          swatch.type = "button";
+          swatch.title = `${step}: ${hex}`;
+          swatch.className = "h-9 flex-1";
+          swatch.style.backgroundColor = hex;
+          swatch.addEventListener("click", async () => {
+            await navigator.clipboard.writeText(hex);
+          });
+          scaleRow.appendChild(swatch);
+        });
+
+        const nameInput = row.querySelector<HTMLInputElement>("[data-name-input]")!;
+        nameInput.addEventListener("input", () => {
+          const sanitized = nameInput.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-") || `color-${index + 1}`;
+          currentColors[index].name = sanitized;
+          renderThemeOutput();
+        });
+
+        paletteList.appendChild(row);
+      });
+
+      renderThemeOutput();
+      paletteSection.classList.remove("hidden");
+      outputSection.classList.remove("hidden");
+    }
+
+    function processImage(file: File) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          preview.innerHTML = "";
+          const imgEl = document.createElement("img");
+          imgEl.src = String(reader.result);
+          imgEl.className = "max-h-full max-w-full object-contain";
+          preview.appendChild(imgEl);
+
+          const maxDim = 150;
+          const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          const width = Math.max(1, Math.round(img.width * scale));
+          const height = Math.max(1, Math.round(img.height * scale));
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const colors = extractDominantColors(ctx, width, height);
+          renderPalette(colors);
+        };
+        img.src = String(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      fileName.textContent = file.name;
+      processImage(file);
+    });
+
+    copyThemeBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(themeOutput.textContent || "");
+      const original = copyThemeBtn.textContent;
+      copyThemeBtn.textContent = "Copied";
+      setTimeout(() => (copyThemeBtn.textContent = original), 1200);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      fileInput.value = "";
+      fileName.textContent = "No image selected";
+      preview.innerHTML = '<span class="text-sm text-slate-400">Upload an image to extract its dominant colors</span>';
+      paletteSection.classList.add("hidden");
+      outputSection.classList.add("hidden");
+      currentColors = [];
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-image-to-tailwind]").forEach(initImageToTailwind);
+</script>

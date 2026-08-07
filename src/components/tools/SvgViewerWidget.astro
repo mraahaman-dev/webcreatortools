@@ -1,0 +1,217 @@
+<div class="svg-viewer" data-svg-viewer>
+  <!-- Toolbar -->
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Upload SVG
+      <input type="file" accept=".svg,image/svg+xml" class="hidden" data-file-input />
+    </label>
+    <button type="button" data-clear-btn
+      class="ml-auto rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-600">
+      Clear
+    </button>
+  </div>
+
+  <!-- Code + Preview -->
+  <div class="grid overflow-hidden border border-b-0 border-slate-200 md:grid-cols-2">
+    <div class="border-b border-slate-200 md:border-b-0 md:border-r">
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        Code
+      </div>
+      <textarea
+        data-code-input
+        spellcheck="false"
+        class="h-72 w-full resize-none border-0 bg-white p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-200"
+        placeholder="Paste your SVG code here, or upload a file above"
+      ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M6 38 L18 14 L28 30 L34 20 L42 38 Z" />
+</svg></textarea>
+    </div>
+    <div>
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        Preview
+      </div>
+      <div
+        data-preview
+        class="flex h-72 items-center justify-center overflow-auto bg-[repeating-conic-gradient(#f1f5f9_0%_25%,white_0%_50%)] bg-[length:20px_20px] p-4"
+      >
+        <span class="text-sm text-slate-400">Nothing to preview yet</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Validation report -->
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Validation report</h3>
+    <ul data-report class="space-y-2 text-sm">
+      <li class="text-slate-400">Paste or upload an SVG to see its validation report.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  interface CheckResult {
+    label: string;
+    pass: boolean;
+    detail: string;
+  }
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function initSvgViewer(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]")!;
+    const codeInput = root.querySelector<HTMLTextAreaElement>("[data-code-input]")!;
+    const preview = root.querySelector<HTMLDivElement>("[data-preview]")!;
+    const report = root.querySelector<HTMLUListElement>("[data-report]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+
+    function iconFor(pass: boolean) {
+      return pass
+        ? '<svg class="h-4 w-4 shrink-0 text-green-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        : '<svg class="h-4 w-4 shrink-0 text-amber-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v4M8 11.5v.01" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5"/></svg>';
+    }
+
+    function runChecks(code: string, doc: Document | null): CheckResult[] {
+      const results: CheckResult[] = [];
+
+      const wellFormed = doc !== null && !doc.querySelector("parsererror");
+      results.push({
+        label: "Well formed XML",
+        pass: wellFormed,
+        detail: wellFormed
+          ? "The document parses cleanly with no syntax errors."
+          : "The XML parser found a syntax error, usually an unclosed tag or a stray character.",
+      });
+
+      if (!wellFormed) return results;
+
+      const root = doc!.documentElement;
+      const isSvgRoot = root.nodeName === "svg";
+      results.push({
+        label: "Root element is <svg>",
+        pass: isSvgRoot,
+        detail: isSvgRoot
+          ? "The document's root element is correctly <svg>."
+          : `The root element is <${root.nodeName}>, not <svg>, so browsers will not render this as an image.`,
+      });
+
+      if (!isSvgRoot) return results;
+
+      const hasViewBox = root.hasAttribute("viewBox");
+      results.push({
+        label: "Has a viewBox attribute",
+        pass: hasViewBox,
+        detail: hasViewBox
+          ? `viewBox is set to "${root.getAttribute("viewBox")}".`
+          : "No viewBox found. Per the SVG 1.1 specification, viewBox controls how the graphic scales inside its container. Without it, the SVG may render at a fixed size or fail to scale responsively.",
+      });
+
+      const hasXmlns = root.hasAttribute("xmlns");
+      results.push({
+        label: "Has an xmlns declaration",
+        pass: hasXmlns,
+        detail: hasXmlns
+          ? "The xmlns namespace is correctly declared."
+          : "No xmlns attribute found. This is usually harmless when the SVG is embedded inline in HTML, but it is required for the file to render correctly when opened directly or used as a standalone image source.",
+      });
+
+      const scriptTags = doc!.querySelectorAll("script");
+      results.push({
+        label: "No embedded <script> tags",
+        pass: scriptTags.length === 0,
+        detail: scriptTags.length === 0
+          ? "No script elements found."
+          : `Found ${scriptTags.length} <script> element(s). SVGs can contain executable JavaScript, which is a known vector for cross site scripting if you render untrusted SVGs directly in a browser. Review this content carefully before using it.`,
+      });
+
+      const eventHandlerRegex = /^on[a-z]+$/i;
+      let handlerCount = 0;
+      doc!.querySelectorAll("*").forEach((el) => {
+        for (const attr of el.attributes) {
+          if (eventHandlerRegex.test(attr.name)) handlerCount++;
+        }
+      });
+      results.push({
+        label: "No inline event handler attributes",
+        pass: handlerCount === 0,
+        detail: handlerCount === 0
+          ? "No onclick, onload, or similar attributes found."
+          : `Found ${handlerCount} inline event handler attribute(s), such as onclick or onload. Like embedded scripts, these can execute JavaScript and are worth reviewing before use.`,
+      });
+
+      const elementCount = doc!.querySelectorAll("*").length;
+      results.push({
+        label: "Structure summary",
+        pass: true,
+        detail: `${elementCount} total element(s) in the document.`,
+      });
+
+      return results;
+    }
+
+    function renderReport(checks: CheckResult[]) {
+      report.innerHTML = checks
+        .map(
+          (check) => `
+          <li class="flex items-start gap-2">
+            ${iconFor(check.pass)}
+            <div>
+              <span class="font-medium text-slate-800">${escapeHtml(check.label)}</span>
+              <p class="text-slate-500">${escapeHtml(check.detail)}</p>
+            </div>
+          </li>`
+        )
+        .join("");
+    }
+
+    function renderAll() {
+      const code = codeInput.value.trim();
+
+      if (!code) {
+        preview.innerHTML = '<span class="text-sm text-slate-400">Nothing to preview yet</span>';
+        report.innerHTML = '<li class="text-slate-400">Paste or upload an SVG to see its validation report.</li>';
+        return;
+      }
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, "image/svg+xml");
+      const hasParseError = !!doc.querySelector("parsererror");
+
+      if (!hasParseError && doc.documentElement.nodeName === "svg") {
+        const svgEl = doc.documentElement.cloneNode(true) as SVGElement;
+        svgEl.setAttribute("class", "max-h-full max-w-full");
+        preview.innerHTML = "";
+        preview.appendChild(svgEl);
+      } else {
+        preview.innerHTML = '<span class="text-sm text-red-500">Cannot render, see validation report</span>';
+      }
+
+      const checks = runChecks(code, hasParseError ? null : doc);
+      renderReport(checks);
+    }
+
+    codeInput.addEventListener("input", renderAll);
+    renderAll();
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        codeInput.value = String(reader.result ?? "");
+        renderAll();
+      };
+      reader.readAsText(file);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      codeInput.value = "";
+      renderAll();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-svg-viewer]").forEach(initSvgViewer);
+</script>

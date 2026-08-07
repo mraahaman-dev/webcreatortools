@@ -1,0 +1,198 @@
+<div class="css-data-uri" data-css-data-uri>
+  <!-- Toolbar -->
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-brand-400">
+      Upload SVG
+      <input type="file" accept=".svg,image/svg+xml" class="hidden" data-file-input />
+    </label>
+
+    <div class="flex overflow-hidden rounded-lg border border-slate-300">
+      <button type="button" data-mode-url class="bg-brand-600 px-3 py-1.5 text-sm font-medium text-white">
+        URL-encoded
+      </button>
+      <button type="button" data-mode-base64 class="bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+        Base64
+      </button>
+    </div>
+
+    <button type="button" data-clear-btn
+      class="ml-auto rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-600">
+      Clear
+    </button>
+  </div>
+
+  <!-- Code + Preview -->
+  <div class="grid overflow-hidden border border-b-0 border-slate-200 md:grid-cols-2">
+    <div class="border-b border-slate-200 md:border-b-0 md:border-r">
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        SVG code
+      </div>
+      <textarea
+        data-code-input
+        spellcheck="false"
+        class="h-56 w-full resize-none border-0 bg-white p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-200"
+        placeholder="Paste your SVG code here, or upload a file above"
+      ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M6 38 L18 14 L28 30 L34 20 L42 38 Z" />
+</svg></textarea>
+    </div>
+    <div>
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        Preview
+      </div>
+      <div
+        data-preview
+        class="flex h-56 items-center justify-center overflow-auto bg-[repeating-conic-gradient(#f1f5f9_0%_25%,white_0%_50%)] bg-[length:20px_20px] p-4"
+      >
+        <span class="text-sm text-slate-400">Nothing to preview yet</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Data URI</h3>
+      <button type="button" data-copy-uri class="text-xs font-medium text-brand-600 hover:underline">Copy</button>
+    </div>
+    <div data-uri-output class="max-h-32 overflow-auto rounded-lg bg-slate-50 p-3 font-mono text-xs text-slate-700 break-all">
+      Paste or upload an SVG to generate a data URI.
+    </div>
+    <p data-size-note class="mt-2 text-xs text-slate-400"></p>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">CSS snippet</h3>
+      <button type="button" data-copy-css class="text-xs font-medium text-brand-600 hover:underline">Copy</button>
+    </div>
+    <div data-css-output class="max-h-32 overflow-auto rounded-lg bg-slate-50 p-3 font-mono text-xs text-slate-700 whitespace-pre-wrap break-all">
+      Paste or upload an SVG to generate a CSS snippet.
+    </div>
+  </div>
+</div>
+
+<script>
+  type Mode = "url" | "base64";
+
+  function initCssDataUri(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]")!;
+    const codeInput = root.querySelector<HTMLTextAreaElement>("[data-code-input]")!;
+    const preview = root.querySelector<HTMLDivElement>("[data-preview]")!;
+    const uriOutput = root.querySelector<HTMLDivElement>("[data-uri-output]")!;
+    const cssOutput = root.querySelector<HTMLDivElement>("[data-css-output]")!;
+    const sizeNote = root.querySelector<HTMLParagraphElement>("[data-size-note]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+    const copyUriBtn = root.querySelector<HTMLButtonElement>("[data-copy-uri]")!;
+    const copyCssBtn = root.querySelector<HTMLButtonElement>("[data-copy-css]")!;
+    const modeUrlBtn = root.querySelector<HTMLButtonElement>("[data-mode-url]")!;
+    const modeBase64Btn = root.querySelector<HTMLButtonElement>("[data-mode-base64]")!;
+
+    let mode: Mode = "url";
+
+    function encodeUrl(svg: string): string {
+      // Standard CSS-friendly URL encoding: swap double quotes for single quotes,
+      // collapse whitespace between tags, then percent-encode the remaining special characters.
+      const cleaned = svg.replace(/"/g, "'").replace(/>\s+</g, "><").trim();
+      let encoded = encodeURIComponent(cleaned);
+      encoded = encoded.replace(/\(/g, "%28").replace(/\)/g, "%29");
+      return `data:image/svg+xml,${encoded}`;
+    }
+
+    function encodeBase64(svg: string): string {
+      const base64 = btoa(unescape(encodeURIComponent(svg)));
+      return `data:image/svg+xml;base64,${base64}`;
+    }
+
+    function setMode(newMode: Mode) {
+      mode = newMode;
+      const activeClasses = ["bg-brand-600", "text-white"];
+      const inactiveClasses = ["bg-white", "text-slate-700", "hover:bg-slate-50"];
+
+      modeUrlBtn.classList.remove(...activeClasses, ...inactiveClasses);
+      modeBase64Btn.classList.remove(...activeClasses, ...inactiveClasses);
+
+      if (mode === "url") {
+        modeUrlBtn.classList.add(...activeClasses);
+        modeBase64Btn.classList.add(...inactiveClasses);
+      } else {
+        modeBase64Btn.classList.add(...activeClasses);
+        modeUrlBtn.classList.add(...inactiveClasses);
+      }
+
+      renderAll();
+    }
+
+    function renderAll() {
+      const code = codeInput.value.trim();
+
+      if (!code) {
+        preview.innerHTML = '<span class="text-sm text-slate-400">Nothing to preview yet</span>';
+        uriOutput.textContent = "Paste or upload an SVG to generate a data URI.";
+        cssOutput.textContent = "Paste or upload an SVG to generate a CSS snippet.";
+        sizeNote.textContent = "";
+        return;
+      }
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, "image/svg+xml");
+      const hasParseError = !!doc.querySelector("parsererror");
+
+      if (hasParseError || doc.documentElement.nodeName !== "svg") {
+        preview.innerHTML = '<span class="text-sm text-red-500">Cannot render, check that your SVG code is valid</span>';
+        uriOutput.textContent = "Cannot generate a data URI from invalid SVG markup.";
+        cssOutput.textContent = "";
+        sizeNote.textContent = "";
+        return;
+      }
+
+      const svgEl = doc.documentElement.cloneNode(true) as SVGElement;
+      svgEl.setAttribute("class", "max-h-full max-w-full");
+      preview.innerHTML = "";
+      preview.appendChild(svgEl);
+
+      const dataUri = mode === "url" ? encodeUrl(code) : encodeBase64(code);
+      uriOutput.textContent = dataUri;
+      cssOutput.textContent = `.icon {\n  background-image: url("${dataUri}");\n  background-size: contain;\n  background-repeat: no-repeat;\n}`;
+
+      const originalKb = (new Blob([code]).size / 1024).toFixed(2);
+      const encodedKb = (new Blob([dataUri]).size / 1024).toFixed(2);
+      sizeNote.textContent = `Original SVG: ${originalKb} KB, encoded: ${encodedKb} KB`;
+    }
+
+    async function copyText(text: string, el: HTMLElement) {
+      if (!text) return;
+      await navigator.clipboard.writeText(text);
+      const original = el.textContent;
+      el.textContent = "Copied";
+      setTimeout(() => (el.textContent = original), 1200);
+    }
+
+    codeInput.addEventListener("input", renderAll);
+    renderAll();
+
+    modeUrlBtn.addEventListener("click", () => setMode("url"));
+    modeBase64Btn.addEventListener("click", () => setMode("base64"));
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        codeInput.value = String(reader.result ?? "");
+        renderAll();
+      };
+      reader.readAsText(file);
+    });
+
+    copyUriBtn.addEventListener("click", () => copyText(uriOutput.textContent || "", copyUriBtn));
+    copyCssBtn.addEventListener("click", () => copyText(cssOutput.textContent || "", copyCssBtn));
+
+    clearBtn.addEventListener("click", () => {
+      codeInput.value = "";
+      renderAll();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-css-data-uri]").forEach(initCssDataUri);
+</script>

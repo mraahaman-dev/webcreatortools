@@ -2,16 +2,42 @@
   {
     "slug": "svg-tools",
     "title": "SVG & Design Tools",
-    "description": "Edit, optimize, convert and inspect SVG files."
+    "description": "Edit, optimize, convert and inspect SVG files.",
+    "metaTitle": "Free SVG Tools, Edit and Fix SVG Files Online | WebCreator Tools",
+    "metaDescription": "Free browser based SVG tools. Edit SVG code, fix broken viewBox attributes, validate markup and extract color palettes. No signup, nothing uploaded.",
+    "badgeColor": "teal",
+    "iconPath": "M12 19l7-7 3 3-7 7-3-3z M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z M2 2l7.586 7.586 M11 13a2 2 0 104 0 2 2 0 00-4 0z",
+    "intro": [
+      "<h3 class=\"text-lg font-semibold text-slate-900\">Why edit SVG code directly</h3><p class=\"mt-2 leading-relaxed text-slate-600\">SVG files look simple but small mistakes in the underlying markup can break how an icon renders, bloat a file's size, or cause it to fail validation entirely. Since an SVG is really just XML text, editing it directly with a proper <a href=\"/svg-tools/svg-editor/\" class=\"text-brand-600 hover:underline\">SVG Code Editor</a> often gets you a cleaner result than clicking through a heavy design application, especially when a file behaves unexpectedly after being exported from a tool like Figma or Illustrator.</p>",
+      "<h3 class=\"mt-8 text-lg font-semibold text-slate-900\">Common problems this collection solves</h3><p class=\"mt-2 leading-relaxed text-slate-600\">The tools here target the issues that come up constantly when working with vector graphics on the web. Use the <a href=\"/svg-tools/svg-viewer/\" class=\"text-brand-600 hover:underline\">SVG Viewer & Validator</a> to catch invalid markup before you ship it, the <a href=\"/svg-tools/viewbox-fixer/\" class=\"text-brand-600 hover:underline\">ViewBox Fixer</a> to correct a missing or broken viewBox so an SVG scales correctly at any size, and the <a href=\"/svg-tools/palette-extractor/\" class=\"text-brand-600 hover:underline\">Palette Extractor</a> to pull a consistent color palette out of an existing icon or logo.</p>",
+      "<h3 class=\"mt-8 text-lg font-semibold text-slate-900\">Privacy first, every time</h3><p class=\"mt-2 leading-relaxed text-slate-600\">Every tool in this collection runs entirely in your browser using the File and Canvas APIs built into modern browsers, so nothing you upload is ever sent to a server, stored, or logged anywhere. That makes it a safe option for client work or unreleased branding. Once your SVG is ready, our <a href=\"/developer-tools/\" class=\"text-brand-600 hover:underline\">Developer Utilities</a> pick up where this collection leaves off, turning that same artwork into a CSS ready data URI or a full Tailwind color theme.</p>"
+    ]
   },
   {
     "slug": "developer-tools",
     "title": "Developer Utilities",
-    "description": "Generate configs, minify code, and speed up workflows."
+    "description": "Generate configs, minify code, and speed up workflows.",
+    "metaTitle": "Developer Utilities, Convert and Generate Web Assets Free | WebCreator Tools",
+    "metaDescription": "Free browser based developer utilities. Convert SVGs to CSS data URIs and generate Tailwind color palettes from any image. No signup, no uploads.",
+    "badgeColor": "purple",
+    "iconPath": "M8 6L2 12l6 6 M16 6l6 6-6 6",
+    "intro": [
+      "<h3 class=\"text-lg font-semibold text-slate-900\">Small tools for everyday frontend work</h3><p class=\"mt-2 leading-relaxed text-slate-600\">Most frontend projects need a handful of small utilities that are too minor to justify installing another dependency, but tedious enough to slow you down when handled by hand. Use the <a href=\"/developer-tools/svg-to-css-data-uri/\" class=\"text-brand-600 hover:underline\">SVG to CSS Data URI</a> tool to convert artwork into an inline, CSS ready string without a build step or bundler plugin.</p>",
+      "<h3 class=\"mt-8 text-lg font-semibold text-slate-900\">From image to design system</h3><p class=\"mt-2 leading-relaxed text-slate-600\">The <a href=\"/developer-tools/image-to-tailwind-palette/\" class=\"text-brand-600 hover:underline\">Image to Tailwind Palette</a> tool turns any image, including a rendered SVG from our <a href=\"/svg-tools/\" class=\"text-brand-600 hover:underline\">SVG & Design Tools</a> collection, into a complete Tailwind color theme with proper shade scales generated automatically, ready to paste into your project's config.</p>",
+      "<h3 class=\"mt-8 text-lg font-semibold text-slate-900\">Client side, no signup</h3><p class=\"mt-2 leading-relaxed text-slate-600\">More utilities will be added here over time, each one focused on solving a single problem well. Everything runs client side in your browser, so files you work with never leave your device, and there is no account required to use any tool in this collection.</p>"
+    ]
   },
   {
     "slug": "seo-tools",
     "title": "Technical SEO Tools",
-    "description": "Check metadata, redirects, robots.txt and more."
+    "description": "Check metadata, redirects, robots.txt and more.",
+    "metaTitle": "Technical SEO Tools, Check Your Site Free | WebCreator Tools",
+    "metaDescription": "Free technical SEO tools. Check metadata, redirect chains, robots.txt rules and more, right in your browser. No signup required.",
+    "badgeColor": "green",
+    "iconPath": "M11 19a8 8 0 100-16 8 8 0 000 16z M21 21l-4.35-4.35",
+    "intro": [
+      "<h3 class=\"text-lg font-semibold text-slate-900\">Why technical SEO gets missed</h3><p class=\"mt-2 leading-relaxed text-slate-600\">Technical SEO problems are often invisible until they cost a site real rankings. A missing canonical tag, a broken redirect chain, or a robots.txt file that accidentally blocks search engines from crawling important pages can undo months of content work without any obvious symptom pointing to the cause.</p>",
+      "<h3 class=\"mt-8 text-lg font-semibold text-slate-900\">What this collection will cover</h3><p class=\"mt-2 leading-relaxed text-slate-600\">Tools here will let you check the technical details search engines actually rely on, directly from your browser, so problems get caught before they affect search performance. This collection is launching alongside our <a href=\"/svg-tools/\" class=\"text-brand-600 hover:underline\">SVG & Design Tools</a> and <a href=\"/developer-tools/\" class=\"text-brand-600 hover:underline\">Developer Utilities</a>, with new SEO checks added as they are built.</p>"
+    ]
   }
 ]

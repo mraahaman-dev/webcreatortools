@@ -1,0 +1,12 @@
+[
+  { "name": "Tailwind Slate", "colors": ["#f8fafc", "#64748b", "#334155", "#1e293b", "#0f172a"] },
+  { "name": "Sunset", "colors": ["#ff6b6b", "#feca57", "#ff9ff3", "#48dbfb", "#1dd1a1"] },
+  { "name": "Nord", "colors": ["#2e3440", "#3b4252", "#88c0d0", "#a3be8c", "#ebcb8b"] },
+  { "name": "Dracula", "colors": ["#282a36", "#ff79c6", "#bd93f9", "#50fa7b", "#f1fa8c"] },
+  { "name": "Pastel Dream", "colors": ["#ffd1dc", "#ffecb8", "#c7f0d8", "#bde0fe", "#cdb4db"] },
+  { "name": "Earth Tones", "colors": ["#7f5539", "#9c6644", "#b08968", "#ddb892", "#e6ccb2"] },
+  { "name": "Material", "colors": ["#f44336", "#2196f3", "#4caf50", "#ff9800", "#9c27b0"] },
+  { "name": "Monochrome", "colors": ["#000000", "#404040", "#808080", "#bfbfbf", "#ffffff"] },
+  { "name": "Vibrant", "colors": ["#e63946", "#f1faee", "#a8dadc", "#457b9d", "#1d3557"] },
+  { "name": "Forest", "colors": ["#081c15", "#1b4332", "#2d6a4f", "#52b788", "#95d5b2"] }
+]
