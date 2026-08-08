@@ -1,14 +1,77 @@
-<header class="border-b border-gray-200">
-  <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-    <a href="/" class="text-xl font-bold text-brand-600">
-      WebCreator Tools
+<header class="sticky top-0 z-50 border-b border-gray-200 bg-brand-50/80 backdrop-blur-sm">
+  <div class="relative max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <img src="/favicon.svg" alt="Pixelquil logo" class="h-8 w-8" />
+      <span class="text-xl tracking-tight">
+        <span class="font-extrabold text-brand-600">Pixel</span><span class="font-extrabold text-gray-900">quil</span>
+      </span>
     </a>
 
-    <nav class="hidden md:flex gap-6 text-sm font-medium text-gray-700">
-      <a href="/svg-tools" class="hover:text-brand-600">SVG Tools</a>
-      <a href="/developer-tools" class="hover:text-brand-600">Developer Tools</a>
-      <a href="/seo-tools" class="hover:text-brand-600">SEO Tools</a>
-      <a href="/guides" class="hover:text-brand-600">Guides</a>
+   <nav class="hidden md:flex gap-6 text-sm font-medium text-gray-700">
+      <a href="/svg-tools/" class="hover:text-brand-600">SVG Tools</a>
+      <a href="/developer-tools/" class="hover:text-brand-600">Developer Tools</a>
+      <a href="/seo-tools/" class="hover:text-brand-600">SEO Tools</a>
+      <a href="/guides/" class="hover:text-brand-600">Guides</a>
+    </nav>
+
+    <button
+      type="button"
+      data-menu-toggle
+      aria-label="Toggle menu"
+      aria-expanded="false"
+      class="md:hidden flex h-9 w-9 items-center justify-center rounded-lg text-gray-700 hover:bg-brand-100"
+    >
+      <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <!-- Dropdown panel, anchored under the button, closed by default -->
+    <nav
+      data-menu-panel
+      class="absolute right-4 top-full mt-2 w-56 origin-top-right scale-95 opacity-0 pointer-events-none rounded-xl border border-gray-200 bg-white p-2 shadow-lg transition-all duration-150 ease-out md:hidden"
+    >
+      <a href="/svg-tools/" class="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600">SVG Tools</a>
+      <a href="/developer-tools/" class="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600">Developer Tools</a>
+      <a href="/seo-tools/" class="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600">SEO Tools</a>
+      <a href="/guides/" class="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600">Guides</a>
+      <a href="/pricing/" class="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600">Pricing</a>
     </nav>
   </div>
 </header>
+
+<script>
+  const toggleBtn = document.querySelector<HTMLButtonElement>("[data-menu-toggle]");
+  const panel = document.querySelector<HTMLElement>("[data-menu-panel]");
+
+  function openMenu() {
+    panel?.classList.remove("scale-95", "opacity-0", "pointer-events-none");
+    panel?.classList.add("scale-100", "opacity-100");
+    toggleBtn?.setAttribute("aria-expanded", "true");
+  }
+
+  function closeMenu() {
+    panel?.classList.add("scale-95", "opacity-0", "pointer-events-none");
+    panel?.classList.remove("scale-100", "opacity-100");
+    toggleBtn?.setAttribute("aria-expanded", "false");
+  }
+
+  function isOpen() {
+    return toggleBtn?.getAttribute("aria-expanded") === "true";
+  }
+
+  toggleBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    isOpen() ? closeMenu() : openMenu();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (isOpen() && panel && !panel.contains(e.target as Node)) {
+      closeMenu();
+    }
+  });
+
+  panel?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", closeMenu);
+  });
+</script>

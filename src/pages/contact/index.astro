@@ -1,0 +1,126 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+
+const contactSchema = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Contact Pixelquil",
+  "url": "https://pixelquil.com/contact/",
+  "about": {
+    "@type": "Organization",
+    "name": "Pixelquil",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "hello@pixelquil.com"
+    }
+  }
+};
+---
+
+<MainLayout
+  title="Contact"
+  description="Get in touch with Pixelquil, questions, bug reports, and tool suggestions all welcome."
+>
+  <script type="application/ld+json" set:html={JSON.stringify(contactSchema)} />
+
+  <section class="mx-auto max-w-5xl px-4 py-20">
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
+      Contact
+    </span>
+
+    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">
+      Get in touch
+    </h1>
+
+    <p class="mt-4 max-w-xl text-slate-600">
+      Found a bug, have a tool idea, or just want to say hello? Every message is read personally,
+      there's no support team behind this, just the person who built the tools.
+    </p>
+
+    <div class="mt-12 grid gap-10 md:grid-cols-5">
+      <!-- Contact info -->
+      <div class="md:col-span-2 space-y-6">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Email</h2>
+          <a href="mailto:hello@pixelquil.com" class="mt-2 block text-lg font-medium text-brand-600 hover:underline">
+            hello@pixelquil.com
+          </a>
+          <p class="mt-2 text-sm text-slate-500">Typical response time: 1–2 business days</p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Based in</h2>
+          <p class="mt-2 text-slate-700">Bangladesh</p>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Best for</h2>
+          <ul class="mt-2 space-y-1.5 text-sm text-slate-600">
+            <li>Bug reports on any tool</li>
+            <li>New tool suggestions</li>
+            <li>General feedback</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Contact form -->
+      <div class="md:col-span-3">
+        <form
+          action="https://formspree.io/f/mkjwobze"
+          method="POST"
+          class="rounded-2xl border border-slate-200 bg-white p-6"
+        >
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label for="name" class="block text-sm font-medium text-slate-700">Name</label>
+              <input
+                type="text" id="name" name="name" required
+                class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              />
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
+              <input
+                type="email" id="email" name="email" required
+                class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              />
+            </div>
+          </div>
+
+          <div class="mt-5">
+            <label for="reason" class="block text-sm font-medium text-slate-700">Reason for contact</label>
+            <select
+              id="reason" name="reason"
+              class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            >
+              <option>Bug report</option>
+              <option>Tool suggestion</option>
+              <option>General feedback</option>
+              <option>Something else</option>
+            </select>
+          </div>
+
+          <div class="mt-5">
+            <label for="message" class="block text-sm font-medium text-slate-700">Message</label>
+            <textarea
+              id="message" name="message" rows="5" required
+              class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            ></textarea>
+          </div>
+
+          <button
+            type="submit"
+            class="mt-6 w-full rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700 sm:w-auto"
+          >
+            Send message
+          </button>
+
+          <p class="mt-4 text-xs text-slate-400">
+            Your message is sent directly and is not stored on this site or used for anything beyond replying to you.
+          </p>
+        </form>
+      </div>
+    </div>
+  </section>
+</MainLayout>

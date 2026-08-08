@@ -1,0 +1,123 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+
+const lastUpdated = "August 2026";
+---
+
+<MainLayout
+  title="Privacy Policy"
+  description="Pixelquil's privacy policy: what data we collect, what we don't, and how our browser-based tools handle your files."
+>
+  <section class="mx-auto max-w-3xl px-4 py-20">
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
+      Privacy Policy
+    </span>
+
+    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">Privacy Policy</h1>
+    <p class="mt-3 text-sm text-slate-500">Last updated: {lastUpdated}</p>
+
+    <div class="mt-10 space-y-10 text-slate-600 leading-relaxed">
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">The short version</h2>
+        <p class="mt-3">
+          Every tool on Pixelquil runs entirely in your browser. Files, code, and text you paste
+          or upload into a tool are processed on your own device and are never sent to, stored
+          on, or seen by any Pixelquil server. This section is a summary. The full policy below
+          explains exactly what data is and isn't collected.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">What we don't collect</h2>
+        <p class="mt-3">
+          We do not require an account or signup to use any core tool. We do not upload, store,
+          or log the content of files, code, images, or text you use within a tool. Tool
+          functionality (formatting, converting, extracting, generating) happens locally in your
+          browser using JavaScript, not on a server.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">What we do collect</h2>
+        <p class="mt-3">
+          <strong class="text-slate-900">Contact form submissions.</strong> If you use the
+          <a href="/contact/" class="text-brand-600 hover:underline">contact form</a>, your name,
+          email address, and message are sent via Formspree, a third-party form processing
+          service, to our inbox. Formspree's own privacy policy governs how they handle that
+          transmission. We use the information you submit only to respond to you.
+        </p>
+        <p class="mt-3">
+          <strong class="text-slate-900">Standard web analytics.</strong> Like most websites, we
+          may use privacy-conscious analytics to understand aggregate traffic patterns, which
+          pages are visited and roughly how much traffic the site receives. This does not include
+          the content of anything you enter into a tool.
+        </p>
+        <p class="mt-3">
+          <strong class="text-slate-900">Advertising.</strong> Pixelquil may display ads served
+          through Google AdSense. Google and its partners may use cookies to serve ads based on a
+          visitor's prior visits to this or other websites. You can opt out of personalized
+          advertising by visiting
+          <a href="https://adssettings.google.com" class="text-brand-600 hover:underline" target="_blank" rel="noopener noreferrer">Google's Ads Settings</a>.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Cookies</h2>
+        <p class="mt-3">
+          Pixelquil itself does not use cookies to track you across sessions or identify you
+          personally. Third-party services embedded on this site, specifically Google AdSense if
+          and when ads are shown, may set their own cookies subject to their own privacy policies.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Third-party services</h2>
+        <p class="mt-3">This site relies on the following third-party services:</p>
+        <ul class="mt-3 list-disc space-y-2 pl-5">
+          <li><strong class="text-slate-900">Cloudflare</strong>, for hosting and content delivery.</li>
+          <li><strong class="text-slate-900">Formspree</strong>, for processing contact form submissions.</li>
+          <li><strong class="text-slate-900">Google AdSense</strong>, for displaying advertising.</li>
+        </ul>
+        <p class="mt-3">
+          Each of these providers has its own privacy policy governing how they handle data that
+          passes through their systems.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Children's privacy</h2>
+        <p class="mt-3">
+          Pixelquil is not directed at children under 13, and we do not knowingly collect
+          personal information from children.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Your rights</h2>
+        <p class="mt-3">
+          Since we collect minimal personal data, there is little to request or delete beyond
+          contact form submissions. If you'd like a copy of, or to request deletion of, any
+          message you've sent us, contact us at
+          <a href="mailto:hello@pixelquil.com" class="text-brand-600 hover:underline">hello@pixelquil.com</a>.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Changes to this policy</h2>
+        <p class="mt-3">
+          We may update this privacy policy as the site evolves. Material changes will be
+          reflected by updating the date at the top of this page.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Contact</h2>
+        <p class="mt-3">
+          Questions about this policy can be sent to
+          <a href="mailto:hello@pixelquil.com" class="text-brand-600 hover:underline">hello@pixelquil.com</a>
+          or through our <a href="/contact/" class="text-brand-600 hover:underline">contact page</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</MainLayout>

@@ -1,0 +1,54 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is Pixelquil really free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Every tool on Pixelquil is free to use, with no signup required for core functionality." } },
+    { "@type": "Question", "name": "Do I need to create an account?", "acceptedAnswer": { "@type": "Answer", "text": "No. All tools work immediately without an account or login." } },
+    { "@type": "Question", "name": "Is my data uploaded to a server?", "acceptedAnswer": { "@type": "Answer", "text": "No. Every tool runs entirely in your browser using JavaScript. Files, code, and text you use in a tool are processed on your own device and never sent to a Pixelquil server." } },
+    { "@type": "Question", "name": "Who built Pixelquil?", "acceptedAnswer": { "@type": "Answer", "text": "Pixelquil is built and maintained by Mizanur Rahaman, a frontend developer with hands-on production experience. More detail is on the About page." } },
+    { "@type": "Question", "name": "Can I suggest a new tool?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, tool suggestions are welcome through the contact page and are genuinely read." } },
+    { "@type": "Question", "name": "Is Pixelquil suitable for commercial or client work?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, tools are free to use for personal or commercial projects, subject to the terms of service." } }
+  ]
+};
+---
+
+<MainLayout
+  title="FAQs"
+  description="Answers to common questions about Pixelquil's free browser-based SVG, developer, and SEO tools."
+>
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <section class="mx-auto max-w-3xl px-4 py-20">
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
+      FAQs
+    </span>
+    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">Frequently asked questions</h1>
+    <p class="mt-4 text-slate-600">
+      General questions about Pixelquil itself. For questions about a specific tool, check that
+      tool's own FAQ section on its page.
+    </p>
+
+    <div class="mt-10 divide-y divide-slate-200 border-t border-slate-200">
+      {faqSchema.mainEntity.map((faq) => (
+        <details class="group py-5">
+          <summary class="flex cursor-pointer list-none items-center justify-between text-base font-medium text-slate-900">
+            {faq.name}
+            <svg class="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-45" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3v10M3 8h10" stroke-linecap="round" />
+            </svg>
+          </summary>
+          <p class="mt-3 text-slate-600 leading-relaxed">{faq.acceptedAnswer.text}</p>
+        </details>
+      ))}
+    </div>
+
+    <div class="mt-12 rounded-2xl bg-brand-50 p-6">
+      <p class="text-sm text-slate-600">
+        Didn't find your answer? <a href="/contact/" class="font-medium text-brand-600 hover:underline">Get in touch</a>.
+      </p>
+    </div>
+  </section>
+</MainLayout>

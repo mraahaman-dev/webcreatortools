@@ -1,0 +1,65 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+const lastUpdated = "August 2026";
+---
+
+<MainLayout
+  title="Cookie Policy"
+  description="How Pixelquil uses cookies, including those set by Google AdSense."
+>
+  <section class="mx-auto max-w-3xl px-4 py-20">
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
+      Cookie Policy
+    </span>
+    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">Cookie Policy</h1>
+    <p class="mt-3 text-sm text-slate-500">Last updated: {lastUpdated}</p>
+
+    <div class="mt-10 space-y-8 text-slate-600 leading-relaxed">
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">What are cookies</h2>
+        <p class="mt-3">
+          Cookies are small text files stored on your device by your browser, commonly used to
+          remember preferences or track visits across sites.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Cookies Pixelquil sets directly</h2>
+        <p class="mt-3">
+          Pixelquil's own tools do not set cookies to track you. Tools run locally in your browser
+          and do not require session cookies to function.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Third-party cookies</h2>
+        <p class="mt-3">
+          If Google AdSense advertising is active on this site, Google and its advertising
+          partners may set cookies to serve ads, including personalized ads based on your prior
+          browsing. This is governed by Google's own policies, not Pixelquil's. You can review or
+          opt out of personalized advertising at
+          <a href="https://adssettings.google.com" class="text-brand-600 hover:underline" target="_blank" rel="noopener noreferrer">Google's Ads Settings</a>,
+          and learn more about how Google uses data at
+          <a href="https://policies.google.com/technologies/partner-sites" class="text-brand-600 hover:underline" target="_blank" rel="noopener noreferrer">Google's Partner Sites policy</a>.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Managing cookies</h2>
+        <p class="mt-3">
+          Most browsers let you block or delete cookies through their settings. Doing so may
+          affect how ads are displayed but will not affect the functionality of any Pixelquil
+          tool, since tools do not depend on cookies to work.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Questions</h2>
+        <p class="mt-3">
+          Questions about this policy can be sent through our
+          <a href="/contact/" class="text-brand-600 hover:underline">contact page</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</MainLayout>

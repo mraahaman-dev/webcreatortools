@@ -1,0 +1,68 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+const lastUpdated = "August 2026";
+---
+
+<MainLayout
+  title="Disclaimer"
+  description="Important information about the accuracy and limitations of Pixelquil's free tools."
+>
+  <section class="mx-auto max-w-3xl px-4 py-20">
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
+      Disclaimer
+    </span>
+    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">Disclaimer</h1>
+    <p class="mt-3 text-sm text-slate-500">Last updated: {lastUpdated}</p>
+
+    <div class="mt-10 space-y-8 text-slate-600 leading-relaxed">
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Accuracy of tool output</h2>
+        <p class="mt-3">
+          Pixelquil's tools are built carefully and tested during development, but no automated
+          tool is infallible. Generated code, converted files, calculated values, and validation
+          results should be independently reviewed before use in any production, client-facing,
+          legal, or financial context. You remain responsible for verifying that output meets
+          your specific requirements.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Not professional advice</h2>
+        <p class="mt-3">
+          Content on Pixelquil, including tool descriptions, guides, and FAQ answers, is provided
+          for general informational and educational purposes. It does not constitute professional
+          legal, security, or engineering advice specific to your situation. For decisions with
+          real consequences, security-sensitive implementations, or legal compliance requirements,
+          consult a qualified professional.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Third-party references</h2>
+        <p class="mt-3">
+          Some tool pages reference third-party standards (such as the SVG or WCAG specifications),
+          libraries, or services. Pixelquil is not affiliated with or endorsed by these
+          organizations unless explicitly stated, and their documentation should be treated as the
+          authoritative source in case of any discrepancy.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">No guarantee of availability</h2>
+        <p class="mt-3">
+          Tools are provided on an "as available" basis. Pixelquil does not guarantee uninterrupted
+          access and may modify or discontinue any tool at any time.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Questions</h2>
+        <p class="mt-3">
+          If something on this site seems inaccurate, please
+          <a href="/contact/" class="text-brand-600 hover:underline">let us know</a>, corrections
+          are genuinely welcomed.
+        </p>
+      </div>
+    </div>
+  </section>
+</MainLayout>

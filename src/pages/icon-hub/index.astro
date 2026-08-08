@@ -1,0 +1,342 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import iconsData from '../../data/icon-library.json';
+
+interface IconElement {
+  tag: string;
+  [key: string]: string;
+}
+
+interface IconDef {
+  id: string;
+  name: string;
+  category: string;
+  categoryLabel: string;
+  tags: string[];
+  viewBox: string;
+  elements: IconElement[];
+}
+
+const icons = iconsData as IconDef[];
+
+function elementToSvgString(el: IconElement): string {
+  const { tag, ...attrs } = el;
+  const attrString = Object.entries(attrs)
+    .map(([key, value]) => `${key}="${value}"`)
+    .join(" ");
+  return `<${tag} ${attrString} />`;
+}
+
+function iconToStandaloneSvg(icon: IconDef): string {
+  const inner = icon.elements.map(elementToSvgString).join("");
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+}
+
+// Lightweight payload sent to the client: id, name, category, tags, and the
+// full standalone SVG string (used for both the small grid preview and the
+// modal's copy/download actions), so no server round trip is ever needed.
+const iconsForClient = icons.map((icon) => ({
+  id: icon.id,
+  name: icon.name,
+  category: icon.category,
+  categoryLabel: icon.categoryLabel,
+  tags: icon.tags,
+  svg: iconToStandaloneSvg(icon),
+}));
+
+// Distinct categories, sorted alphabetically by their display label
+const categoryMap = new Map<string, string>();
+icons.forEach((icon) => categoryMap.set(icon.category, icon.categoryLabel));
+const categories = Array.from(categoryMap.entries())
+  .map(([slug, label]) => ({ slug, label }))
+  .sort((a, b) => a.label.localeCompare(b.label));
+
+const siteUrl = "https://webcreatortools.com";
+const pageUrl = `${siteUrl}/icon-hub/`;
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+    { "@type": "ListItem", position: 2, name: "Icon Hub", item: pageUrl },
+  ],
+};
+---
+
+<MainLayout
+  title="Free Icon Hub, Browse 1,700+ SVG Icons | Pixelquil"
+  description="Browse a free, open SVG icon library with over 1,700 icons. Search by name or category, preview any icon, then copy the SVG code or download it directly."
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+
+  <!-- Breadcrumb -->
+  <nav class="mx-auto max-w-6xl px-4 pt-6 text-sm text-slate-500" aria-label="Breadcrumb">
+    <ol class="flex flex-wrap items-center gap-1.5">
+      <li><a href="/" class="hover:text-brand-600">Home</a></li>
+      <li aria-hidden="true">/</li>
+      <li class="text-slate-900">Icon Hub</li>
+    </ol>
+  </nav>
+
+  <section class="mx-auto max-w-6xl px-4 py-16">
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
+      Icon hub
+    </span>
+    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">Free SVG icons</h1>
+    <p class="mt-4 max-w-xl text-slate-600">
+      {icons.length} free, open icons. Search, filter by category, then copy the SVG code or download the file, no signup required.
+    </p>
+
+    <!-- Search + category filter -->
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+      <div class="relative flex-1 sm:max-w-md">
+        <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="7" cy="7" r="5" />
+          <path d="M14 14l-3-3" stroke-linecap="round" />
+        </svg>
+        <input
+          type="text"
+          data-icon-search
+          placeholder="Search icons by name or tag..."
+          class="w-full rounded-lg border border-slate-300 py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+        />
+      </div>
+
+      <select
+        data-category-select
+        class="rounded-lg border border-slate-300 py-2.5 px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-200 sm:w-56"
+      >
+        <option value="all">All categories</option>
+        {categories.map((cat) => (
+          <option value={cat.slug}>{cat.label}</option>
+        ))}
+      </select>
+    </div>
+
+    <!-- Result count -->
+    <p data-icon-count class="mt-6 text-sm text-slate-500">{icons.length} icons</p>
+
+    <!-- Scrollable container, keeps the page from growing endlessly with 1,764 icons -->
+    <div data-scroll-container class="mt-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin">
+      <div data-icon-grid class="grid grid-cols-3 gap-4 sm:grid-cols-4 lg:grid-cols-6"></div>
+
+      <!-- Sentinel element, triggers loading the next batch when scrolled into view -->
+      <div data-scroll-sentinel class="h-1"></div>
+
+      <p data-icon-loading class="hidden py-6 text-center text-sm text-slate-400">
+        Loading more icons...
+      </p>
+    </div>
+
+    <p data-icon-empty class="mt-10 hidden text-center text-sm text-slate-400">
+      No icons match your search.
+    </p>
+  </section>
+
+  <!-- Preview modal -->
+  <div
+    data-icon-modal
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 px-4"
+  >
+    <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 data-modal-name class="text-lg font-semibold text-slate-900"></h2>
+          <p data-modal-category class="mt-1 text-xs text-slate-400"></p>
+        </div>
+        <button type="button" data-modal-close class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600" aria-label="Close">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+
+      <div data-modal-preview class="mx-auto my-6 flex h-24 w-24 items-center justify-center rounded-xl bg-slate-50 text-brand-600"></div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button
+          type="button"
+          data-modal-copy
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:border-brand-300 hover:text-brand-600"
+        >
+          Copy SVG
+        </button>
+        <button
+          type="button"
+          data-modal-download
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Download SVG
+        </button>
+      </div>
+    </div>
+  </div>
+</MainLayout>
+
+<style>
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #c7d2fe transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #c7d2fe;
+    border-radius: 999px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #a5b4fc;
+  }
+</style>
+
+<script define:vars={{ icons: iconsForClient }}>
+  const BATCH_SIZE = 60;
+
+  const searchInput = document.querySelector("[data-icon-search]");
+  const categorySelect = document.querySelector("[data-category-select]");
+  const grid = document.querySelector("[data-icon-grid]");
+  const sentinel = document.querySelector("[data-scroll-sentinel]");
+  const loadingLabel = document.querySelector("[data-icon-loading]");
+  const emptyMessage = document.querySelector("[data-icon-empty]");
+  const countLabel = document.querySelector("[data-icon-count]");
+
+  let filteredIcons = icons;
+  let renderedCount = 0;
+
+  function iconCardHTML(icon) {
+    return `
+      <button
+        type="button"
+        data-icon-card
+        data-icon-id="${icon.id}"
+        class="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-5 text-center transition-colors hover:border-brand-300"
+      >
+        <div class="flex h-10 w-10 items-center justify-center text-brand-600">${icon.svg}</div>
+        <span class="text-xs font-medium text-slate-700">${icon.name}</span>
+      </button>
+    `;
+  }
+
+  function renderNextBatch() {
+    const nextChunk = filteredIcons.slice(renderedCount, renderedCount + BATCH_SIZE);
+    if (nextChunk.length === 0) return;
+
+    grid.insertAdjacentHTML("beforeend", nextChunk.map(iconCardHTML).join(""));
+    renderedCount += nextChunk.length;
+
+    grid.querySelectorAll("[data-icon-card]").forEach((card) => {
+      if (card.dataset.bound) return;
+      card.dataset.bound = "true";
+      card.addEventListener("click", () => openModal(card.getAttribute("data-icon-id")));
+    });
+  }
+
+  function applyFilters() {
+    const query = (searchInput?.value || "").trim().toLowerCase();
+    const activeCategory = categorySelect?.value || "all";
+
+    filteredIcons = icons.filter((icon) => {
+      const matchesQuery =
+        !query ||
+        icon.name.toLowerCase().includes(query) ||
+        icon.tags.some((t) => t.toLowerCase().includes(query));
+      const matchesCategory = activeCategory === "all" || icon.category === activeCategory;
+      return matchesQuery && matchesCategory;
+    });
+
+    grid.innerHTML = "";
+    renderedCount = 0;
+
+    countLabel.textContent = `${filteredIcons.length} icon${filteredIcons.length === 1 ? "" : "s"}`;
+    emptyMessage.classList.toggle("hidden", filteredIcons.length !== 0);
+    grid.classList.toggle("hidden", filteredIcons.length === 0);
+
+    renderNextBatch();
+  }
+
+  searchInput?.addEventListener("input", applyFilters);
+  categorySelect?.addEventListener("change", applyFilters);
+
+// Load the next batch when the sentinel scrolls into view, watching the
+  // scroll container itself rather than the page, since the grid now scrolls
+  // internally instead of growing the whole page.
+  const scrollContainer = document.querySelector("[data-scroll-container]");
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        loadingLabel.classList.toggle("hidden", renderedCount >= filteredIcons.length);
+        renderNextBatch();
+      }
+    },
+    { root: scrollContainer, rootMargin: "300px" }
+  );
+  observer.observe(sentinel);
+
+  // Modal
+  const modal = document.querySelector("[data-icon-modal]");
+  const modalName = document.querySelector("[data-modal-name]");
+  const modalCategory = document.querySelector("[data-modal-category]");
+  const modalPreview = document.querySelector("[data-modal-preview]");
+  const modalCopy = document.querySelector("[data-modal-copy]");
+  const modalDownload = document.querySelector("[data-modal-download]");
+  const modalClose = document.querySelector("[data-modal-close]");
+
+  let currentIcon = null;
+
+  function openModal(iconId) {
+    const icon = icons.find((i) => i.id === iconId);
+    if (!icon) return;
+    currentIcon = icon;
+    modalName.textContent = icon.name;
+    modalCategory.textContent = icon.categoryLabel;
+    modalPreview.innerHTML = icon.svg;
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  function closeModal() {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    currentIcon = null;
+  }
+
+  modalClose?.addEventListener("click", closeModal);
+  modal?.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
+  modalCopy?.addEventListener("click", async () => {
+    if (!currentIcon) return;
+    await navigator.clipboard.writeText(currentIcon.svg);
+    const original = modalCopy.textContent;
+    modalCopy.textContent = "Copied";
+    setTimeout(() => (modalCopy.textContent = original), 1200);
+  });
+
+  modalDownload?.addEventListener("click", () => {
+    if (!currentIcon) return;
+    const blob = new Blob([currentIcon.svg], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${currentIcon.id}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Initial render
+  applyFilters();
+</script>

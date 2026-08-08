@@ -1,0 +1,95 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Mizanur Rahaman",
+  "jobTitle": "Frontend Developer & Founder",
+  "url": "https://pixelquil.com/about/",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Pixelquil"
+  },
+  "knowsAbout": ["SVG", "Frontend Development", "Shopify Development", "Technical SEO", "JavaScript", "CSS"],
+  "nationality": "Bangladeshi"
+};
+---
+
+<MainLayout
+  title="About"
+  description="Meet the developer behind Pixelquil, a privacy-first toolkit for SVG, frontend, and technical SEO work, built from real production experience."
+>
+  <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+
+  <section class="mx-auto max-w-3xl px-4 py-20">
+    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
+      About Pixelquil
+    </span>
+
+    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">
+      Built by someone who actually uses these tools
+    </h1>
+
+    <p class="mt-6 text-lg text-slate-600 leading-relaxed">
+      Pixelquil is built and maintained by Mizanur Rahaman, a frontend developer based in Bangladesh
+      with over 5 years of hands-on experience building live, production websites, not just design
+      mockups. Every tool on this site exists because it solved a real problem in real client work
+      first.
+    </p>
+
+    <div class="mt-10 flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-6">
+      <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-100 text-2xl font-bold text-brand-600">
+        MR
+      </div>
+      <div>
+        <p class="font-semibold text-slate-900">Mizanur Rahaman</p>
+        <p class="text-sm text-slate-500">Frontend Developer, Bangladesh</p>
+      </div>
+    </div>
+
+    <h2 class="mt-12 text-2xl font-bold text-slate-900">Why Pixelquil exists</h2>
+    <p class="mt-4 text-slate-600 leading-relaxed">
+      Over years of turning Figma and design files into fully functional, pixel-accurate live
+      websites, the same small technical problems kept coming up: SVG exports with broken viewBox
+      attributes, icons that needed quick recoloring, config files that needed converting, technical
+      SEO checks that needed a fast answer without opening a full audit suite. Most existing tools
+      for these tasks were either buried in ads, required a signup, or quietly uploaded files to a
+      server with no clear privacy policy. Pixelquil is the toolkit built to fix that: fast, free,
+      and everything runs in your browser.
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold text-slate-900">Real experience, not just theory</h2>
+    <p class="mt-4 text-slate-600 leading-relaxed">
+      Every tool on this site is grounded in production work, not written from a textbook. Building
+      hundreds of Shopify storefronts and custom frontend projects means translating Figma designs
+      into pixel-accurate HTML, CSS, and JavaScript, optimizing conversion-focused landing pages, and
+      fixing the exact SVG and technical SEO issues that Pixelquil's tools now solve directly. That
+      hands-on background is also why every tool page on this site includes real, specific written
+      guidance, not generic filler, alongside the tool itself.
+    </p>
+
+    <h2 class="mt-12 text-2xl font-bold text-slate-900">What Pixelquil stands for</h2>
+    <ul class="mt-4 space-y-3 text-slate-600">
+      <li class="flex gap-3">
+        <svg class="mt-1 h-4 w-4 shrink-0 text-brand-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><strong class="text-slate-900">Privacy by default.</strong> Every tool runs entirely in your browser. Nothing you paste or upload is sent to a server.</span>
+      </li>
+      <li class="flex gap-3">
+        <svg class="mt-1 h-4 w-4 shrink-0 text-brand-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><strong class="text-slate-900">No signup for core tools.</strong> Open a tool and use it immediately.</span>
+      </li>
+      <li class="flex gap-3">
+        <svg class="mt-1 h-4 w-4 shrink-0 text-brand-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span><strong class="text-slate-900">Real written guidance, not filler.</strong> Every tool page includes genuine explanation grounded in actual production experience, not generic AI padding.</span>
+      </li>
+    </ul>
+
+    <div class="mt-12 rounded-2xl bg-brand-50 p-6">
+      <p class="text-sm text-slate-600">
+        Have feedback, found a bug, or want to suggest a tool? Reach out through the
+        <a href="/contact/" class="font-medium text-brand-600 hover:underline">contact page</a>.
+      </p>
+    </div>
+  </section>
+</MainLayout>

@@ -9,7 +9,7 @@
       "<h3 class=\"mt-10 mb-3 flex items-center gap-2 text-xl font-semibold text-slate-900\"><svg class=\"h-5 w-5 text-brand-600\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3v12 M7 10l5 5 5-5 M4 21h16\"/></svg>Multiple export options for every workflow</h3><p class=\"text-slate-600 leading-relaxed\">Once your SVG looks right in the preview, you have several ways to take it further. Copy code puts the raw markup on your clipboard, ready to paste into a component file or a stylesheet. Download SVG saves it as a standalone file. Download PNG rasterizes the current SVG onto a canvas and exports it as a flat image, useful for places that only accept raster formats, like a social media profile picture or an email signature. Copy Data URI base64 encodes the SVG into a single string ready to paste anywhere a URL is expected.</p>",
       "<h3 class=\"mt-10 mb-3 flex items-center gap-2 text-xl font-semibold text-slate-900\"><svg class=\"h-5 w-5 text-brand-600\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 3v10M3 8h10\"/></svg>Built for CSS, React Native, and modern frontend workflows</h3><p class=\"text-slate-600 leading-relaxed\">The Copy Data URI button is especially handy if you are building a mobile app and want to embed a small icon without adding it as a separate asset file, since the resulting string works directly as a React Native <code>Image</code> component's <code>source</code> prop. If your end goal is using this SVG in a modern frontend codebase rather than an app, our <a href=\"/developer-tools/svg-to-css-data-uri/\" class=\"text-brand-600 hover:underline\">SVG to CSS Data URI</a> tool is built specifically around that CSS use case, and our <a href=\"/developer-tools/image-to-tailwind-palette/\" class=\"text-brand-600 hover:underline\">Image to Tailwind Palette</a> tool can turn any image, including a rendered SVG, into a ready to use Tailwind color theme.</p>",
       "<h3 class=\"mt-10 mb-3 flex items-center gap-2 text-xl font-semibold text-slate-900\"><svg class=\"h-5 w-5 text-brand-600\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z\"/></svg>Privacy first, every time</h3><p class=\"text-slate-600 leading-relaxed\">Because this editor runs entirely in your browser using your device's own memory, nothing you paste or upload is ever sent to a server, logged, or stored anywhere. That makes it a safe option for client work, unreleased branding, or any file you would rather not upload to a third party service. You can also verify an SVG's structure before using it in production with our <a href=\"/svg-tools/svg-viewer/\" class=\"text-brand-600 hover:underline\">SVG Viewer & Validator</a>, which checks for malformed markup and common export issues.</p>",
-      "<h3 class=\"mt-10 mb-3 flex items-center gap-2 text-xl font-semibold text-slate-900\"><svg class=\"h-5 w-5 text-brand-600\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 6L2 12l6 6 M16 6l6 6-6 6\"/></svg>Part of the WebCreator Tools ecosystem</h3><p class=\"text-slate-600 leading-relaxed\">This tool is part of the broader <a href=\"/svg-tools/\" class=\"text-brand-600 hover:underline\">SVG & Design Tools</a> collection on WebCreator Tools, alongside a growing set of <a href=\"/developer-tools/\" class=\"text-brand-600 hover:underline\">Developer Utilities</a> aimed at frontend workflows. All of them share the same principle behind this editor: fast, browser based, and privacy first, with no signup required for the core features.</p>"
+      "<h3 class=\"mt-10 mb-3 flex items-center gap-2 text-xl font-semibold text-slate-900\"><svg class=\"h-5 w-5 text-brand-600\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 6L2 12l6 6 M16 6l6 6-6 6\"/></svg>Part of the Pixelquil ecosystem</h3><p class=\"text-slate-600 leading-relaxed\">This tool is part of the broader <a href=\"/svg-tools/\" class=\"text-brand-600 hover:underline\">SVG & Design Tools</a> collection on Pixelquil, alongside a growing set of <a href=\"/developer-tools/\" class=\"text-brand-600 hover:underline\">Developer Utilities</a> aimed at frontend workflows. All of them share the same principle behind this editor: fast, browser based, and privacy first, with no signup required for the core features.</p>"
     ],
     "howTo": [
       { "title": "Paste or upload your SVG", "description": "Paste SVG code directly into the editor, or click Upload SVG to load a file from your device." },
@@ -163,6 +163,516 @@
       { "question": "Does this work with older Tailwind versions?", "answer": "The output is written for Tailwind v4's CSS based @theme syntax. For Tailwind v3 or earlier, the same hex values can be added to the colors section of your tailwind.config.js instead." },
       { "question": "Is my image uploaded to a server?", "answer": "No, extraction happens entirely in your browser using the canvas API. Your image is never uploaded or stored." },
       { "question": "Why are background colors sometimes excluded?", "answer": "Near-white and near-black colors are deprioritized during extraction, since large plain backgrounds often dominate an image by pixel count without being the color you actually want as a theme token." }
+    ]
+},
+  {
+    "slug": "svg-optimizer", "category": "svg-tools", "title": "SVG Optimizer & Minifier", "description": "Strip unnecessary metadata and shrink SVG file size automatically, ready for production use.", "badgeColor": "indigo", "iconPath": "M13 2L3 14h7l-1 8 10-12h-7l1-8z",
+    "content": [
+      "An SVG exported from a design tool often carries extra weight it does not need in production: editor metadata, unused IDs, redundant groups, and verbose path data. This tool strips that overhead automatically, reducing file size without changing how the SVG looks, distinct from manual editing since the process is fully automated and repeatable across many files."
+    ],
+    "faqs": [
+      { "question": "Will optimizing change how my SVG looks?", "answer": "No, optimization removes unnecessary code, not visible content. The rendered result stays the same." },
+      { "question": "How is this different from the SVG Code Editor?", "answer": "The Code Editor is for manual, hands-on changes. This tool is automated cleanup focused purely on reducing file size for production." }
+    ]
+  },
+  {
+    "slug": "image-to-svg-converter", "category": "svg-tools", "title": "Image to SVG Converter", "description": "Trace a raster image into editable vector SVG paths, right in your browser.", "badgeColor": "purple", "iconPath": "M4 4h7v7H4z M13 13h7v7h-7z M11 11l2 2",
+    "content": [
+      "This tool traces a raster image, a PNG, JPG, or scanned sketch, into vector paths, converting flat pixels into an editable SVG. This is genuinely useful for turning a photographed logo, a hand drawn sketch, or a low resolution image into a scalable, editable vector, a fundamentally different process from any color, code, or size tool in this collection, since it generates new path geometry rather than working with existing SVG markup."
+    ],
+    "faqs": [
+      { "question": "What kind of images work best for vectorization?", "answer": "High contrast images with clear, distinct shapes trace most accurately, such as logos and line art. Complex photographs with soft gradients are harder to trace cleanly." },
+      { "question": "Will the traced SVG need cleanup afterward?", "answer": "Often yes, especially for detailed images. The SVG Code Editor is a good next step to refine the traced result." }
+    ]
+  },
+  {
+    "slug": "svg-to-png-batch", "category": "svg-tools", "title": "SVG to PNG Batch Converter", "description": "Convert multiple SVG files to PNG at once, with custom size presets.", "badgeColor": "blue", "iconPath": "M4 4h16v16H4z M4 4l6 6 M20 4l-6 6 M4 20l6-6 M20 20l-6-6",
+    "content": [
+      "Exporting a whole icon set or illustration library to PNG one file at a time is slow. This tool converts many SVG files to PNG in a single batch, with size presets so every export comes out consistently sized, a bulk workflow tool distinct from the SVG Code Editor's single file PNG export, built for people exporting entire sets rather than one icon at a time."
+    ],
+    "faqs": [
+      { "question": "How many files can I convert at once?", "answer": "There is no hard limit set by the tool itself, though very large batches depend on your device's available memory since processing happens entirely in your browser." },
+      { "question": "Can each file use a different export size?", "answer": "You can apply one size preset across the batch, or export at each SVG's own native dimensions." }
+    ]
+  },
+  {
+    "slug": "svg-sprite-generator", "category": "svg-tools", "title": "SVG Sprite Sheet Generator", "description": "Combine multiple SVG icons into a single sprite sheet using symbol and use references.", "badgeColor": "teal", "iconPath": "M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z",
+    "content": [
+      "Serving many small icons as separate files means many separate network requests. This tool combines multiple SVG icons into a single sprite sheet using the standard symbol and use technique, so a page can reference any icon from one shared file. This is a specific, well established performance pattern, distinct from the CSS data URI approach, which is better suited to a small number of icons rather than a full icon library."
+    ],
+    "faqs": [
+      { "question": "How is a sprite sheet different from inlining icons as data URIs?", "answer": "A sprite sheet loads once and is reused across many icon references, better suited to larger icon libraries. Data URIs work well for a small number of individually used icons." },
+      { "question": "Do I need JavaScript to use the generated sprite sheet?", "answer": "No, sprite sheets work with plain HTML using an SVG use element referencing the sheet, no JavaScript required." }
+    ]
+  },
+  {
+    "slug": "svg-to-react-component", "category": "svg-tools", "title": "SVG to React & Vue Component Converter", "description": "Convert raw SVG markup into a ready to paste React or Vue component.", "badgeColor": "indigo", "iconPath": "M12 2l3 6 6 1-4.5 4 1 6L12 16l-5.5 3 1-6L3 9l6-1z",
+    "content": [
+      "Pasting raw SVG markup into a React or Vue project usually needs manual adjustment: converting attributes like class to className, adding props for size and color, and wrapping it as a proper component. This tool automates that conversion, producing a ready to use component file, a distinct output format from anything else in this collection, since the result is framework specific code rather than plain SVG or CSS."
+    ],
+    "faqs": [
+      { "question": "Which frameworks are supported?", "answer": "React and Vue are supported, each with syntax matching that framework's conventions for attributes and props." },
+      { "question": "Can the generated component accept a custom color?", "answer": "Yes, the tool can generate a component with a color prop wired to the SVG's fill or stroke, so it can be styled dynamically." }
+    ]
+  },
+  {
+    "slug": "svg-path-editor", "category": "svg-tools", "title": "SVG Path Visualizer & Point Editor", "description": "See and drag a path's control points visually instead of editing raw path data by hand.", "badgeColor": "purple", "iconPath": "M4 18c4-12 12-12 16-14 M4 18a2 2 0 100 4 2 2 0 000-4z M20 4a2 2 0 100 4 2 2 0 000-4z",
+    "content": [
+      "Editing an SVG path's raw d attribute by hand means reading long strings of coordinate numbers. This tool renders a path's individual anchor points and curve handles visually, so points can be dragged directly, a fundamentally different interaction model from the code based SVG Code Editor, useful specifically for fine tuning curve shapes without decoding path syntax by eye."
+    ],
+    "faqs": [
+      { "question": "Does this replace the SVG Code Editor?", "answer": "No, they serve different purposes. This tool is for visual, point by point curve adjustments. The Code Editor is better for broader structural changes." },
+      { "question": "Can I export the edited path back to code?", "answer": "Yes, dragging points updates the underlying path data, which you can then copy as standard SVG markup." }
+    ]
+  },
+  {
+    "slug": "favicon-generator", "category": "svg-tools", "title": "Favicon & App Icon Generator", "description": "Generate a complete favicon set and web manifest from one SVG or image.", "badgeColor": "amber", "iconPath": "M12 2l2.5 5.5L20 8l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z",
+    "content": [
+      "A complete favicon setup needs more than one file: multiple PNG sizes, an ICO file, and often a web manifest for mobile home screen icons. This tool takes a single SVG or image and generates the full set automatically, a specific packaging task distinct from any single format converter, since it produces a complete, ready to deploy icon bundle rather than one output file."
+    ],
+    "faqs": [
+      { "question": "What files does the generator produce?", "answer": "A set of PNG icons at standard sizes, an ICO file for legacy browser support, and a web manifest file for mobile and PWA icon support." },
+      { "question": "Can I start from a raster image instead of an SVG?", "answer": "Yes, both SVG and standard image formats work as a source, though starting from an SVG generally produces sharper results at every size." }
+    ]
+  },
+  {
+    "slug": "text-to-svg-path", "category": "svg-tools", "title": "Text to SVG Path Converter", "description": "Convert text into vector path outlines that render identically everywhere, no fonts required.", "badgeColor": "blue", "iconPath": "M4 6h16 M4 12h10 M4 18h13",
+    "content": [
+      "Text rendered with a font tag depends on that font being available wherever the SVG is displayed. This tool converts text into actual vector path outlines using a chosen web font, so the result renders identically everywhere without depending on font availability, a specific need for logos, wordmarks, and any text that must look pixel perfect and consistent across every environment."
+    ],
+    "faqs": [
+      { "question": "Why convert text to paths instead of just using a font tag?", "answer": "Path outlines render identically regardless of whether a viewer's system has the original font installed, which matters for logos and brand consistent text." },
+      { "question": "Can the resulting text still be edited afterward?", "answer": "Once converted to paths, the content is no longer editable as text, only as vector shapes, similar to how a logo behaves after being finalized." }
+    ]
+  },
+  {
+    "slug": "batch-color-replacer", "category": "svg-tools", "title": "Batch SVG Color Replacer", "description": "Find and replace a specific color across multiple SVG files at once.", "badgeColor": "amber", "iconPath": "M12 2a10 10 0 100 20 10 10 0 000-20z M12 2v20 M2 12h20",
+    "content": [
+      "Rebranding an entire icon set one file at a time is tedious. This tool finds and replaces a specific color across many uploaded SVG files in a single batch operation, distinct from the Palette Extractor's single file color reading and application, since this is built specifically for bulk, multi-file color updates."
+    ],
+    "faqs": [
+      { "question": "How is this different from the Palette Extractor's Apply to SVG feature?", "answer": "The Palette Extractor works on one SVG at a time. This tool is built for updating the same color across many files in one pass." },
+      { "question": "Can I replace more than one color at a time?", "answer": "Yes, you can set up multiple find and replace color pairs to apply across the batch in a single run." }
+    ]
+  },
+  {
+    "slug": "stroke-to-fill-converter", "category": "svg-tools", "title": "Stroke to Fill Path Converter", "description": "Convert a stroked line into an equivalent filled shape for reliable scaling.", "badgeColor": "teal", "iconPath": "M4 12h16 M4 12a2 2 0 100 4 2 2 0 000-4z M20 12a2 2 0 100 4 2 2 0 000-4z",
+    "content": [
+      "A stroked line's visible width can distort unpredictably when an SVG is scaled or transformed in certain contexts. This tool converts a stroke into an equivalent filled shape representing the same visible outline, so the icon scales reliably as pure fill geometry, a specific production concern for icon sets that need to behave consistently at any size."
+    ],
+    "faqs": [
+      { "question": "Why would I need to convert a stroke to a fill?", "answer": "Filled shapes scale more predictably than strokes in some rendering and animation contexts, where stroke width can behave inconsistently across transformations." },
+      { "question": "Does this change how the icon looks visually?", "answer": "No, the goal is a visually identical result, just represented as fill geometry instead of a stroked line." }
+    ]
+  },
+  {
+    "slug": "svg-gradient-generator", "category": "svg-tools", "title": "SVG Gradient Generator", "description": "Visually build linear and radial gradients and get the resulting SVG markup.", "badgeColor": "purple", "iconPath": "M4 4h16v16H4z M4 4l16 16",
+    "content": [
+      "Writing gradient markup by hand, stop colors, offsets, and angles, is fiddly to get right. This tool provides a visual editor for building linear and radial gradients, drag color stops and adjust the angle directly, then copy the resulting linearGradient or radialGradient markup, a creation tool distinct from anything color related already in this collection, which focus on extracting or applying existing solid colors rather than building new gradients."
+    ],
+    "faqs": [
+      { "question": "Does this support both linear and radial gradients?", "answer": "Yes, both gradient types are supported, with a visual editor for stop colors, positions, and angle or radius." },
+      { "question": "Can I add more than two color stops?", "answer": "Yes, any number of color stops can be added and positioned along the gradient." }
+    ]
+  },
+  {
+    "slug": "svg-pattern-generator", "category": "svg-tools", "title": "Seamless SVG Pattern Generator", "description": "Generate tileable background patterns, dots, stripes, and grids, as SVG.", "badgeColor": "green", "iconPath": "M4 4h4v4H4z M12 4h4v4h-4z M20 4h4v4h-4z M4 12h4v4H4z M12 12h4v4h-4z M4 20h4v4H4z",
+    "content": [
+      "Decorative repeating backgrounds, dots, stripes, grids, and similar patterns are commonly needed but tedious to build from scratch. This tool generates tileable SVG patterns with adjustable spacing, size, and color, a decorative background generator, a different category entirely from the icon and logo focused tools elsewhere in this collection."
+    ],
+    "faqs": [
+      { "question": "What pattern types are available?", "answer": "Common options include dots, stripes, grids, and checkerboards, each with adjustable spacing and color." },
+      { "question": "Will the pattern tile seamlessly with no visible seams?", "answer": "Yes, each generated pattern is built to repeat edge to edge without visible seams when tiled." }
+    ]
+  },
+  {
+    "slug": "blob-shape-generator", "category": "svg-tools", "title": "Organic Blob Shape Generator", "description": "Generate randomized smooth, organic blob shapes for modern hero sections and backgrounds.", "badgeColor": "green", "iconPath": "M12 3c4 0 8 2 8 7 0 4-2 8-7 9-5 1-9-2-9-7 0-4 3-9 8-9z",
+    "content": [
+      "Smooth, organic blob shapes have become a common design element in modern hero sections and backgrounds, but hand drawing one that looks natural takes practice. This tool generates randomized organic blob shapes as SVG paths, with a regenerate option to explore variations, a distinct decorative shape generator rather than an icon or utility tool."
+    ],
+    "faqs": [
+      { "question": "Can I control how irregular the blob looks?", "answer": "Yes, a smoothness or randomness setting adjusts how subtle or pronounced the organic irregularity is." },
+      { "question": "Can I change the blob's color after generating it?", "answer": "Yes, the generated shape is plain SVG markup with an editable fill color." }
+    ]
+  },
+  {
+    "slug": "clip-path-generator", "category": "svg-tools", "title": "CSS Clip-Path Generator", "description": "Visually build a polygon shape and get the matching CSS clip-path value.", "badgeColor": "blue", "iconPath": "M4 4l16 4-4 16z",
+    "content": [
+      "Writing a CSS clip-path polygon value by guessing coordinates is slow and error prone. This tool provides a visual editor, drag points on a shape directly over a preview, and generates the matching clip-path CSS value automatically, a CSS specific tool adjacent to SVG conceptually but distinct in output format and use case from anything else in this collection."
+    ],
+    "faqs": [
+      { "question": "Is clip-path the same thing as an SVG clip path?", "answer": "They are related concepts, but this tool specifically generates a CSS clip-path property value for use directly in a stylesheet, not SVG markup." },
+      { "question": "Can I preview the clip-path applied to an actual image?", "answer": "Yes, the editor shows a live preview of the clip-path applied over a sample image as you adjust points." }
+    ]
+  },
+  {
+    "slug": "svg-accessibility-checker", "category": "svg-tools", "title": "SVG Accessibility Checker", "description": "Check an SVG for title and desc elements, ARIA roles, and color contrast issues.", "badgeColor": "amber", "iconPath": "M12 2a10 10 0 100 20 10 10 0 000-20z M12 8v4 M12 16v.01",
+    "content": [
+      "An SVG that is structurally valid is not necessarily accessible. This tool checks specifically for accessibility concerns: whether a title or desc element is present for screen readers, whether appropriate ARIA roles are set, and whether foreground and background colors meet contrast guidelines, a distinct focus from the SVG Viewer & Validator, which checks structural validity and security rather than accessibility."
+    ],
+    "faqs": [
+      { "question": "How is this different from the SVG Viewer & Validator?", "answer": "The Viewer & Validator checks whether an SVG is structurally valid and free of security risks. This tool checks specifically for accessibility concerns, like missing screen reader text and contrast issues." },
+      { "question": "What accessibility standard does the contrast check follow?", "answer": "Contrast checks follow WCAG color contrast guidelines, the widely used web accessibility standard for readable color combinations." }
+   ]
+  },
+  {
+    "slug": "json-formatter-validator", "category": "developer-tools", "title": "JSON Formatter That Shows the Exact Broken Line", "description": "Format and validate JSON with error line highlighting, no upload, nothing leaves your device.", "badgeColor": "indigo", "iconPath": "M4 4h16v16H4z M8 8h8v8H8z",
+    "content": [
+      "Minified or malformed JSON is hard to debug when you cannot tell exactly where it broke. This tool formats JSON into readable, indented output, and when the input is invalid, it points to the exact line and character where parsing failed, instead of just saying invalid JSON. Useful for debugging API responses, config files, or any pasted JSON that will not parse."
+    ],
+    "faqs": [
+      { "question": "Does this validate JSON as well as format it?", "answer": "Yes, invalid JSON is flagged with the specific line and character where the syntax error occurs, not just a generic error message." },
+      { "question": "Is my JSON data uploaded anywhere?", "answer": "No, formatting and validation both happen entirely in your browser. Nothing you paste is sent to a server." }
+    ]
+  },
+  {
+    "slug": "jwt-decoder", "category": "developer-tools", "title": "JWT Decoder, Runs Locally in Your Browser", "description": "Decode a JWT's header and payload claims instantly, entirely client-side, safe for real tokens.", "badgeColor": "purple", "iconPath": "M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z M9 12l2 2 4-4",
+    "content": [
+      "A JSON Web Token's header and payload are base64url encoded but not encrypted, so decoding them is useful for inspecting claims while debugging authentication or session issues. This tool decodes both segments instantly and displays them as readable JSON. Because it runs entirely client-side with no server round trip, it is safe to paste tokens containing real session data while debugging."
+    ],
+    "faqs": [
+      { "question": "Does this verify the token's signature?", "answer": "No, this tool decodes the header and payload only. Signature verification requires the token's secret or public key, which is a separate, server-side concern." },
+      { "question": "Is it safe to paste a real production token here?", "answer": "Decoding happens entirely in your browser, nothing is sent to a server, which makes it reasonably safe for debugging. As general practice, avoid pasting sensitive tokens into any third-party tool when possible." }
+    ]
+  },
+  {
+    "slug": "regex-tester-builder", "category": "developer-tools", "title": "Regex Tester With Live Group Highlighting", "description": "Test regular expressions against sample text with live match and capture group highlighting.", "badgeColor": "blue", "iconPath": "M4 4l16 16 M20 4L4 20 M12 2v20",
+    "content": [
+      "Regular expression syntax is notoriously easy to get subtly wrong. This tool matches a regex pattern against sample text in real time, highlighting full matches and individual capture groups as you type, so you can see immediately whether a pattern behaves the way you expect before dropping it into production code."
+    ],
+    "faqs": [
+      { "question": "Which regex flavor does this use?", "answer": "This tool uses JavaScript's native regular expression engine, matching the syntax and behavior you would get in a browser or Node.js environment." },
+      { "question": "Can I see individual capture groups, not just the full match?", "answer": "Yes, each capture group in your pattern is highlighted separately and listed alongside the full match." }
+    ]
+  },
+  {
+    "slug": "uuid-generator", "category": "developer-tools", "title": "UUID v4 & v7 Generator, Bulk Output", "description": "Generate classic random UUIDs or newer sortable UUIDv7s, in bulk, copy or export instantly.", "badgeColor": "teal", "iconPath": "M12 2a10 10 0 100 20 10 10 0 000-20z M12 8v4l3 3",
+    "content": [
+      "UUIDs are used everywhere as unique identifiers, but not all UUID versions behave the same. This tool generates both v4, fully random, and the newer v7, which embeds a timestamp so generated IDs sort chronologically, a meaningful difference for anyone using UUIDs as database primary keys. Generate a single ID or a bulk batch, and copy or export the result."
+    ],
+    "faqs": [
+      { "question": "What is the difference between UUID v4 and v7?", "answer": "v4 is fully random with no inherent order. v7 embeds a timestamp, so generated IDs sort chronologically, which can improve database index performance when used as a primary key." },
+      { "question": "How many UUIDs can I generate at once?", "answer": "You can generate a large batch in one go, generation happens instantly in your browser with no server round trip." }
+    ]
+  },
+  {
+    "slug": "hash-generator", "category": "developer-tools", "title": "MD5, SHA-1 & SHA-256 Hash Generator", "description": "Generate MD5, SHA-1, SHA-256, and SHA-512 hashes from text or a file, all at once.", "badgeColor": "amber", "iconPath": "M4 4h16v16H4z M4 10h16 M10 4v16",
+    "content": [
+      "This tool generates cryptographic hash digests, MD5, SHA-1, SHA-256, and SHA-512, from either pasted text or an uploaded file, all calculated at once rather than one algorithm at a time. Useful for verifying file integrity, checking a checksum against a published value, or generating hashes for non-security use cases like cache keys."
+    ],
+    "faqs": [
+      { "question": "Is MD5 secure for password hashing?", "answer": "No, MD5 is considered cryptographically broken for security purposes like password storage. It remains useful for basic checksums and non-security integrity checks, not for protecting sensitive data." },
+      { "question": "Can I hash a file instead of text?", "answer": "Yes, you can upload a file directly and the tool computes hashes from its contents, entirely in your browser." }
+    ]
+  },
+  {
+    "slug": "cron-expression-parser", "category": "developer-tools", "title": "Cron Expression Translator & Visual Builder", "description": "Translate a cron expression into plain English, or build one visually with a schedule picker.", "badgeColor": "green", "iconPath": "M12 2a10 10 0 100 20 10 10 0 000-20z M12 6v6l4 2",
+    "content": [
+      "Cron syntax is compact but easy to misread, is that field the hour or the day of month. This tool translates any cron expression into a plain English description of its schedule, and also works in reverse, letting you build a valid expression visually by picking days, hours, and intervals rather than writing the syntax from memory."
+    ],
+    "faqs": [
+      { "question": "Does this support standard 5-field cron syntax?", "answer": "Yes, standard 5-field cron expressions are supported, along with common extensions like step values and ranges." },
+      { "question": "Can I build an expression without knowing cron syntax at all?", "answer": "Yes, the visual builder lets you pick a schedule using plain controls, and generates the correct cron expression for you." }
+    ]
+  },
+  {
+    "slug": "text-diff-checker", "category": "developer-tools", "title": "Text & Code Diff Checker, Side-by-Side View", "description": "Compare two blocks of text or code and see every addition, deletion, and change highlighted.", "badgeColor": "indigo", "iconPath": "M4 4h7v16H4z M13 4h7v16h-7z",
+    "content": [
+      "Comparing two versions of a config file, an API response, or a code snippet by eye is slow and error prone. This tool shows two blocks of text side by side, with every added, removed, and changed line clearly highlighted, useful anywhere you need to spot differences quickly without relying on a full version control setup."
+    ],
+    "faqs": [
+      { "question": "Does this work for code, not just plain text?", "answer": "Yes, the diff comparison works on any text input, including source code, configuration files, and structured data like JSON or YAML." },
+      { "question": "Is my pasted content uploaded anywhere?", "answer": "No, the comparison runs entirely in your browser. Neither block of text is sent to a server." }
+    ]
+  },
+  {
+    "slug": "markdown-live-previewer", "category": "developer-tools", "title": "Live Markdown Previewer, No File Saved", "description": "Type markdown and see the rendered output update live, nothing saved or uploaded.", "badgeColor": "purple", "iconPath": "M4 4h16v16H4z M8 16V8l4 4 4-4v8",
+    "content": [
+      "Markdown is simple, but knowing exactly how a README or documentation page will render before committing it saves back and forth guessing. This tool renders markdown live in a split view as you type, standard formatting, headers, lists, code blocks, and links all render exactly as they would on GitHub or a documentation site."
+    ],
+    "faqs": [
+      { "question": "Does this support GitHub-flavored markdown, like tables and task lists?", "answer": "Yes, common GitHub-flavored markdown extensions including tables, task lists, and fenced code blocks with syntax highlighting are supported." },
+      { "question": "Is my markdown content saved anywhere?", "answer": "No, nothing is saved or uploaded. The preview updates live in your browser only, and clears when you leave the page." }
+    ]
+  },
+  {
+    "slug": "color-format-converter", "category": "developer-tools", "title": "HEX, RGB, HSL & OKLCH Color Converter", "description": "Convert instantly between HEX, RGB, HSL, and the newer OKLCH color format.", "badgeColor": "blue", "iconPath": "M12 2a10 10 0 100 20 10 10 0 000-20z M12 2v20 M2 12h20",
+    "content": [
+      "Modern CSS increasingly supports color formats beyond the familiar HEX and RGB, including OKLCH, a perceptually uniform color space gaining adoption for its more predictable lightness and saturation adjustments. This tool converts instantly between HEX, RGB, HSL, and OKLCH, useful when a design system or CSS codebase mixes formats or is migrating to newer color functions."
+    ],
+    "faqs": [
+      { "question": "What is OKLCH and why would I use it?", "answer": "OKLCH is a color format designed to be perceptually uniform, meaning equal changes in its lightness value look equally different to the human eye, which makes building consistent color scales more predictable than with HSL." },
+      { "question": "Does browser support matter for using OKLCH in CSS?", "answer": "OKLCH is supported in all modern browsers, though it is worth checking your specific browser support requirements before relying on it as your only color format in production CSS." }
+    ]
+  },
+  {
+    "slug": "unix-timestamp-converter", "category": "developer-tools", "title": "Unix Timestamp Converter With Timezone Support", "description": "Convert epoch timestamps to human-readable dates across any timezone, both directions.", "badgeColor": "teal", "iconPath": "M12 2a10 10 0 100 20 10 10 0 000-20z M12 6v6l4 2 M8 2h8",
+    "content": [
+      "Logs, databases, and APIs frequently store dates as Unix timestamps, seconds or milliseconds since January 1, 1970, which are not human readable on their own. This tool converts a timestamp to a readable date in any timezone, and works in reverse too, turning a chosen date and time into its corresponding timestamp."
+    ],
+    "faqs": [
+      { "question": "Does this handle both seconds and milliseconds timestamps?", "answer": "Yes, the tool automatically detects whether an entered timestamp is in seconds or milliseconds based on its length, and converts accordingly." },
+      { "question": "Can I convert a date to a timestamp in a specific timezone?", "answer": "Yes, you can select any timezone when converting a date to a timestamp, or when converting a timestamp to a readable date." }
+    ]
+  },
+  {
+    "slug": "placeholder-text-generator", "category": "developer-tools", "title": "Placeholder Text Generator by Word Count", "description": "Generate lorem ipsum or plain-English placeholder text by exact word, sentence, or paragraph count.", "badgeColor": "amber", "iconPath": "M4 6h16 M4 12h16 M4 18h10",
+    "content": [
+      "Placeholder text fills a layout before real content is ready, and having control over exactly how much you get matters when testing how a design handles different content lengths. This tool generates text by an exact word, sentence, or paragraph count, in either classic Latin lorem ipsum or a plain-English style for a more realistic preview."
+    ],
+    "faqs": [
+      { "question": "Can I generate placeholder text that isn't Latin lorem ipsum?", "answer": "Yes, a plain-English placeholder mode is available alongside the classic Latin style, useful when you want a more realistic sense of how real content will read." },
+      { "question": "Can I set an exact word count instead of paragraphs?", "answer": "Yes, you can generate text by exact word count, sentence count, or paragraph count, depending on what you need to test." }
+    ]
+  },
+  {
+    "slug": "qr-code-generator", "category": "developer-tools", "title": "QR Code Generator With SVG Download", "description": "Generate a QR code from any URL or text and download it as clean, scalable SVG or PNG.", "badgeColor": "green", "iconPath": "M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M15 15h5v5h-5z",
+    "content": [
+      "Most free QR code generators only offer a PNG export, which looks blurry when printed large or scaled up. This tool generates a QR code from any URL or text and lets you download it as either SVG, fully scalable with no quality loss, or PNG. Codes are generated fresh each time with no expiration and no tracking."
+    ],
+    "faqs": [
+      { "question": "Why would I want an SVG QR code instead of PNG?", "answer": "An SVG QR code scales to any size, print materials, large signage, without losing sharpness, since it is vector-based rather than a fixed grid of pixels like PNG." },
+      { "question": "Do the generated QR codes expire or get tracked?", "answer": "No, each QR code is generated directly from your input with no tracking, no expiration, and no account required." }
+    ]
+  },
+  {
+    "slug": "case-converter", "category": "developer-tools", "title": "camelCase, snake_case & kebab-case Converter", "description": "Convert text between camelCase, snake_case, kebab-case, and PascalCase instantly.", "badgeColor": "indigo", "iconPath": "M4 6h16 M4 12h10 M4 18h13 M18 16l2 2-2 2",
+    "content": [
+      "Renaming a variable or converting a data field between naming conventions used by different languages or systems is a small but frequent task. This tool converts text instantly between camelCase, snake_case, kebab-case, and PascalCase, a quick copy paste utility for anyone moving code or data between conventions."
+    ],
+    "faqs": [
+      { "question": "Which naming conventions are supported?", "answer": "camelCase, snake_case, kebab-case, and PascalCase are all supported, converting instantly between any of them." },
+      { "question": "Can I convert a whole list of names at once?", "answer": "Yes, you can paste multiple lines at once and each one is converted independently." }
+    ]
+  },
+  {
+    "slug": "yaml-json-converter", "category": "developer-tools", "title": "YAML to JSON Converter, Both Directions", "description": "Convert YAML to JSON or JSON to YAML instantly, with syntax errors flagged clearly.", "badgeColor": "purple", "iconPath": "M4 4l8 8-8 8 M20 4l-8 8 8 8",
+    "content": [
+      "YAML's whitespace sensitivity makes manual conversion to or from JSON error prone, a single misplaced indent can silently change the structure. This tool converts YAML to JSON or JSON to YAML instantly in either direction, with syntax errors flagged clearly, useful for anyone working with Docker Compose files, CI configs, or Kubernetes manifests alongside JSON-based tooling."
+    ],
+    "faqs": [
+      { "question": "Does this preserve comments when converting YAML to JSON?", "answer": "No, JSON has no concept of comments, so any comments in the source YAML are not carried over in the converted output. This is a limitation of the JSON format itself, not the tool." },
+      { "question": "What happens if my YAML has a syntax error?", "answer": "The tool flags the syntax error clearly rather than producing an incorrect or silently wrong conversion." }
+    ]
+  },
+  {
+    "slug": "password-passphrase-generator", "category": "developer-tools", "title": "Password & Memorable Passphrase Generator", "description": "Generate secure random passwords or memorable multi-word passphrases, fully client-side.", "badgeColor": "blue", "iconPath": "M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z M9 12l2 2 4-4",
+    "content": [
+      "A strong password does not have to be unmemorable. This tool generates both traditional random character passwords with configurable length and character sets, and memorable multi-word passphrases built from a word list, a format that is often easier to type and recall while still being resistant to guessing. Everything is generated using your browser's cryptographically secure random number source, and nothing generated is ever sent or stored anywhere."
+    ],
+    "faqs": [
+      { "question": "Is a passphrase as secure as a random password?", "answer": "A sufficiently long passphrase, several random words combined, can be comparably strong to a random character password, while being easier to remember and type." },
+      { "question": "Are generated passwords stored anywhere?", "answer": "No, generation happens entirely in your browser using a cryptographically secure random source, and nothing generated is transmitted or stored." }
+  ]
+  },
+  {
+    "slug": "robots-txt-tester", "category": "seo-tools", "title": "Robots.txt Tester, Check Any URL Against Any Bot", "description": "Test whether a specific URL is allowed or blocked for any crawler, directly against your robots.txt rules.", "badgeColor": "indigo", "iconPath": "M4 4h16v16H4z M9 9l6 6 M15 9l-6 6",
+    "content": [
+      "A robots.txt file can quietly block pages you never meant to hide, or allow crawlers you meant to restrict. This tool tests a specific URL against a robots.txt file's rules for any named crawler, showing clearly whether that URL is allowed or disallowed, useful for catching a misconfigured rule before it costs you indexing."
+    ],
+    "faqs": [
+      { "question": "Can I test rules for a specific bot, not just any crawler?", "answer": "Yes, you can test a URL against rules for a specific named user-agent, since robots.txt rules can differ between crawlers." },
+      { "question": "Do I need to paste my robots.txt, or can it fetch mine automatically?", "answer": "You can paste rules directly, or fetch and test against a live robots.txt file by domain." }
+    ]
+  },
+  {
+    "slug": "ai-crawler-access-checker", "category": "seo-tools", "title": "AI Crawler Access Checker (GPTBot, ClaudeBot & More)", "description": "See at a glance whether GPTBot, ClaudeBot, PerplexityBot, and Google-Extended are allowed or blocked on your site.", "badgeColor": "purple", "iconPath": "M12 2a10 10 0 100 20 10 10 0 000-20z M8 12h8 M12 8v8",
+    "content": [
+      "AI crawlers like GPTBot, ClaudeBot, PerplexityBot, and Google-Extended each respect robots.txt independently, and a site can easily end up blocking one without meaning to, or without realizing a rule change affected it. This tool checks a robots.txt file against each of these crawlers individually and reports allowed or blocked status for each one, useful for anyone deciding whether to allow AI systems to access their content."
+    ],
+    "faqs": [
+      { "question": "Which AI crawlers does this check?", "answer": "GPTBot, ClaudeBot, PerplexityBot, and Google-Extended are checked individually, since each respects robots.txt rules independently." },
+      { "question": "Should I allow or block AI crawlers?", "answer": "This is a judgment call based on your own goals around content visibility and AI systems. This tool reports current access status rather than recommending a policy." }
+    ]
+  },
+  {
+    "slug": "xml-sitemap-generator", "category": "seo-tools", "title": "XML Sitemap Generator From a URL List", "description": "Paste a list of URLs and get a valid XML sitemap file instantly, no crawling required.", "badgeColor": "blue", "iconPath": "M4 4h16v16H4z M4 10h16 M10 4v16",
+    "content": [
+      "Generating a sitemap usually means running a full site crawl, overkill when you already know exactly which URLs you want included. This tool takes a pasted list of URLs and generates a valid XML sitemap instantly, with optional last modified dates and priority values, ready to download or copy directly."
+    ],
+    "faqs": [
+      { "question": "Do I need to crawl my site to use this?", "answer": "No, you provide the URL list directly, which is faster for smaller sites or when you already know exactly which pages should be included." },
+      { "question": "Can I set priority and last modified values?", "answer": "Yes, both are optional fields you can set per URL, or leave out entirely for a simpler sitemap." }
+    ]
+  },
+  {
+    "slug": "xml-sitemap-validator", "category": "seo-tools", "title": "XML Sitemap Validator, Catch Errors Before Submitting", "description": "Check an existing sitemap for structural errors and invalid URLs before submitting it to Search Console.", "badgeColor": "teal", "iconPath": "M4 4h16v16H4z M8 12l3 3 5-6",
+    "content": [
+      "A malformed sitemap can be silently ignored or partially processed by search engines, without a clear error surfaced to you. This tool checks an existing XML sitemap for structural problems, invalid URLs, and formatting issues, so you can catch and fix them before submitting the file to Search Console."
+    ],
+    "faqs": [
+      { "question": "What kind of errors does this catch?", "answer": "Structural XML errors, invalid or malformed URLs, and common formatting issues that can cause a sitemap to be rejected or partially ignored." },
+      { "question": "Can I validate a sitemap index file too?", "answer": "Yes, sitemap index files referencing multiple sitemaps are supported alongside standard single sitemap files." }
+    ]
+  },
+  {
+    "slug": "serp-snippet-preview", "category": "seo-tools", "title": "Google SERP Snippet Preview & Pixel Length Checker", "description": "See exactly how a title and meta description will look in Google results, with real pixel-width truncation warnings.", "badgeColor": "amber", "iconPath": "M4 4h16v16H4z M6 8h12 M6 12h12 M6 16h8",
+    "content": [
+      "Character count limits are a rough guide at best, since Google truncates titles and descriptions based on pixel width, not character count, and different letters take up different amounts of space. This tool renders a live preview of how a title and description will actually look in search results, with a true pixel-width warning rather than a generic character counter."
+    ],
+    "faqs": [
+      { "question": "Why does pixel width matter more than character count?", "answer": "Google truncates snippets based on rendered pixel width, and letters vary in width, so two titles with the same character count can truncate differently depending on which letters they contain." },
+      { "question": "Does this show both desktop and mobile previews?", "answer": "Yes, since Google's snippet display width differs between desktop and mobile search results." }
+    ]
+  },
+  {
+    "slug": "open-graph-generator", "category": "seo-tools", "title": "Open Graph Tags Generator With Live Preview", "description": "Generate Open Graph meta tags and preview exactly how the share card looks before publishing.", "badgeColor": "green", "iconPath": "M4 4h16v16H4z M8 16l4-8 4 8",
+    "content": [
+      "Open Graph tags control how a page looks when shared on Facebook, LinkedIn, and other platforms that read them, but there is no way to preview the result without actually publishing and sharing the link. This tool generates the correct og tags from your inputs and renders a live preview of the resulting share card before you ship anything."
+    ],
+    "faqs": [
+      { "question": "Which platforms use Open Graph tags?", "answer": "Facebook, LinkedIn, and many other platforms and messaging apps read Open Graph tags to build link preview cards." },
+      { "question": "Can I preview different image dimensions?", "answer": "Yes, the preview reflects your specified og:image, and the tool notes the recommended dimensions for a properly cropped card." }
+    ]
+  },
+  {
+    "slug": "twitter-card-validator", "category": "seo-tools", "title": "Twitter/X Card Preview & Validator", "description": "Preview and validate a Twitter/X card without needing a live URL or an X developer account.", "badgeColor": "blue", "iconPath": "M4 4l16 16 M20 4L4 20",
+    "content": [
+      "X's own card validator requires a developer account and a live, publicly accessible URL, which is not always convenient during development. This tool previews a Twitter/X card from manually entered meta tag values, and checks for common validation issues, without needing either a live URL or platform account access."
+    ],
+    "faqs": [
+      { "question": "Do I need a live URL to use this?", "answer": "No, you can enter your meta tag values directly and preview the resulting card without a publicly accessible URL." },
+      { "question": "What card types are supported?", "answer": "Summary and summary_large_image card types are both supported, covering the most commonly used Twitter/X card formats." }
+    ]
+  },
+  {
+    "slug": "json-ld-schema-generator", "category": "seo-tools", "title": "JSON-LD Schema Generator for Articles & Products", "description": "Build valid JSON-LD structured data for common schema types through a simple form, no manual JSON writing.", "badgeColor": "purple", "iconPath": "M4 4h16v16H4z M8 8h8v8H8z M12 8v8",
+    "content": [
+      "Writing JSON-LD structured data by hand means tracking exact property names and nesting rules for each schema type. This tool generates valid JSON-LD for common types, Article, Product, FAQ, and more, through a straightforward form, so the correct structure and property names are handled for you."
+    ],
+    "faqs": [
+      { "question": "Which schema types are supported?", "answer": "Common types including Article, Product, FAQPage, Organization, and Breadcrumb, covering the schema types most sites actually need." },
+      { "question": "Does the generated markup follow schema.org exactly?", "answer": "Yes, generated output follows current schema.org property names and structure for the selected type." }
+    ]
+  },
+  {
+    "slug": "schema-markup-validator", "category": "seo-tools", "title": "Schema Markup Validator for JSON-LD", "description": "Check JSON-LD structured data for schema.org compliance errors before it ships to production.", "badgeColor": "indigo", "iconPath": "M12 2a10 10 0 100 20 10 10 0 000-20z M12 8v4 M12 16v.01",
+    "content": [
+      "Structured data that is technically valid JSON can still be invalid schema markup, missing required properties, using the wrong type, or nesting objects incorrectly. This tool checks JSON-LD specifically against schema.org's requirements for the declared type, catching structural issues beyond basic JSON syntax."
+    ],
+    "faqs": [
+      { "question": "Is this the same as checking for valid JSON syntax?", "answer": "No, this checks schema.org compliance specifically, required properties, correct types, and proper nesting, beyond just whether the JSON itself parses correctly." },
+      { "question": "Does a passing check guarantee rich results in Google?", "answer": "No, valid schema markup is a requirement for rich results eligibility, not a guarantee, since Google applies its own additional criteria and discretion." }
+    ]
+  },
+  {
+    "slug": "canonical-tag-checker", "category": "seo-tools", "title": "Canonical Tag Checker, Spot Mismatched URLs", "description": "Check whether a page's canonical tag correctly matches its own URL or points elsewhere.", "badgeColor": "teal", "iconPath": "M4 4h16v16H4z M4 4l16 16",
+    "content": [
+      "A canonical tag pointing to the wrong URL, an old version, a different domain, or a parameterized duplicate, can quietly tell search engines to ignore the page you actually want indexed. This tool checks a page's canonical tag against its own URL and flags whether they match or diverge."
+    ],
+    "faqs": [
+      { "question": "What does it mean if the canonical tag doesn't match the page URL?", "answer": "It signals to search engines that a different URL should be treated as the primary version, which is sometimes intentional but often an unintended misconfiguration worth double checking." },
+      { "question": "Can I check a canonical tag from pasted HTML instead of a live URL?", "answer": "Yes, you can paste raw HTML directly if the page isn't publicly accessible yet." }
+    ]
+  },
+  {
+    "slug": "hreflang-tag-generator", "category": "seo-tools", "title": "Hreflang Tag Generator & Validator", "description": "Generate correct hreflang tags for multi-language pages and validate them for common return-tag errors.", "badgeColor": "amber", "iconPath": "M4 6h16 M4 12h16 M4 18h16 M20 4v4 M20 16v4",
+    "content": [
+      "Hreflang tags are notoriously error prone, a missing return tag on one language variant can invalidate the whole set. This tool generates correct hreflang tags for a set of language and region variants, and checks for the most common validation errors, like missing self-references and mismatched return tags."
+    ],
+    "faqs": [
+      { "question": "What is a missing return tag error?", "answer": "Hreflang requires each page in a set to reference every other page, including itself. If page A points to page B but page B does not point back to page A, that is a return tag error." },
+      { "question": "Does this support region-specific language codes?", "answer": "Yes, both language-only codes like en, and region-specific codes like en-US or en-GB, are supported." }
+    ]
+  },
+  {
+    "slug": "redirect-chain-checker", "category": "seo-tools", "title": "Redirect Chain Checker, See Every Hop", "description": "See every hop in a redirect chain and how many redirects a URL passes through before its final destination.", "badgeColor": "blue", "iconPath": "M4 12h6 M14 12h6 M14 12l-3-3 M14 12l-3 3",
+    "content": [
+      "A URL that redirects through several hops before reaching its final destination wastes crawl budget and can dilute link value passed between pages. This tool follows a URL's full redirect chain and shows every hop, its status code, and the final destination, so you can spot and fix unnecessarily long chains."
+    ],
+    "faqs": [
+      { "question": "How many redirect hops is too many?", "answer": "There is no strict cutoff, but each additional hop adds latency and complexity. A single redirect straight to the final destination is generally the cleanest approach where possible." },
+      { "question": "Does this catch redirect loops?", "answer": "Yes, a redirect loop, where a chain returns to a URL already visited, is detected and flagged rather than causing an endless check." }
+    ]
+  },
+  {
+    "slug": "http-header-checker", "category": "seo-tools", "title": "HTTP Header & Status Code Checker", "description": "Inspect a URL's full HTTP response headers and status code without opening dev tools.", "badgeColor": "green", "iconPath": "M4 4h16v16H4z M4 9h16 M4 14h10",
+    "content": [
+      "Checking response headers for caching directives, security headers, or the exact status code a URL returns usually means opening browser dev tools or a terminal. This tool fetches and displays a URL's full HTTP response headers and status code directly, a quick way to check without leaving the browser tab."
+    ],
+    "faqs": [
+      { "question": "What headers does this show?", "answer": "All standard HTTP response headers returned by the server, including status code, content type, caching directives, and security headers like Content-Security-Policy." },
+      { "question": "Can I check headers for a page that isn't live yet?", "answer": "No, this tool checks headers for a live, publicly accessible URL, since it performs a real HTTP request." }
+    ]
+  },
+  {
+    "slug": "broken-link-checker", "category": "seo-tools", "title": "Broken Link Checker for a Single Page", "description": "Scan a page's links and flag which ones return a broken or error status.", "badgeColor": "purple", "iconPath": "M9 3a3 3 0 000 6h2 M15 21a3 3 0 000-6h-2 M8 12h8",
+    "content": [
+      "A page with even a handful of broken outbound or internal links looks unmaintained to both visitors and search engines. This tool scans a single page's links and checks each one's response status, flagging broken or error results so you know exactly which links need fixing."
+    ],
+    "faqs": [
+      { "question": "Does this check a whole site or just one page?", "answer": "This checks the links found on a single page you provide, rather than crawling an entire site." },
+      { "question": "What counts as a broken link?", "answer": "Any link returning a 4xx or 5xx status code, or failing to resolve at all, is flagged as broken." }
+    ]
+  },
+  {
+    "slug": "robots-meta-tag-generator", "category": "seo-tools", "title": "Robots Meta Tag Generator (noindex, nofollow)", "description": "Build a correct robots meta tag with the exact index, follow, and archive directives you need.", "badgeColor": "indigo", "iconPath": "M4 4h16v16H4z M9 9h6v6H9z",
+    "content": [
+      "A robots meta tag with the wrong combination of directives can accidentally deindex a page, or leave it indexed when it should not be. This tool builds a correct robots meta tag from a set of clear options, index or noindex, follow or nofollow, and additional directives like noarchive, avoiding syntax mistakes in a tag that is easy to get subtly wrong by hand."
+    ],
+    "faqs": [
+      { "question": "What is the difference between noindex and nofollow?", "answer": "Noindex tells search engines not to include the page in results. Nofollow tells them not to pass ranking credit through the page's outbound links. They can be used independently or together." },
+      { "question": "Can I add multiple directives to one tag?", "answer": "Yes, directives like noindex, nofollow, and noarchive can be combined in a single robots meta tag as needed." }
+    ]
+  },
+  {
+    "slug": "htaccess-redirect-generator", "category": "seo-tools", "title": ".htaccess Redirect Rule Generator", "description": "Generate correct .htaccess redirect rules without memorizing Apache rewrite syntax.", "badgeColor": "teal", "iconPath": "M4 4h7v7H4z M13 13h7v7h-7z M11 11l2 2",
+    "content": [
+      "Apache's rewrite and redirect syntax in .htaccess is powerful but easy to get wrong, a single misplaced character can break an entire site's routing. This tool generates correct .htaccess redirect rules, single URL, wildcard, or domain-level redirects, from a simple form, without needing to write the raw syntax by hand."
+    ],
+    "faqs": [
+      { "question": "Does this generate 301 or 302 redirects?", "answer": "Both are supported. 301 is used for permanent redirects, which pass SEO value to the destination, while 302 is used for temporary redirects." },
+      { "question": "Can I generate a wildcard redirect for an entire folder?", "answer": "Yes, wildcard and pattern-based redirect rules are supported alongside single URL redirects." }
+    ]
+  },
+  {
+    "slug": "seo-url-slug-generator", "category": "seo-tools", "title": "SEO-Friendly URL Slug Generator", "description": "Convert a page title into a clean, SEO-friendly URL slug, stripping stop words and special characters correctly.", "badgeColor": "amber", "iconPath": "M4 6h16 M4 12h10 M4 18h13",
+    "content": [
+      "A URL slug generated by simply lowercasing and hyphenating a title often ends up longer and messier than it needs to be. This tool converts a page title into a clean, SEO-friendly slug, stripping special characters, collapsing extra hyphens, and optionally removing common stop words, for a shorter, more readable URL."
+    ],
+    "faqs": [
+      { "question": "Does this remove stop words like 'the' and 'and'?", "answer": "Yes, stop word removal is an optional setting, useful for keeping slugs shorter and more focused on the meaningful keywords." },
+      { "question": "How is this different from a general case converter?", "answer": "This is purpose-built for URL slugs specifically, handling special character stripping, stop words, and hyphenation together, rather than converting between programming naming conventions." }
+    ]
+  },
+  {
+    "slug": "keyword-density-checker", "category": "seo-tools", "title": "Keyword Density Checker for Any Text", "description": "See exact keyword and phrase frequency in a block of content, without needing to paste a live URL.", "badgeColor": "blue", "iconPath": "M4 4h16v16H4z M8 8h3v3H8z M13 8h3v3h-3z M8 13h3v3H8z",
+    "content": [
+      "Checking how often a target keyword or phrase appears in a piece of content is a quick sanity check many writers still do manually. This tool analyzes pasted text and reports keyword and phrase frequency directly, no live URL or crawler required, useful for checking a draft before it is published."
+    ],
+    "faqs": [
+      { "question": "Does this check single keywords or phrases too?", "answer": "Both, single word frequency and multi-word phrase frequency are reported separately." },
+      { "question": "Is keyword density still a meaningful SEO metric?", "answer": "It is a much smaller ranking signal than it once was, but checking for natural, non-repetitive language and confirming target terms actually appear remains a reasonable quick sanity check." }
+    ]
+  },
+  {
+    "slug": "text-to-html-ratio-checker", "category": "seo-tools", "title": "Text-to-HTML Ratio Checker", "description": "Check the ratio of visible text to total HTML markup on a page, a signal some SEO audits still flag.", "badgeColor": "green", "iconPath": "M4 4h16v16H4z M4 4l16 16 M20 4L4 20",
+    "content": [
+      "A page with a very low ratio of visible text to total HTML markup can signal a bloated, code-heavy page with thin actual content. This tool calculates that ratio directly from a URL or pasted HTML, giving a quick, specific number rather than a vague sense of whether a page feels heavy."
+    ],
+    "faqs": [
+      { "question": "What is considered a healthy text-to-HTML ratio?", "answer": "There is no single official threshold, but a very low ratio can indicate a code-heavy page with comparatively thin visible content, worth a closer look rather than treated as a hard rule." },
+      { "question": "Can I check pasted HTML instead of a live URL?", "answer": "Yes, both a live URL and pasted raw HTML are supported." }
+    ]
+  },
+  {
+    "slug": "image-alt-text-auditor", "category": "seo-tools", "title": "Image Alt Text Auditor for Any Page", "description": "Scan a page and list every image missing alt text, or with empty or unhelpful alt attributes.", "badgeColor": "purple", "iconPath": "M4 4h16v16H4z M4 16l4-4 3 3 5-6 4 4",
+    "content": [
+      "Missing or unhelpful alt text affects both accessibility and image SEO, and it is easy for a few images to slip through unnoticed on a large page. This tool scans a page's images and lists which ones are missing alt text entirely, or have empty or clearly placeholder alt attributes, so they can be fixed in one pass."
+    ],
+    "faqs": [
+      { "question": "Does this check for accessibility, SEO, or both?", "answer": "Both, missing or poor alt text is a genuine issue for screen reader accessibility and can also affect how search engines understand image content." },
+      { "question": "What counts as an unhelpful alt attribute?", "answer": "Empty alt attributes, generic placeholder text like 'image' or the filename itself, and alt text that clearly does not describe the image are flagged." }
+    ]
+  },
+  {
+    "slug": "meta-tag-extractor", "category": "seo-tools", "title": "Meta Tag Extractor, See Every Tag on Any Page", "description": "Pull every meta tag from a page's head section into one readable list.", "badgeColor": "indigo", "iconPath": "M4 4h16v16H4z M4 9h16 M8 4v16",
+    "content": [
+      "Manually scrolling through a page's raw HTML to check its meta tags is slow, especially when comparing your own page against a competitor's. This tool extracts every meta tag from a page's head section, title, description, canonical, Open Graph, robots directives, and more, into one clean, readable list."
+    ],
+    "faqs": [
+      { "question": "Does this show Open Graph and Twitter card tags too?", "answer": "Yes, all meta tags found in the head section are listed, including standard SEO tags, Open Graph, and Twitter card tags." },
+      { "question": "Can I extract meta tags from a competitor's page?", "answer": "Yes, this works on any publicly accessible URL, useful for quick competitive checks alongside auditing your own pages." }
     ]
   }
 ]
