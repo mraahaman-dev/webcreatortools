@@ -17,7 +17,12 @@
     "@astrojs/sitemap": "^3.7.3",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.1.6",
+    "qrcode": "^1.5.4",
     "tailwindcss": "^4.3.3",
-    "wrangler": "^4.119.0"
+    "wrangler": "^4.119.0",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.6"
   }
 }

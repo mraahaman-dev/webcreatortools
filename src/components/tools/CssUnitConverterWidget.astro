@@ -1,0 +1,240 @@
+<div class="css-unit-converter" data-css-unit-converter>
+  <div class="mb-4 flex flex-wrap items-center gap-3 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="flex items-center gap-2 text-sm text-slate-600">
+      <span>Base font size (root, px)</span>
+      <input type="number" data-base-input value="16" min="1"
+        class="w-20 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100" />
+    </label>
+    <label class="flex items-center gap-2 text-sm text-slate-600">
+      <span>Parent font size (for EM, px)</span>
+      <input type="number" data-parent-input value="16" min="1"
+        class="w-20 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100" />
+    </label>
+  </div>
+
+  <!-- PX to everything -->
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">PX to REM, EM & Percentage</h3>
+    <input type="number" data-px-input value="24" step="any"
+      class="mb-4 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
+      placeholder="Enter a PX value..." />
+
+    <div class="grid gap-3 sm:grid-cols-3">
+      <div>
+        <div class="mb-1 flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">REM</span>
+          <button type="button" data-copy-btn data-target="rem-output"
+  class="inline-flex items-center gap-1 rounded-full border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-medium text-pink-600 transition hover:border-pink-300 hover:bg-pink-100">
+  <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="11" height="11" rx="2"/>
+    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+  </svg>
+  <span data-copy-label>Copy</span>
+</button>
+        </div>
+        <div data-rem-output class="rounded-lg bg-slate-50 p-3 font-mono text-sm text-slate-800">—</div>
+      </div>
+      <div>
+        <div class="mb-1 flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">EM</span>
+          <button type="button" data-copy-btn data-target="em-output"
+  class="inline-flex items-center gap-1 rounded-full border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-medium text-pink-600 transition hover:border-pink-300 hover:bg-pink-100">
+  <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="11" height="11" rx="2"/>
+    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+  </svg>
+  <span data-copy-label>Copy</span>
+</button>
+        </div>
+        <div data-em-output class="rounded-lg bg-slate-50 p-3 font-mono text-sm text-slate-800">—</div>
+      </div>
+      <div>
+        <div class="mb-1 flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Percentage</span>
+          <button type="button" data-copy-btn data-target="percent-output"
+  class="inline-flex items-center gap-1 rounded-full border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-medium text-pink-600 transition hover:border-pink-300 hover:bg-pink-100">
+  <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="11" height="11" rx="2"/>
+    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+  </svg>
+  <span data-copy-label>Copy</span>
+</button>
+        </div>
+        <div data-percent-output class="rounded-lg bg-slate-50 p-3 font-mono text-sm text-slate-800">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reverse: base unit to px -->
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">REM, EM or % to PX</h3>
+    <div class="flex flex-wrap items-center gap-2">
+      <input type="number" data-reverse-input value="1.5" step="any"
+        class="min-w-0 flex-1 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
+        placeholder="Enter a value..." />
+      <select data-reverse-unit class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+        <option value="rem">rem</option>
+        <option value="em">em</option>
+        <option value="percent">%</option>
+      </select>
+      <span class="text-slate-400">=</span>
+      <div data-reverse-output class="flex-1 rounded-lg bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800">—</div>
+      <button type="button" data-copy-btn data-target="reverse-output"
+  class="inline-flex items-center gap-1 rounded-full border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-medium text-pink-600 transition hover:border-pink-300 hover:bg-pink-100">
+  <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="11" height="11" rx="2"/>
+    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+  </svg>
+  <span data-copy-label>Copy</span>
+</button>
+    </div>
+  </div>
+
+  <!-- PX to Tailwind -->
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">PX to Tailwind Spacing Token</h3>
+    <input type="number" data-tw-input value="24" step="any"
+      class="mb-3 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-100"
+      placeholder="Enter a PX value..." />
+    <div class="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+      <div>
+        <div data-tw-output class="font-mono text-sm text-slate-800">—</div>
+        <div data-tw-note class="mt-1 text-xs text-slate-500"></div>
+      </div>
+      <button type="button" data-copy-btn data-target="tw-output"
+  class="inline-flex items-center gap-1 rounded-full border border-pink-200 bg-pink-50 px-2.5 py-1 text-xs font-medium text-pink-600 transition hover:border-pink-300 hover:bg-pink-100">
+  <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="11" height="11" rx="2"/>
+    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+  </svg>
+  <span data-copy-label>Copy</span>
+</button>
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you enter is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  // Tailwind's default spacing scale: token -> px (at 16px root, 1 token = 0.25rem = 4px).
+  const TAILWIND_SCALE: [string, number][] = [
+    ["0", 0], ["px", 1], ["0.5", 2], ["1", 4], ["1.5", 6], ["2", 8], ["2.5", 10],
+    ["3", 12], ["3.5", 14], ["4", 16], ["5", 20], ["6", 24], ["7", 28], ["8", 32],
+    ["9", 36], ["10", 40], ["11", 44], ["12", 48], ["14", 56], ["16", 64], ["20", 80],
+    ["24", 96], ["28", 112], ["32", 128], ["36", 144], ["40", 160], ["44", 176],
+    ["48", 192], ["52", 208], ["56", 224], ["60", 240], ["64", 256], ["72", 288],
+    ["80", 320], ["96", 384],
+  ];
+
+  function initCssUnitConverter(root: HTMLElement) {
+    const baseInput = root.querySelector<HTMLInputElement>("[data-base-input]")!;
+    const parentInput = root.querySelector<HTMLInputElement>("[data-parent-input]")!;
+    const pxInput = root.querySelector<HTMLInputElement>("[data-px-input]")!;
+    const remOutput = root.querySelector<HTMLDivElement>("[data-rem-output]")!;
+    const emOutput = root.querySelector<HTMLDivElement>("[data-em-output]")!;
+    const percentOutput = root.querySelector<HTMLDivElement>("[data-percent-output]")!;
+    const reverseInput = root.querySelector<HTMLInputElement>("[data-reverse-input]")!;
+    const reverseUnit = root.querySelector<HTMLSelectElement>("[data-reverse-unit]")!;
+    const reverseOutput = root.querySelector<HTMLDivElement>("[data-reverse-output]")!;
+    const twInput = root.querySelector<HTMLInputElement>("[data-tw-input]")!;
+    const twOutput = root.querySelector<HTMLDivElement>("[data-tw-output]")!;
+    const twNote = root.querySelector<HTMLDivElement>("[data-tw-note]")!;
+    const copyBtns = root.querySelectorAll<HTMLButtonElement>("[data-copy-btn]");
+
+    function getBase(): number {
+      return parseFloat(baseInput.value) || 16;
+    }
+    function getParent(): number {
+      return parseFloat(parentInput.value) || 16;
+    }
+
+    function updateForward() {
+      const px = parseFloat(pxInput.value);
+      if (isNaN(px)) {
+        remOutput.textContent = "—";
+        emOutput.textContent = "—";
+        percentOutput.textContent = "—";
+        return;
+      }
+      const base = getBase();
+      const parent = getParent();
+      remOutput.textContent = `${(px / base).toFixed(4).replace(/\.?0+$/, "")}rem`;
+      emOutput.textContent = `${(px / parent).toFixed(4).replace(/\.?0+$/, "")}em`;
+      percentOutput.textContent = `${((px / parent) * 100).toFixed(2).replace(/\.?0+$/, "")}%`;
+    }
+
+    function updateReverse() {
+      const value = parseFloat(reverseInput.value);
+      if (isNaN(value)) {
+        reverseOutput.textContent = "—";
+        return;
+      }
+      const unit = reverseUnit.value;
+      const base = getBase();
+      const parent = getParent();
+      let px: number;
+      if (unit === "rem") px = value * base;
+      else if (unit === "em") px = value * parent;
+      else px = (value / 100) * parent;
+      reverseOutput.textContent = `${px.toFixed(2).replace(/\.?0+$/, "")}px`;
+    }
+
+    function updateTailwind() {
+      const px = parseFloat(twInput.value);
+      if (isNaN(px)) {
+        twOutput.textContent = "—";
+        twNote.textContent = "";
+        return;
+      }
+      let closest = TAILWIND_SCALE[0];
+      let smallestDiff = Infinity;
+      for (const entry of TAILWIND_SCALE) {
+        const diff = Math.abs(entry[1] - px);
+        if (diff < smallestDiff) {
+          smallestDiff = diff;
+          closest = entry;
+        }
+      }
+      if (smallestDiff === 0) {
+        twOutput.textContent = `${closest[0]}  (e.g. p-${closest[0]}, m-${closest[0]}, gap-${closest[0]})`;
+        twNote.textContent = `Exact match: ${closest[1]}px`;
+      } else {
+        twOutput.textContent = `${closest[0]}  (e.g. p-${closest[0]}, m-${closest[0]}, gap-${closest[0]})`;
+        twNote.textContent = `Closest match: ${closest[1]}px (off by ${smallestDiff}px). For an exact value, use an arbitrary value like p-[${px}px].`;
+      }
+    }
+
+    pxInput.addEventListener("input", updateForward);
+    baseInput.addEventListener("input", () => {
+      updateForward();
+      updateReverse();
+    });
+    parentInput.addEventListener("input", () => {
+      updateForward();
+      updateReverse();
+    });
+    reverseInput.addEventListener("input", updateReverse);
+    reverseUnit.addEventListener("change", updateReverse);
+    twInput.addEventListener("input", updateTailwind);
+
+    copyBtns.forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const targetAttr = btn.dataset.target!;
+        const el = root.querySelector(`[data-${targetAttr.replace("-output", "")}-output]`) as HTMLElement;
+        const text = el?.textContent ?? "";
+        if (!text || text === "—") return;
+        await navigator.clipboard.writeText(text);
+        btn.textContent = "Copied!";
+        setTimeout(() => (btn.textContent = "Copy"), 1500);
+      });
+    });
+
+    updateForward();
+    updateReverse();
+    updateTailwind();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-css-unit-converter]").forEach(initCssUnitConverter);
+</script>

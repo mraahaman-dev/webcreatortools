@@ -1,0 +1,171 @@
+<div class="uuid-generator" data-uuid-generator>
+  <div class="mb-4 flex flex-wrap items-center gap-3 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <div class="flex items-center gap-1 rounded-lg border border-slate-300 bg-white p-1">
+      <button type="button" data-version-btn data-version="v4"
+        class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 transition">
+        UUID v4
+      </button>
+      <button type="button" data-version-btn data-version="v7"
+        class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-500 transition">
+        UUID v7
+      </button>
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-slate-600">
+      <span>Count</span>
+      <input type="number" data-count-input value="1" min="1" max="1000"
+        class="w-20 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-100" />
+    </label>
+
+    <label class="flex items-center gap-1.5 text-sm text-slate-600">
+      <input type="checkbox" data-hyphens-toggle checked class="rounded border-slate-300 text-teal-600 focus:ring-teal-400" />
+      Hyphens
+    </label>
+
+    <label class="flex items-center gap-1.5 text-sm text-slate-600">
+      <input type="checkbox" data-uppercase-toggle class="rounded border-slate-300 text-teal-600 focus:ring-teal-400" />
+      Uppercase
+    </label>
+
+    <button type="button" data-generate-btn
+      class="ml-auto rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-700">
+      Generate
+    </button>
+  </div>
+
+  <div class="border border-b-0 border-slate-200 bg-white p-4">
+    <textarea
+      data-output
+      spellcheck="false"
+      readonly
+      class="h-64 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-200"
+    ></textarea>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-2 rounded-b-2xl border border-slate-200 bg-white p-4">
+    <button type="button" data-copy-btn
+      class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-teal-700">
+      Copy All
+    </button>
+    <button type="button" data-download-btn
+      class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+      Download .txt
+    </button>
+    <span data-output-count class="ml-auto text-xs text-slate-400"></span>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Generated using your browser's cryptographically secure random source. Nothing is sent to a server or stored.
+  </p>
+</div>
+
+<script>
+  function generateV4(): string {
+    // crypto.randomUUID() is already RFC 4122 v4, use it directly when available.
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+      return crypto.randomUUID();
+    }
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0"));
+    return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex
+      .slice(8, 10)
+      .join("")}-${hex.slice(10, 16).join("")}`;
+  }
+
+  function generateV7(): string {
+    // UUIDv7: 48-bit big-endian timestamp (ms) + version/variant bits + random.
+    const timestamp = Date.now();
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+
+    bytes[0] = (timestamp / 2 ** 40) & 0xff;
+    bytes[1] = (timestamp / 2 ** 32) & 0xff;
+    bytes[2] = (timestamp / 2 ** 24) & 0xff;
+    bytes[3] = (timestamp / 2 ** 16) & 0xff;
+    bytes[4] = (timestamp / 2 ** 8) & 0xff;
+    bytes[5] = timestamp & 0xff;
+
+    bytes[6] = (bytes[6] & 0x0f) | 0x70; // version 7
+    bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant
+
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0"));
+    return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex
+      .slice(8, 10)
+      .join("")}-${hex.slice(10, 16).join("")}`;
+  }
+
+  function initUuidGenerator(root: HTMLElement) {
+    const versionBtns = root.querySelectorAll<HTMLButtonElement>("[data-version-btn]");
+    const countInput = root.querySelector<HTMLInputElement>("[data-count-input]")!;
+    const hyphensToggle = root.querySelector<HTMLInputElement>("[data-hyphens-toggle]")!;
+    const uppercaseToggle = root.querySelector<HTMLInputElement>("[data-uppercase-toggle]")!;
+    const generateBtn = root.querySelector<HTMLButtonElement>("[data-generate-btn]")!;
+    const output = root.querySelector<HTMLTextAreaElement>("[data-output]")!;
+    const outputCount = root.querySelector<HTMLSpanElement>("[data-output-count]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+    const downloadBtn = root.querySelector<HTMLButtonElement>("[data-download-btn]")!;
+
+    let version: "v4" | "v7" = "v4";
+
+    function setActiveVersion(v: "v4" | "v7") {
+      version = v;
+      versionBtns.forEach((btn) => {
+        const isActive = btn.dataset.version === v;
+        btn.classList.toggle("bg-teal-600", isActive);
+        btn.classList.toggle("text-white", isActive);
+        btn.classList.toggle("text-slate-500", !isActive);
+      });
+    }
+
+    function generate() {
+      const count = Math.min(Math.max(parseInt(countInput.value, 10) || 1, 1), 1000);
+      const results: string[] = [];
+      for (let i = 0; i < count; i++) {
+        let id = version === "v4" ? generateV4() : generateV7();
+        if (!hyphensToggle.checked) id = id.replace(/-/g, "");
+        if (uppercaseToggle.checked) id = id.toUpperCase();
+        results.push(id);
+      }
+      output.value = results.join("\n");
+      outputCount.textContent = `${results.length} generated`;
+    }
+
+    versionBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        setActiveVersion(btn.dataset.version as "v4" | "v7");
+        generate();
+      });
+    });
+
+    generateBtn.addEventListener("click", generate);
+    countInput.addEventListener("change", generate);
+    hyphensToggle.addEventListener("change", generate);
+    uppercaseToggle.addEventListener("change", generate);
+
+    copyBtn.addEventListener("click", async () => {
+      if (!output.value) return;
+      await navigator.clipboard.writeText(output.value);
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => (copyBtn.textContent = "Copy All"), 1500);
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      if (!output.value) return;
+      const blob = new Blob([output.value], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "uuids.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    setActiveVersion("v4");
+    generate();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-uuid-generator]").forEach(initUuidGenerator);
+</script>

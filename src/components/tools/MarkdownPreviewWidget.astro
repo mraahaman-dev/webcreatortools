@@ -1,0 +1,339 @@
+<div class="markdown-preview" data-markdown-preview>
+  <div class="mb-4 flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <button type="button" data-sample-btn
+      class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+      Load Sample
+    </button>
+    <button type="button" data-clear-btn
+      class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+      Clear
+    </button>
+    <button type="button" data-copy-html-btn
+      class="ml-auto rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700">
+      Copy Rendered HTML
+    </button>
+  </div>
+
+  <div class="grid overflow-hidden border border-slate-200 rounded-b-2xl md:grid-cols-2">
+    <div class="border-b border-slate-200 md:border-b-0 md:border-r">
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        Markdown
+      </div>
+      <textarea
+        data-markdown-input
+        spellcheck="false"
+        placeholder="Type markdown here..."
+        class="h-96 w-full resize-none border-0 bg-white p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-200"
+      ></textarea>
+    </div>
+    <div>
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+        Preview
+      </div>
+      <div data-preview-output class="markdown-body h-96 overflow-auto bg-white p-4 text-sm text-slate-800"></div>
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Nothing you type is saved or uploaded. The preview clears when you leave the page.
+  </p>
+</div>
+
+<style>
+  .markdown-body :global(h1) { font-size: 1.5rem; font-weight: 700; margin: 0.6em 0 0.4em; }
+  .markdown-body :global(h2) { font-size: 1.25rem; font-weight: 700; margin: 0.6em 0 0.4em; }
+  .markdown-body :global(h3) { font-size: 1.1rem; font-weight: 600; margin: 0.5em 0 0.3em; }
+  .markdown-body :global(p) { margin: 0.5em 0; line-height: 1.6; }
+  .markdown-body :global(ul), .markdown-body :global(ol) { margin: 0.5em 0; padding-left: 1.5em; }
+  .markdown-body :global(li) { margin: 0.2em 0; }
+  .markdown-body :global(li.task-item) { list-style: none; margin-left: -1.5em; padding-left: 1.5em; }
+  .markdown-body :global(a) { color: #9333ea; text-decoration: underline; }
+  .markdown-body :global(code) { background: #f1f5f9; padding: 0.15em 0.4em; border-radius: 0.25em; font-size: 0.875em; }
+  .markdown-body :global(pre) { background: #0f172a; color: #e2e8f0; padding: 1em; border-radius: 0.5em; overflow-x: auto; margin: 0.6em 0; }
+  .markdown-body :global(pre code) { background: none; padding: 0; color: inherit; }
+  .markdown-body :global(blockquote) { border-left: 3px solid #e2e8f0; padding-left: 1em; margin: 0.6em 0; color: #64748b; }
+  .markdown-body :global(table) { border-collapse: collapse; margin: 0.6em 0; width: 100%; }
+  .markdown-body :global(th), .markdown-body :global(td) { border: 1px solid #e2e8f0; padding: 0.4em 0.7em; text-align: left; }
+  .markdown-body :global(th) { background: #f8fafc; font-weight: 600; }
+  .markdown-body :global(hr) { border: none; border-top: 1px solid #e2e8f0; margin: 1em 0; }
+  .markdown-body :global(img) { max-width: 100%; border-radius: 0.375em; }
+</style>
+
+<script>
+  function escapeHtml(text: string): string {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  // Inline-level parsing: bold, italic, code, links, images.
+  function parseInline(text: string): string {
+    let result = escapeHtml(text);
+    result = result.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" />');
+    result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    result = result.replace(/`([^`]+)`/g, "<code>$1</code>");
+    result = result.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    result = result.replace(/__([^_]+)__/g, "<strong>$1</strong>");
+    result = result.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+    result = result.replace(/(?<!_)_([^_]+)_(?!_)/g, "<em>$1</em>");
+    result = result.replace(/~~([^~]+)~~/g, "<del>$1</del>");
+    return result;
+  }
+
+  function parseMarkdown(md: string): string {
+    const lines = md.replace(/\r\n/g, "\n").split("\n");
+    let html = "";
+    let i = 0;
+    let inCodeBlock = false;
+    let codeLang = "";
+    let codeBuffer: string[] = [];
+    let listStack: { type: "ul" | "ol"; indent: number }[] = [];
+    let inTable = false;
+    let tableRows: string[][] = [];
+    let tableHeader: string[] = [];
+
+    function closeLists() {
+      while (listStack.length) {
+        html += `</${listStack.pop()!.type}>`;
+      }
+    }
+
+    function flushTable() {
+      if (!inTable) return;
+      html += "<table><thead><tr>";
+      tableHeader.forEach((h) => (html += `<th>${parseInline(h.trim())}</th>`));
+      html += "</tr></thead><tbody>";
+      tableRows.forEach((row) => {
+        html += "<tr>";
+        row.forEach((cell) => (html += `<td>${parseInline(cell.trim())}</td>`));
+        html += "</tr>";
+      });
+      html += "</tbody></table>";
+      inTable = false;
+      tableRows = [];
+      tableHeader = [];
+    }
+
+    while (i < lines.length) {
+      const line = lines[i];
+
+      // Fenced code blocks
+      const fenceMatch = line.match(/^```(\w*)/);
+      if (fenceMatch) {
+        if (!inCodeBlock) {
+          closeLists();
+          flushTable();
+          inCodeBlock = true;
+          codeLang = fenceMatch[1];
+          codeBuffer = [];
+        } else {
+          html += `<pre><code class="language-${codeLang}">${escapeHtml(codeBuffer.join("\n"))}</code></pre>`;
+          inCodeBlock = false;
+        }
+        i++;
+        continue;
+      }
+      if (inCodeBlock) {
+        codeBuffer.push(line);
+        i++;
+        continue;
+      }
+
+      // Table detection: a header row followed by a separator row like |---|---|
+      if (/^\s*\|.*\|\s*$/.test(line) && lines[i + 1] && /^\s*\|?[\s:-]+\|[\s:|-]*$/.test(lines[i + 1])) {
+        closeLists();
+        tableHeader = line.trim().replace(/^\||\|$/g, "").split("|");
+        inTable = true;
+        i += 2;
+        while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) {
+          tableRows.push(lines[i].trim().replace(/^\||\|$/g, "").split("|"));
+          i++;
+        }
+        flushTable();
+        continue;
+      }
+
+      // Headers
+      const headerMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if (headerMatch) {
+        closeLists();
+        flushTable();
+        const level = headerMatch[1].length;
+        html += `<h${level}>${parseInline(headerMatch[2])}</h${level}>`;
+        i++;
+        continue;
+      }
+
+      // Horizontal rule
+      if (/^(---|\*\*\*|___)\s*$/.test(line)) {
+        closeLists();
+        flushTable();
+        html += "<hr />";
+        i++;
+        continue;
+      }
+
+      // Blockquote
+      if (/^>\s?/.test(line)) {
+        closeLists();
+        flushTable();
+        const quoteLines: string[] = [];
+        while (i < lines.length && /^>\s?/.test(lines[i])) {
+          quoteLines.push(lines[i].replace(/^>\s?/, ""));
+          i++;
+        }
+        html += `<blockquote>${parseInline(quoteLines.join(" "))}</blockquote>`;
+        continue;
+      }
+
+      // Task list items
+      const taskMatch = line.match(/^(\s*)[-*]\s+\[([ xX])\]\s+(.*)$/);
+      if (taskMatch) {
+        flushTable();
+        if (!listStack.length || listStack[listStack.length - 1].type !== "ul") {
+          closeLists();
+          html += "<ul>";
+          listStack.push({ type: "ul", indent: 0 });
+        }
+        const checked = taskMatch[2].toLowerCase() === "x";
+        html += `<li class="task-item"><input type="checkbox" disabled ${checked ? "checked" : ""} /> ${parseInline(taskMatch[3])}</li>`;
+        i++;
+        continue;
+      }
+
+      // Unordered list
+      const ulMatch = line.match(/^(\s*)[-*+]\s+(.*)$/);
+      if (ulMatch) {
+        flushTable();
+        if (!listStack.length || listStack[listStack.length - 1].type !== "ul") {
+          closeLists();
+          html += "<ul>";
+          listStack.push({ type: "ul", indent: 0 });
+        }
+        html += `<li>${parseInline(ulMatch[2])}</li>`;
+        i++;
+        continue;
+      }
+
+      // Ordered list
+      const olMatch = line.match(/^(\s*)\d+\.\s+(.*)$/);
+      if (olMatch) {
+        flushTable();
+        if (!listStack.length || listStack[listStack.length - 1].type !== "ol") {
+          closeLists();
+          html += "<ol>";
+          listStack.push({ type: "ol", indent: 0 });
+        }
+        html += `<li>${parseInline(olMatch[2])}</li>`;
+        i++;
+        continue;
+      }
+
+      // Blank line
+      if (line.trim() === "") {
+        closeLists();
+        flushTable();
+        i++;
+        continue;
+      }
+
+      // Paragraph
+      closeLists();
+      flushTable();
+      const paraLines: string[] = [line];
+      i++;
+      while (
+        i < lines.length &&
+        lines[i].trim() !== "" &&
+        !/^#{1,6}\s/.test(lines[i]) &&
+        !/^[-*+]\s/.test(lines[i]) &&
+        !/^\d+\.\s/.test(lines[i]) &&
+        !/^```/.test(lines[i]) &&
+        !/^>\s?/.test(lines[i])
+      ) {
+        paraLines.push(lines[i]);
+        i++;
+      }
+      html += `<p>${parseInline(paraLines.join(" "))}</p>`;
+    }
+
+    closeLists();
+    flushTable();
+    if (inCodeBlock) {
+      html += `<pre><code>${escapeHtml(codeBuffer.join("\n"))}</code></pre>`;
+    }
+
+    return html;
+  }
+
+  function initMarkdownPreview(root: HTMLElement) {
+    const input = root.querySelector<HTMLTextAreaElement>("[data-markdown-input]")!;
+    const output = root.querySelector<HTMLDivElement>("[data-preview-output]")!;
+    const sampleBtn = root.querySelector<HTMLButtonElement>("[data-sample-btn]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+    const copyHtmlBtn = root.querySelector<HTMLButtonElement>("[data-copy-html-btn]")!;
+
+    function render() {
+      output.innerHTML = parseMarkdown(input.value);
+    }
+
+    input.addEventListener("input", render);
+
+    sampleBtn.addEventListener("click", () => {
+      input.value = `# Project README
+
+A short description of what this project does and who it's for.
+
+## Features
+
+- Fast and lightweight
+- **No dependencies** required
+- Works entirely *client side*
+
+## Getting started
+
+1. Clone the repo
+2. Run \`npm install\`
+3. Run \`npm run dev\`
+
+\`\`\`bash
+git clone https://github.com/example/repo.git
+cd repo
+npm install
+\`\`\`
+
+> Note: requires Node.js 18 or later.
+
+## Roadmap
+
+- [x] Core parser
+- [x] Live preview
+- [ ] Syntax highlighting
+- [ ] Export to PDF
+
+| Feature | Status |
+|---------|--------|
+| Parser  | Done   |
+| Preview | Done   |
+
+Learn more on [our website](https://example.com).`;
+      render();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      render();
+    });
+
+    copyHtmlBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(output.innerHTML);
+      copyHtmlBtn.textContent = "Copied!";
+      setTimeout(() => (copyHtmlBtn.textContent = "Copy Rendered HTML"), 1500);
+    });
+
+    sampleBtn.click();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-markdown-preview]").forEach(initMarkdownPreview);
+</script>

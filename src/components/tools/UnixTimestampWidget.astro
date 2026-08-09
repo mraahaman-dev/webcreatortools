@@ -1,0 +1,239 @@
+<div class="unix-timestamp" data-unix-timestamp>
+  <div class="mb-4 flex flex-wrap items-center gap-3 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <button type="button" data-now-btn
+      class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
+      Use Current Time
+    </button>
+    <label class="ml-auto flex items-center gap-2 text-sm text-slate-600">
+      <span>Timezone</span>
+      <select data-timezone-select
+        class="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-100">
+      </select>
+    </label>
+  </div>
+
+  <!-- Timestamp to date -->
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Timestamp to Date</h3>
+    <div class="flex flex-wrap items-center gap-2">
+      <input type="text" data-timestamp-input placeholder="e.g. 1716239022 or 1716239022000"
+        class="min-w-0 flex-1 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-100" />
+      <span data-unit-badge class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">seconds</span>
+    </div>
+    <div data-timestamp-error class="mt-2 hidden text-sm text-red-600"></div>
+    <div class="mt-4 flex items-center justify-between rounded-lg bg-slate-50 p-3">
+      <div data-date-output class="font-mono text-sm text-slate-800">—</div>
+      <button type="button" data-copy-btn data-target="date-output"
+        class="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-600 transition hover:border-teal-300 hover:bg-teal-100">
+        <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        <span data-copy-label>Copy</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Date to timestamp -->
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Date to Timestamp</h3>
+    <div class="flex flex-wrap items-center gap-2">
+      <input type="date" data-date-input
+        class="rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-100" />
+      <input type="time" data-time-input step="1"
+        class="rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-100" />
+    </div>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+      <div class="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+        <div>
+          <div class="text-xs text-slate-500">Seconds</div>
+          <div data-seconds-output class="font-mono text-sm text-slate-800">—</div>
+        </div>
+        <button type="button" data-copy-btn data-target="seconds-output"
+          class="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-600 transition hover:border-teal-300 hover:bg-teal-100">
+          <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          <span data-copy-label>Copy</span>
+        </button>
+      </div>
+      <div class="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+        <div>
+          <div class="text-xs text-slate-500">Milliseconds</div>
+          <div data-millis-output class="font-mono text-sm text-slate-800">—</div>
+        </div>
+        <button type="button" data-copy-btn data-target="millis-output"
+          class="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-600 transition hover:border-teal-300 hover:bg-teal-100">
+          <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          <span data-copy-label>Copy</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser using its built in timezone data. Nothing you enter is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  const COMMON_TIMEZONES = [
+    "UTC", "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles",
+    "America/Sao_Paulo", "Europe/London", "Europe/Paris", "Europe/Berlin", "Europe/Moscow",
+    "Africa/Cairo", "Asia/Dubai", "Asia/Karachi", "Asia/Kolkata", "Asia/Dhaka",
+    "Asia/Bangkok", "Asia/Shanghai", "Asia/Tokyo", "Asia/Seoul", "Australia/Sydney",
+    "Pacific/Auckland",
+  ];
+
+  const CHECK_ICON = `<path d="M20 6L9 17l-5-5"/>`;
+  const COPY_ICON = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+
+  function initUnixTimestamp(root: HTMLElement) {
+    const timezoneSelect = root.querySelector<HTMLSelectElement>("[data-timezone-select]")!;
+    const nowBtn = root.querySelector<HTMLButtonElement>("[data-now-btn]")!;
+    const timestampInput = root.querySelector<HTMLInputElement>("[data-timestamp-input]")!;
+    const unitBadge = root.querySelector<HTMLSpanElement>("[data-unit-badge]")!;
+    const timestampError = root.querySelector<HTMLDivElement>("[data-timestamp-error]")!;
+    const dateOutput = root.querySelector<HTMLDivElement>("[data-date-output]")!;
+    const dateInput = root.querySelector<HTMLInputElement>("[data-date-input]")!;
+    const timeInput = root.querySelector<HTMLInputElement>("[data-time-input]")!;
+    const secondsOutput = root.querySelector<HTMLDivElement>("[data-seconds-output]")!;
+    const millisOutput = root.querySelector<HTMLDivElement>("[data-millis-output]")!;
+    const copyBtns = root.querySelectorAll<HTMLButtonElement>("[data-copy-btn]");
+
+    // Populate timezone select, defaulting to the browser's own timezone.
+    const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const tzList = Array.from(new Set([browserTz, ...COMMON_TIMEZONES]));
+    timezoneSelect.innerHTML = tzList
+      .map((tz) => `<option value="${tz}" ${tz === browserTz ? "selected" : ""}>${tz}</option>`)
+      .join("");
+
+    function formatInTimezone(date: Date, timeZone: string): string {
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZoneName: "short",
+      });
+      return formatter.format(date);
+    }
+
+    function updateTimestampToDate() {
+      const raw = timestampInput.value.trim();
+      timestampError.classList.add("hidden");
+
+      if (!raw) {
+        dateOutput.textContent = "—";
+        unitBadge.textContent = "seconds";
+        return;
+      }
+
+      if (!/^-?\d+$/.test(raw)) {
+        timestampError.classList.remove("hidden");
+        timestampError.textContent = "Enter a valid integer timestamp.";
+        dateOutput.textContent = "—";
+        return;
+      }
+
+      const num = parseInt(raw, 10);
+      // Values with 13+ digits are treated as milliseconds, shorter as seconds.
+      const isMillis = Math.abs(num) >= 1e12;
+      unitBadge.textContent = isMillis ? "milliseconds" : "seconds";
+
+      const date = new Date(isMillis ? num : num * 1000);
+      if (isNaN(date.getTime())) {
+        timestampError.classList.remove("hidden");
+        timestampError.textContent = "This value is out of range for a valid date.";
+        dateOutput.textContent = "—";
+        return;
+      }
+
+      dateOutput.textContent = formatInTimezone(date, timezoneSelect.value);
+    }
+
+    function updateDateToTimestamp() {
+      if (!dateInput.value) {
+        secondsOutput.textContent = "—";
+        millisOutput.textContent = "—";
+        return;
+      }
+      const timeValue = timeInput.value || "00:00:00";
+      // Interpret the entered date/time as wall-clock time in the selected timezone.
+      const isoLocal = `${dateInput.value}T${timeValue}`;
+      const tz = timezoneSelect.value;
+
+      // Compute the UTC offset for the given timezone at this date by comparing
+      // a formatted round-trip, since Date has no native "parse as timezone X" API.
+      const naiveDate = new Date(isoLocal + "Z"); // treat as UTC first
+      const tzFormatted = new Date(
+        new Intl.DateTimeFormat("en-US", {
+          timeZone: tz,
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit",
+          hour12: false,
+        }).format(naiveDate).replace(
+          /(\d+)\/(\d+)\/(\d+), (\d+):(\d+):(\d+)/,
+          "$3-$1-$2T$4:$5:$6"
+        )
+      );
+      const offsetMs = naiveDate.getTime() - tzFormatted.getTime();
+      const actual = new Date(naiveDate.getTime() + offsetMs);
+
+      const seconds = Math.floor(actual.getTime() / 1000);
+      secondsOutput.textContent = String(seconds);
+      millisOutput.textContent = String(actual.getTime());
+    }
+
+    nowBtn.addEventListener("click", () => {
+      const now = new Date();
+      timestampInput.value = String(Math.floor(now.getTime() / 1000));
+      updateTimestampToDate();
+
+      dateInput.value = now.toISOString().slice(0, 10);
+      timeInput.value = now.toTimeString().slice(0, 8);
+      updateDateToTimestamp();
+    });
+
+    timestampInput.addEventListener("input", updateTimestampToDate);
+    timezoneSelect.addEventListener("change", () => {
+      updateTimestampToDate();
+      updateDateToTimestamp();
+    });
+    dateInput.addEventListener("input", updateDateToTimestamp);
+    timeInput.addEventListener("input", updateDateToTimestamp);
+
+    copyBtns.forEach((btn) => {
+      const icon = btn.querySelector<SVGElement>("[data-copy-icon]")!;
+      const label = btn.querySelector<HTMLSpanElement>("[data-copy-label]")!;
+      btn.addEventListener("click", async () => {
+        const targetAttr = btn.dataset.target!;
+        const el = root.querySelector(`[data-${targetAttr.replace("-output", "")}-output]`) as HTMLElement;
+        const text = el?.textContent ?? "";
+        if (!text || text === "—") return;
+        await navigator.clipboard.writeText(text);
+        icon.innerHTML = CHECK_ICON;
+        label.textContent = "Copied";
+        btn.classList.add("border-green-300", "bg-green-50", "text-green-600");
+        btn.classList.remove("border-teal-200", "bg-teal-50", "text-teal-600");
+        setTimeout(() => {
+          icon.innerHTML = COPY_ICON;
+          label.textContent = "Copy";
+          btn.classList.remove("border-green-300", "bg-green-50", "text-green-600");
+          btn.classList.add("border-teal-200", "bg-teal-50", "text-teal-600");
+        }, 1500);
+      });
+    });
+
+    // Seed with current time on load.
+    nowBtn.click();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-unix-timestamp]").forEach(initUnixTimestamp);
+</script>

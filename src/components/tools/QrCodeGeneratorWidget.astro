@@ -1,0 +1,209 @@
+---
+---
+
+<div data-qr-code-generator-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div class="mb-4">
+    <label class="block text-xs font-medium text-gray-600 mb-1">URL or text</label>
+    <textarea
+      data-text-input
+      rows="2"
+      placeholder="https://example.com"
+      class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-y"
+    ></textarea>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Size (px)</label>
+      <input
+        type="number"
+        data-size-input
+        min="100"
+        max="1000"
+        step="10"
+        value="300"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+      />
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Error correction</label>
+      <select
+        data-ecc-select
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+      >
+        <option value="L">Low (~7% recovery)</option>
+        <option value="M" selected>Medium (~15% recovery)</option>
+        <option value="Q">Quartile (~25% recovery)</option>
+        <option value="H">High (~30% recovery)</option>
+      </select>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    data-generate-btn
+    class="w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition-colors mb-4"
+  >
+    Generate
+  </button>
+
+  <div
+    data-preview
+    class="flex items-center justify-center min-h-[220px] rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 mb-2"
+  >
+    <p data-empty-hint class="text-sm text-gray-400">Enter a URL or text above to generate a QR code</p>
+  </div>
+
+  <p data-error-message class="text-xs text-red-600 mb-3"></p>
+
+  <div class="flex flex-col sm:flex-row gap-2">
+    <button
+      type="button"
+      data-download-svg-btn
+      disabled
+      class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    >
+      Download SVG
+    </button>
+    <button
+      type="button"
+      data-download-png-btn
+      disabled
+      class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    >
+      Download PNG
+    </button>
+  </div>
+</div>
+
+<script>
+  import QRCode from "qrcode";
+
+  const DEBOUNCE_MS = 350;
+
+  function clamp(n: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, n));
+  }
+
+  function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function initQrCodeGenerator(root: HTMLElement) {
+    const textInput = root.querySelector<HTMLTextAreaElement>("[data-text-input]");
+    const sizeInput = root.querySelector<HTMLInputElement>("[data-size-input]");
+    const eccSelect = root.querySelector<HTMLSelectElement>("[data-ecc-select]");
+    const generateBtn = root.querySelector<HTMLButtonElement>("[data-generate-btn]");
+    const preview = root.querySelector<HTMLElement>("[data-preview]");
+    const emptyHint = root.querySelector<HTMLElement>("[data-empty-hint]");
+    const errorMessage = root.querySelector<HTMLElement>("[data-error-message]");
+    const downloadSvgBtn = root.querySelector<HTMLButtonElement>("[data-download-svg-btn]");
+    const downloadPngBtn = root.querySelector<HTMLButtonElement>("[data-download-png-btn]");
+
+    if (
+      !textInput || !sizeInput || !eccSelect || !generateBtn || !preview ||
+      !emptyHint || !errorMessage || !downloadSvgBtn || !downloadPngBtn
+    ) {
+      return;
+    }
+
+    let lastSvgString = "";
+    let debounceTimer: number | undefined;
+
+    function resetToEmpty() {
+      preview!.innerHTML = "";
+      preview!.appendChild(emptyHint!);
+      downloadSvgBtn!.disabled = true;
+      downloadPngBtn!.disabled = true;
+      lastSvgString = "";
+    }
+
+    async function generate() {
+      const text = textInput!.value.trim();
+      errorMessage!.textContent = "";
+
+      if (!text) {
+        resetToEmpty();
+        return;
+      }
+
+      const size = clamp(parseInt(sizeInput!.value, 10) || 300, 100, 1000);
+      const ecc = eccSelect!.value || "M";
+
+      try {
+        const svgString = await QRCode.toString(text, {
+          type: "svg",
+          errorCorrectionLevel: ecc as "L" | "M" | "Q" | "H",
+          width: size,
+          margin: 2,
+          color: { dark: "#111827", light: "#ffffff" },
+        });
+
+        preview!.innerHTML = svgString;
+        const svgEl = preview!.querySelector("svg");
+        if (svgEl) {
+          svgEl.style.width = "100%";
+          svgEl.style.maxWidth = size + "px";
+          svgEl.style.height = "auto";
+        }
+
+        lastSvgString = svgString;
+        downloadSvgBtn!.disabled = false;
+        downloadPngBtn!.disabled = false;
+      } catch {
+        resetToEmpty();
+        errorMessage!.textContent =
+          "This text is too long for the selected error correction level. Try a lower level or shorter text.";
+      }
+    }
+
+    function scheduleGenerate() {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(generate, DEBOUNCE_MS);
+    }
+
+    textInput.addEventListener("input", scheduleGenerate);
+    sizeInput.addEventListener("input", scheduleGenerate);
+    eccSelect.addEventListener("change", generate);
+    generateBtn.addEventListener("click", generate);
+
+    downloadSvgBtn.addEventListener("click", () => {
+      if (!lastSvgString) return;
+      downloadBlob(new Blob([lastSvgString], { type: "image/svg+xml" }), "qr-code.svg");
+    });
+
+    downloadPngBtn.addEventListener("click", async () => {
+      const text = textInput!.value.trim();
+      if (!text) return;
+
+      const size = clamp(parseInt(sizeInput!.value, 10) || 300, 100, 1000);
+      const ecc = eccSelect!.value || "M";
+
+      try {
+        const canvas = document.createElement("canvas");
+        await QRCode.toCanvas(canvas, text, {
+          errorCorrectionLevel: ecc as "L" | "M" | "Q" | "H",
+          width: size,
+          margin: 2,
+          color: { dark: "#111827", light: "#ffffff" },
+        });
+        canvas.toBlob((blob) => {
+          if (blob) downloadBlob(blob, "qr-code.png");
+        }, "image/png");
+      } catch {
+        errorMessage!.textContent = "Could not generate a PNG for this text and error correction level.";
+      }
+    });
+  }
+
+  document
+    .querySelectorAll<HTMLElement>("[data-qr-code-generator-widget]")
+    .forEach(initQrCodeGenerator);
+</script>

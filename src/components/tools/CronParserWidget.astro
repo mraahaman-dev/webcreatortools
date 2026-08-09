@@ -1,0 +1,314 @@
+<div class="cron-parser" data-cron-parser>
+  <div class="mb-4 flex items-center gap-1 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <button type="button" data-mode-btn data-mode="translate" class="mode-btn rounded-md px-3 py-1.5 text-sm font-medium bg-green-600 text-white">
+      Translate Expression
+    </button>
+    <button type="button" data-mode-btn data-mode="build" class="mode-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">
+      Visual Builder
+    </button>
+  </div>
+
+  <!-- Translate mode -->
+  <div data-translate-panel class="border border-b-0 border-slate-200 bg-white p-5">
+    <input type="text" data-cron-input value="*/15 9-17 * * 1-5" spellcheck="false"
+      class="mb-4 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-sm text-slate-800 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100"
+      placeholder="e.g. */15 9-17 * * 1-5" />
+
+    <div data-cron-error class="mb-3 hidden rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"></div>
+
+    <div data-cron-result class="rounded-lg bg-green-50 p-4 text-sm text-green-800"></div>
+
+    <div class="mt-4 grid grid-cols-5 gap-2 text-center text-xs">
+      <div class="rounded-lg bg-slate-50 p-2">
+        <div class="font-semibold text-slate-500">Minute</div>
+        <div data-field-minute class="mt-1 font-mono text-slate-800">*</div>
+      </div>
+      <div class="rounded-lg bg-slate-50 p-2">
+        <div class="font-semibold text-slate-500">Hour</div>
+        <div data-field-hour class="mt-1 font-mono text-slate-800">*</div>
+      </div>
+      <div class="rounded-lg bg-slate-50 p-2">
+        <div class="font-semibold text-slate-500">Day</div>
+        <div data-field-dom class="mt-1 font-mono text-slate-800">*</div>
+      </div>
+      <div class="rounded-lg bg-slate-50 p-2">
+        <div class="font-semibold text-slate-500">Month</div>
+        <div data-field-month class="mt-1 font-mono text-slate-800">*</div>
+      </div>
+      <div class="rounded-lg bg-slate-50 p-2">
+        <div class="font-semibold text-slate-500">Weekday</div>
+        <div data-field-dow class="mt-1 font-mono text-slate-800">*</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Build mode -->
+  <div data-build-panel class="hidden border border-b-0 border-slate-200 bg-white p-5">
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="block">
+        <span class="mb-1 block text-sm text-slate-600">Frequency</span>
+        <select data-frequency-select
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100">
+          <option value="minute">Every N minutes</option>
+          <option value="hourly">Hourly at a specific minute</option>
+          <option value="daily" selected>Daily at a specific time</option>
+          <option value="weekly">Weekly on chosen days</option>
+          <option value="monthly">Monthly on a specific day</option>
+        </select>
+      </label>
+
+      <label data-opt-minute-interval class="hidden block">
+        <span class="mb-1 block text-sm text-slate-600">Every</span>
+        <select data-minute-interval class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+          <option value="5">5 minutes</option>
+          <option value="10">10 minutes</option>
+          <option value="15" selected>15 minutes</option>
+          <option value="30">30 minutes</option>
+        </select>
+      </label>
+
+      <label data-opt-hour-min class="hidden block">
+        <span class="mb-1 block text-sm text-slate-600">At minute</span>
+        <input type="number" data-hour-min value="0" min="0" max="59"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700" />
+      </label>
+
+      <label data-opt-time class="block">
+        <span class="mb-1 block text-sm text-slate-600">At time</span>
+        <input type="time" data-time-input value="09:00"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700" />
+      </label>
+
+      <div data-opt-weekdays class="hidden sm:col-span-2">
+        <span class="mb-1 block text-sm text-slate-600">On days</span>
+        <div class="flex flex-wrap gap-2">
+          <label class="flex items-center gap-1 text-sm text-slate-600"><input type="checkbox" data-weekday="1" class="rounded border-slate-300 text-green-600" checked> Mon</label>
+          <label class="flex items-center gap-1 text-sm text-slate-600"><input type="checkbox" data-weekday="2" class="rounded border-slate-300 text-green-600" checked> Tue</label>
+          <label class="flex items-center gap-1 text-sm text-slate-600"><input type="checkbox" data-weekday="3" class="rounded border-slate-300 text-green-600" checked> Wed</label>
+          <label class="flex items-center gap-1 text-sm text-slate-600"><input type="checkbox" data-weekday="4" class="rounded border-slate-300 text-green-600" checked> Thu</label>
+          <label class="flex items-center gap-1 text-sm text-slate-600"><input type="checkbox" data-weekday="5" class="rounded border-slate-300 text-green-600" checked> Fri</label>
+          <label class="flex items-center gap-1 text-sm text-slate-600"><input type="checkbox" data-weekday="6" class="rounded border-slate-300 text-green-600"> Sat</label>
+          <label class="flex items-center gap-1 text-sm text-slate-600"><input type="checkbox" data-weekday="0" class="rounded border-slate-300 text-green-600"> Sun</label>
+        </div>
+      </div>
+
+      <label data-opt-month-day class="hidden block">
+        <span class="mb-1 block text-sm text-slate-600">Day of month</span>
+        <input type="number" data-month-day value="1" min="1" max="31"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700" />
+      </label>
+    </div>
+
+    <div class="mt-4 flex items-center gap-2 rounded-lg bg-slate-50 p-3">
+      <span data-built-expression class="flex-1 font-mono text-sm text-slate-800">0 9 * * *</span>
+      <button type="button" data-use-btn class="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700">
+        Use This Expression
+      </button>
+    </div>
+  </div>
+
+  <p class="mt-3 rounded-b-2xl border border-slate-200 bg-white p-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you enter is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+  function ordinal(n: number): string {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  // Parses a single cron field into a description fragment.
+  function describeField(
+    field: string,
+    unitSingular: string,
+    names: string[] | null,
+    min: number,
+    max: number
+  ): { every: boolean; description: string } {
+    if (field === "*") return { every: true, description: `every ${unitSingular}` };
+
+    const label = (n: number) => (names ? names[n] : String(n));
+
+    if (field.includes("/")) {
+      const [range, step] = field.split("/");
+      const stepNum = step;
+      if (range === "*") return { every: false, description: `every ${stepNum} ${unitSingular}s` };
+      return { every: false, description: `every ${stepNum} ${unitSingular}s, ${range}` };
+    }
+
+    if (field.includes(",")) {
+      const parts = field.split(",").map((p) => (names ? label(parseInt(p, 10)) : p));
+      return { every: false, description: `${unitSingular}s ${parts.join(", ")}` };
+    }
+
+    if (field.includes("-")) {
+      const [start, end] = field.split("-").map((n) => parseInt(n, 10));
+      return { every: false, description: `${unitSingular}s ${label(start)} through ${label(end)}` };
+    }
+
+    const num = parseInt(field, 10);
+    return { every: false, description: names ? label(num) : String(num) };
+  }
+
+  function describeCron(minute: string, hour: string, dom: string, month: string, dow: string): string {
+    const min = describeField(minute, "minute", null, 0, 59);
+    const hr = describeField(hour, "hour", null, 0, 23);
+    const domD = describeField(dom, "day", null, 1, 31);
+    const monD = describeField(month, "month", MONTH_NAMES, 1, 12);
+    const dowD = describeField(dow, "weekday", DAY_NAMES, 0, 6);
+
+    let timePart: string;
+    if (min.every && hr.every) {
+      timePart = "every minute";
+    } else if (minute.includes("/") && hour === "*") {
+      timePart = min.description;
+    } else if (min.every) {
+      timePart = `every minute of ${hr.description}`;
+    } else if (hr.every) {
+      timePart = `${min.description === "0" ? "at the top of every hour" : `at minute ${min.description} of every hour`}`;
+    } else {
+      const minNum = /^\d+$/.test(minute) ? parseInt(minute, 10) : null;
+      const hourNum = /^\d+$/.test(hour) ? parseInt(hour, 10) : null;
+      if (minNum !== null && hourNum !== null) {
+        const h12 = hourNum % 12 === 0 ? 12 : hourNum % 12;
+        const ampm = hourNum < 12 ? "AM" : "PM";
+        timePart = `at ${h12}:${String(minNum).padStart(2, "0")} ${ampm}`;
+      } else {
+        timePart = `at ${min.description}, ${hr.description}`;
+      }
+    }
+
+    const parts = [timePart];
+
+    if (dom !== "*") parts.push(`on day ${domD.description} of the month`);
+    if (month !== "*") parts.push(`in ${monD.description}`);
+    if (dow !== "*") parts.push(`on ${dowD.description}`);
+
+    return parts.join(", ") + ".";
+  }
+
+  function initCronParser(root: HTMLElement) {
+    const modeBtns = root.querySelectorAll<HTMLButtonElement>("[data-mode-btn]");
+    const translatePanel = root.querySelector<HTMLDivElement>("[data-translate-panel]")!;
+    const buildPanel = root.querySelector<HTMLDivElement>("[data-build-panel]")!;
+    const cronInput = root.querySelector<HTMLInputElement>("[data-cron-input]")!;
+    const cronError = root.querySelector<HTMLDivElement>("[data-cron-error]")!;
+    const cronResult = root.querySelector<HTMLDivElement>("[data-cron-result]")!;
+
+    function setMode(m: "translate" | "build") {
+      modeBtns.forEach((btn) => {
+        const active = btn.dataset.mode === m;
+        btn.classList.toggle("bg-green-600", active);
+        btn.classList.toggle("text-white", active);
+        btn.classList.toggle("text-slate-500", !active);
+      });
+      translatePanel.classList.toggle("hidden", m !== "translate");
+      buildPanel.classList.toggle("hidden", m !== "build");
+    }
+
+    function translate() {
+      const raw = cronInput.value.trim();
+      cronError.classList.add("hidden");
+
+      const fields = raw.split(/\s+/).filter(Boolean);
+      if (fields.length !== 5) {
+        cronError.classList.remove("hidden");
+        cronError.textContent = "A standard cron expression needs exactly 5 fields: minute, hour, day of month, month, day of week.";
+        cronResult.textContent = "";
+        return;
+      }
+
+      const [minute, hour, dom, month, dow] = fields;
+      const validPattern = /^(\*|\d+)(\/\d+)?((-\d+)(\/\d+)?)?(,(\*|\d+)((-\d+))?)*$/;
+      for (const f of fields) {
+        if (!validPattern.test(f)) {
+          cronError.classList.remove("hidden");
+          cronError.textContent = `The field "${f}" doesn't look like valid cron syntax.`;
+          cronResult.textContent = "";
+          return;
+        }
+      }
+
+      root.querySelector("[data-field-minute]")!.textContent = minute;
+      root.querySelector("[data-field-hour]")!.textContent = hour;
+      root.querySelector("[data-field-dom]")!.textContent = dom;
+      root.querySelector("[data-field-month]")!.textContent = month;
+      root.querySelector("[data-field-dow]")!.textContent = dow;
+
+      try {
+        cronResult.textContent = describeCron(minute, hour, dom, month, dow);
+      } catch {
+        cronError.classList.remove("hidden");
+        cronError.textContent = "Could not parse this expression.";
+        cronResult.textContent = "";
+      }
+    }
+
+    modeBtns.forEach((btn) => btn.addEventListener("click", () => setMode(btn.dataset.mode as "translate" | "build")));
+    cronInput.addEventListener("input", translate);
+    translate();
+
+    // ---------- Visual builder ----------
+    const frequencySelect = root.querySelector<HTMLSelectElement>("[data-frequency-select]")!;
+    const minuteIntervalWrap = root.querySelector<HTMLElement>("[data-opt-minute-interval]")!;
+    const minuteInterval = root.querySelector<HTMLSelectElement>("[data-minute-interval]")!;
+    const hourMinWrap = root.querySelector<HTMLElement>("[data-opt-hour-min]")!;
+    const hourMin = root.querySelector<HTMLInputElement>("[data-hour-min]")!;
+    const timeWrap = root.querySelector<HTMLElement>("[data-opt-time]")!;
+    const timeInput = root.querySelector<HTMLInputElement>("[data-time-input]")!;
+    const weekdaysWrap = root.querySelector<HTMLElement>("[data-opt-weekdays]")!;
+    const monthDayWrap = root.querySelector<HTMLElement>("[data-opt-month-day]")!;
+    const monthDay = root.querySelector<HTMLInputElement>("[data-month-day]")!;
+    const builtExpression = root.querySelector<HTMLSpanElement>("[data-built-expression]")!;
+    const useBtn = root.querySelector<HTMLButtonElement>("[data-use-btn]")!;
+
+    function updateVisibility() {
+      const freq = frequencySelect.value;
+      minuteIntervalWrap.classList.toggle("hidden", freq !== "minute");
+      hourMinWrap.classList.toggle("hidden", freq !== "hourly");
+      timeWrap.classList.toggle("hidden", !["daily", "weekly", "monthly"].includes(freq));
+      weekdaysWrap.classList.toggle("hidden", freq !== "weekly");
+      monthDayWrap.classList.toggle("hidden", freq !== "monthly");
+    }
+
+    function buildExpression(): string {
+      const freq = frequencySelect.value;
+      const [h, m] = timeInput.value.split(":").map((v) => parseInt(v, 10));
+
+      if (freq === "minute") return `*/${minuteInterval.value} * * * *`;
+      if (freq === "hourly") return `${hourMin.value || 0} * * * *`;
+      if (freq === "daily") return `${m || 0} ${h || 0} * * *`;
+      if (freq === "weekly") {
+        const days = Array.from(root.querySelectorAll<HTMLInputElement>("[data-weekday]:checked")).map((el) => el.dataset.weekday);
+        return `${m || 0} ${h || 0} * * ${days.length ? days.join(",") : "*"}`;
+      }
+      if (freq === "monthly") return `${m || 0} ${h || 0} ${monthDay.value || 1} * *`;
+      return "* * * * *";
+    }
+
+    function updateBuild() {
+      updateVisibility();
+      builtExpression.textContent = buildExpression();
+    }
+
+    [frequencySelect, minuteInterval, hourMin, timeInput, monthDay].forEach((el) =>
+      el.addEventListener("input", updateBuild)
+    );
+    root.querySelectorAll<HTMLInputElement>("[data-weekday]").forEach((el) => el.addEventListener("change", updateBuild));
+
+    useBtn.addEventListener("click", () => {
+      cronInput.value = builtExpression.textContent ?? "";
+      setMode("translate");
+      translate();
+    });
+
+    updateBuild();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-cron-parser]").forEach(initCronParser);
+</script>

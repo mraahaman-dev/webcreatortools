@@ -8,7 +8,24 @@ import ViewBoxFixerWidget from '../../components/tools/ViewBoxFixerWidget.astro'
 import PaletteExtractorWidget from '../../components/tools/PaletteExtractorWidget.astro';
 import CssDataUriWidget from '../../components/tools/CssDataUriWidget.astro';
 import ImageToTailwindWidget from '../../components/tools/ImageToTailwindWidget.astro';
+import JsonFormatterWidget from '../../components/tools/JsonFormatterWidget.astro';
+import JwtDecoderWidget from '../../components/tools/JwtDecoderWidget.astro';
+import RegexTesterWidget from '../../components/tools/RegexTesterWidget.astro';
+import UuidGeneratorWidget from '../../components/tools/UuidGeneratorWidget.astro';
+import HashGeneratorWidget from '../../components/tools/HashGeneratorWidget.astro';
+import ColorConverterWidget from '../../components/tools/ColorConverterWidget.astro';
+import PasswordGeneratorWidget from '../../components/tools/PasswordGeneratorWidget.astro';
+import CaseConverterWidget from '../../components/tools/CaseConverterWidget.astro';
+import CssUnitConverterWidget from '../../components/tools/CssUnitConverterWidget.astro';
+import UnixTimestampWidget from '../../components/tools/UnixTimestampWidget.astro';
+import TextDiffWidget from '../../components/tools/TextDiffWidget.astro';
+import CronParserWidget from '../../components/tools/CronParserWidget.astro';
+import MarkdownPreviewWidget from '../../components/tools/MarkdownPreviewWidget.astro';
+import PlaceholderTextGeneratorWidget from '../../components/tools/PlaceholderTextGeneratorWidget.astro';
+import QrCodeGeneratorWidget from '../../components/tools/QrCodeGeneratorWidget.astro';
+import YamlJsonConverterWidget from '../../components/tools/YamlJsonConverterWidget.astro';
 import ComingSoonWidget from '../../components/tools/ComingSoonWidget.astro';
+
 
 export function getStaticPaths() {
   return toolsData.map((tool) => ({
@@ -29,6 +46,22 @@ const widgets: Record<string, any> = {
   "palette-extractor": PaletteExtractorWidget,
   "svg-to-css-data-uri": CssDataUriWidget,
   "image-to-tailwind-palette": ImageToTailwindWidget,
+  "json-formatter-validator": JsonFormatterWidget,
+  "jwt-decoder": JwtDecoderWidget,
+  "regex-tester-builder": RegexTesterWidget,
+  "uuid-generator": UuidGeneratorWidget,
+  "hash-generator": HashGeneratorWidget,
+  "color-format-converter": ColorConverterWidget,
+  "password-passphrase-generator": PasswordGeneratorWidget,
+  "css-unit-converter": CssUnitConverterWidget,
+  "case-converter": CaseConverterWidget,
+  "unix-timestamp-converter": UnixTimestampWidget,
+  "text-diff-checker": TextDiffWidget,
+  "cron-expression-parser": CronParserWidget,
+  "markdown-live-previewer": MarkdownPreviewWidget,
+  "placeholder-text-generator": PlaceholderTextGeneratorWidget,
+  "qr-code-generator": QrCodeGeneratorWidget,
+  "yaml-json-converter": YamlJsonConverterWidget,
 };
 
 const Widget = widgets[tool.slug] ?? ComingSoonWidget;

@@ -1,0 +1,300 @@
+---
+---
+
+<div data-placeholder-text-generator-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Style</label>
+      <select
+        data-style-select
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+      >
+        <option value="lorem">Lorem Ipsum</option>
+        <option value="plain">Plain English</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Unit</label>
+      <select
+        data-unit-select
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+      >
+        <option value="words">Words</option>
+        <option value="sentences">Sentences</option>
+        <option value="paragraphs">Paragraphs</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Count</label>
+      <input
+        type="number"
+        data-count-input
+        min="1"
+        max="2000"
+        value="50"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+      />
+    </div>
+
+    <div class="flex items-end">
+      <label class="flex items-center gap-2 text-xs text-gray-600 mb-2 select-none">
+        <input type="checkbox" data-classic-checkbox checked class="rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+        Start with classic opening
+      </label>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    data-generate-btn
+    class="w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition-colors mb-4"
+  >
+    Generate
+  </button>
+
+  <div class="relative">
+    <textarea
+      data-output
+      readonly
+      rows="10"
+      class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-3 text-sm text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-500 resize-y"
+    ></textarea>
+
+    <button
+      type="button"
+      data-copy-btn
+      class="absolute top-2.5 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors"
+    >
+      <svg data-copy-icon xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+      <svg data-copy-check xmlns="http://www.w3.org/2000/svg" class="hidden h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span data-copy-label>Copy</span>
+    </button>
+  </div>
+
+  <p data-stats class="mt-2 text-xs text-gray-500"></p>
+</div>
+
+<script>
+  const LOREM_WORDS = [
+    "lorem","ipsum","dolor","sit","amet","consectetur","adipiscing","elit","sed","do",
+    "eiusmod","tempor","incididunt","ut","labore","et","dolore","magna","aliqua","enim",
+    "ad","minim","veniam","quis","nostrud","exercitation","ullamco","laboris","nisi","aliquip",
+    "ex","ea","commodo","consequat","duis","aute","irure","in","reprehenderit","voluptate",
+    "velit","esse","cillum","eu","fugiat","nulla","pariatur","excepteur","sint","occaecat",
+    "cupidatat","non","proident","sunt","culpa","qui","officia","deserunt","mollit","anim",
+    "id","est","laborum"
+  ];
+
+  const PLAIN_WORDS = [
+    "system","design","content","layout","structure","process","feature","product","service","value",
+    "quality","team","project","timeline","result","effort","review","update","approach","outcome",
+    "detail","element","function","component","interface","workflow","solution","strategy","resource","decision",
+    "feedback","insight","balance","context","pattern","concept","framework","module","version","format",
+    "standard","method","practice","measure","target","metric","signal","factor","option","input",
+    "output","record","summary","overview","section","segment","stage","phase","cycle","draft",
+    "sample","template","preview","example","reference","source","channel","platform","network","session",
+    "interaction","response","request","query","filter","sort","group","category","label","tag",
+    "note","comment","thread","topic","subject","theme","focus","scope","range","limit"
+  ];
+
+  const CLASSIC_OPENING = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+  const CLASSIC_WORD_COUNT = 8;
+
+  function randomInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function randomWord(pool: string[]): string {
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function capitalize(word: string): string {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }
+
+  function finalizeSentence(words: string[]): string {
+    const w = words.slice();
+    w[0] = capitalize(w[0]);
+    if (w.length > 7) {
+      const commaPos = Math.floor(w.length * 0.4);
+      w[commaPos] = w[commaPos] + ",";
+    }
+    return w.join(" ") + ".";
+  }
+
+  function fixedLenSentence(pool: string[], len: number): string {
+    const words: string[] = [];
+    for (let i = 0; i < len; i++) words.push(randomWord(pool));
+    return finalizeSentence(words);
+  }
+
+  function randomSentence(pool: string[], minLen = 6, maxLen = 16): string {
+    return fixedLenSentence(pool, randomInt(minLen, maxLen));
+  }
+
+  function randomParagraph(pool: string[], minSent = 3, maxSent = 6): string {
+    const n = randomInt(minSent, maxSent);
+    const sentences: string[] = [];
+    for (let i = 0; i < n; i++) sentences.push(randomSentence(pool));
+    return sentences.join(" ");
+  }
+
+  function buildByWords(pool: string[], target: number, classicStart: boolean): string {
+    const sentences: string[] = [];
+    let remaining = target;
+
+    if (classicStart) {
+      if (remaining <= CLASSIC_WORD_COUNT) {
+        const words = CLASSIC_OPENING.replace(/[,.]/g, "").split(" ").slice(0, remaining);
+        if (words.length === 0) return "";
+        words[0] = capitalize(words[0]);
+        return words.join(" ") + ".";
+      }
+      sentences.push(CLASSIC_OPENING);
+      remaining -= CLASSIC_WORD_COUNT;
+    }
+
+    while (remaining > 0) {
+      const len = Math.min(remaining, randomInt(6, 14));
+      sentences.push(fixedLenSentence(pool, len));
+      remaining -= len;
+    }
+
+    return sentences.join(" ");
+  }
+
+  function buildBySentences(pool: string[], target: number, classicStart: boolean): string {
+    const sentences: string[] = [];
+    let start = 0;
+    if (classicStart && target > 0) {
+      sentences.push(CLASSIC_OPENING);
+      start = 1;
+    }
+    for (let i = start; i < target; i++) sentences.push(randomSentence(pool));
+    return sentences.join(" ");
+  }
+
+  function buildByParagraphs(pool: string[], target: number, classicStart: boolean): string {
+    const paragraphs: string[] = [];
+    for (let i = 0; i < target; i++) {
+      if (i === 0 && classicStart) {
+        paragraphs.push(CLASSIC_OPENING + " " + randomParagraph(pool, 2, 5));
+      } else {
+        paragraphs.push(randomParagraph(pool));
+      }
+    }
+    return paragraphs.join("\n\n");
+  }
+
+  const UNIT_DEFAULTS: Record<string, { value: number; min: number; max: number }> = {
+    words: { value: 50, min: 1, max: 2000 },
+    sentences: { value: 5, min: 1, max: 200 },
+    paragraphs: { value: 3, min: 1, max: 50 },
+  };
+
+  function countWords(text: string): number {
+    const trimmed = text.trim();
+    return trimmed.length === 0 ? 0 : trimmed.split(/\s+/).length;
+  }
+
+  function initPlaceholderTextGenerator(root: HTMLElement) {
+    const styleSelect = root.querySelector<HTMLSelectElement>("[data-style-select]");
+    const unitSelect = root.querySelector<HTMLSelectElement>("[data-unit-select]");
+    const countInput = root.querySelector<HTMLInputElement>("[data-count-input]");
+    const classicCheckbox = root.querySelector<HTMLInputElement>("[data-classic-checkbox]");
+    const generateBtn = root.querySelector<HTMLButtonElement>("[data-generate-btn]");
+    const output = root.querySelector<HTMLTextAreaElement>("[data-output]");
+    const stats = root.querySelector<HTMLElement>("[data-stats]");
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]");
+    const copyIcon = root.querySelector<HTMLElement>("[data-copy-icon]");
+    const copyCheck = root.querySelector<HTMLElement>("[data-copy-check]");
+    const copyLabel = root.querySelector<HTMLElement>("[data-copy-label]");
+
+    if (!styleSelect || !unitSelect || !countInput || !classicCheckbox || !generateBtn || !output || !stats || !copyBtn || !copyIcon || !copyCheck || !copyLabel) {
+      return;
+    }
+
+    function syncClassicCheckboxAvailability() {
+      const isLorem = styleSelect!.value === "lorem";
+      classicCheckbox!.disabled = !isLorem;
+      if (!isLorem) classicCheckbox!.checked = false;
+      else classicCheckbox!.checked = true;
+    }
+
+    function syncCountDefaults() {
+      const defaults = UNIT_DEFAULTS[unitSelect!.value];
+      if (!defaults) return;
+      countInput!.min = String(defaults.min);
+      countInput!.max = String(defaults.max);
+      countInput!.value = String(defaults.value);
+    }
+
+    function generate() {
+      const pool = styleSelect!.value === "lorem" ? LOREM_WORDS : PLAIN_WORDS;
+      const unit = unitSelect!.value;
+      const defaults = UNIT_DEFAULTS[unit] || UNIT_DEFAULTS.words;
+      let target = parseInt(countInput!.value, 10);
+      if (isNaN(target) || target < 1) target = 1;
+      if (target > defaults.max) target = defaults.max;
+      const classicStart = classicCheckbox!.checked && styleSelect!.value === "lorem";
+
+      let text = "";
+      if (unit === "words") {
+        text = buildByWords(pool, target, classicStart);
+      } else if (unit === "sentences") {
+        text = buildBySentences(pool, target, classicStart);
+      } else {
+        text = buildByParagraphs(pool, target, classicStart);
+      }
+
+      output!.value = text;
+      const wordCount = countWords(text);
+      const charCount = text.length;
+      stats!.textContent = `${wordCount.toLocaleString()} words \u00b7 ${charCount.toLocaleString()} characters`;
+    }
+
+    styleSelect.addEventListener("change", () => {
+      syncClassicCheckboxAvailability();
+      generate();
+    });
+
+    unitSelect.addEventListener("change", () => {
+      syncCountDefaults();
+      generate();
+    });
+
+    generateBtn.addEventListener("click", generate);
+
+    copyBtn.addEventListener("click", async () => {
+      if (!output!.value) return;
+      try {
+        await navigator.clipboard.writeText(output!.value);
+        copyIcon!.classList.add("hidden");
+        copyCheck!.classList.remove("hidden");
+        copyLabel!.textContent = "Copied!";
+        setTimeout(() => {
+          copyIcon!.classList.remove("hidden");
+          copyCheck!.classList.add("hidden");
+          copyLabel!.textContent = "Copy";
+        }, 1500);
+      } catch {
+        // clipboard write failed silently; user can still select the text manually
+      }
+    });
+
+    syncClassicCheckboxAvailability();
+    syncCountDefaults();
+    generate();
+  }
+
+  document
+    .querySelectorAll<HTMLElement>("[data-placeholder-text-generator-widget]")
+    .forEach(initPlaceholderTextGenerator);
+</script>

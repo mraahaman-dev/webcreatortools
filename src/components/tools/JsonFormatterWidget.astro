@@ -1,0 +1,205 @@
+<div class="json-formatter" data-json-formatter>
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <div class="flex flex-wrap gap-2">
+      <button type="button" data-format-btn
+        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
+        Format
+      </button>
+      <button type="button" data-minify-btn
+        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+        Minify
+      </button>
+      <button type="button" data-copy-btn
+        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+        Copy
+      </button>
+      <button type="button" data-clear-btn
+        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+        Clear
+      </button>
+      <button type="button" data-findreplace-toggle-btn
+        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+        Find & Replace
+      </button>
+    </div>
+    <label class="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
+      <span>Indent</span>
+      <select data-indent-select class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-700">
+        <option value="2">2 spaces</option>
+        <option value="4">4 spaces</option>
+        <option value="tab">Tab</option>
+      </select>
+    </label>
+  </div>
+
+  <div data-findreplace-panel class="hidden flex-wrap items-center gap-2 border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <input type="text" data-find-input placeholder="Find..."
+      class="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+    <input type="text" data-replace-input placeholder="Replace with..."
+      class="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100" />
+    <label class="flex items-center gap-1.5 text-xs text-slate-600">
+      <input type="checkbox" data-find-case class="rounded border-slate-300" />
+      Match case
+    </label>
+    <button type="button" data-replace-all-btn
+      class="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700">
+      Replace All
+    </button>
+    <span data-find-count class="text-xs text-slate-500"></span>
+  </div>
+
+  <textarea
+    data-json-input
+    spellcheck="false"
+    placeholder="Paste your JSON here..."
+    class="h-80 w-full resize-y border border-slate-200 bg-white p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-200"
+  ></textarea>
+
+  <div data-json-status class="hidden rounded-b-2xl border border-t-0 border-slate-200 bg-white p-4 text-sm"></div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you paste is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  function escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function locateError(text: string, err: Error): string {
+    const match = err.message.match(/position (\d+)/);
+    if (!match) return err.message;
+    const pos = parseInt(match[1], 10);
+    const before = text.slice(0, pos);
+    const line = before.split("\n").length;
+    const lastNewline = before.lastIndexOf("\n");
+    const column = pos - lastNewline;
+    return `Invalid JSON at line ${line}, column ${column}: ${err.message}`;
+  }
+
+  function initJsonFormatter(root: HTMLElement) {
+    const input = root.querySelector<HTMLTextAreaElement>("[data-json-input]")!;
+    const status = root.querySelector<HTMLDivElement>("[data-json-status]")!;
+    const indentSelect = root.querySelector<HTMLSelectElement>("[data-indent-select]")!;
+    const formatBtn = root.querySelector<HTMLButtonElement>("[data-format-btn]")!;
+    const minifyBtn = root.querySelector<HTMLButtonElement>("[data-minify-btn]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+    const findReplacePanel = root.querySelector<HTMLDivElement>("[data-findreplace-panel]")!;
+    const findReplaceToggleBtn = root.querySelector<HTMLButtonElement>("[data-findreplace-toggle-btn]")!;
+    const findInput = root.querySelector<HTMLInputElement>("[data-find-input]")!;
+    const replaceInput = root.querySelector<HTMLInputElement>("[data-replace-input]")!;
+    const caseCheckbox = root.querySelector<HTMLInputElement>("[data-find-case]")!;
+    const replaceAllBtn = root.querySelector<HTMLButtonElement>("[data-replace-all-btn]")!;
+    const findCount = root.querySelector<HTMLSpanElement>("[data-find-count]")!;
+
+    function getIndent(): string | number {
+      const v = indentSelect.value;
+      return v === "tab" ? "\t" : Number(v);
+    }
+
+    function showStatus(message: string, kind: "ok" | "error") {
+      status.classList.remove("hidden");
+      status.className =
+        kind === "ok"
+          ? "rounded-b-2xl border border-t-0 border-green-200 bg-green-50 p-4 text-sm text-green-700"
+          : "rounded-b-2xl border border-t-0 border-red-200 bg-red-50 p-4 text-sm text-red-700";
+      status.textContent = message;
+    }
+
+    function clearStatus() {
+      status.classList.add("hidden");
+      status.textContent = "";
+    }
+
+    function format() {
+      const text = input.value.trim();
+      if (!text) return clearStatus();
+      try {
+        const parsed = JSON.parse(text);
+        input.value = JSON.stringify(parsed, null, getIndent());
+        showStatus("Valid JSON, formatted below.", "ok");
+      } catch (err) {
+        showStatus(locateError(text, err as Error), "error");
+      }
+    }
+
+    function minify() {
+      const text = input.value.trim();
+      if (!text) return clearStatus();
+      try {
+        const parsed = JSON.parse(text);
+        input.value = JSON.stringify(parsed);
+        showStatus("Valid JSON, minified below.", "ok");
+      } catch (err) {
+        showStatus(locateError(text, err as Error), "error");
+      }
+    }
+
+    formatBtn.addEventListener("click", format);
+    minifyBtn.addEventListener("click", minify);
+
+    copyBtn.addEventListener("click", async () => {
+      if (!input.value) return;
+      await navigator.clipboard.writeText(input.value);
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => (copyBtn.textContent = "Copy"), 1500);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      clearStatus();
+    });
+
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    input.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const text = input.value.trim();
+        if (!text) return clearStatus();
+        try {
+          JSON.parse(text);
+          showStatus("Valid JSON.", "ok");
+        } catch (err) {
+          showStatus(locateError(text, err as Error), "error");
+        }
+      }, 400);
+    });
+
+    findReplaceToggleBtn.addEventListener("click", () => {
+      const isHidden = findReplacePanel.classList.contains("hidden");
+      findReplacePanel.classList.toggle("hidden");
+      findReplacePanel.classList.toggle("flex");
+      if (isHidden) findInput.focus();
+    });
+
+    function updateFindCount() {
+      const term = findInput.value;
+      if (!term) {
+        findCount.textContent = "";
+        return;
+      }
+      const flags = caseCheckbox.checked ? "g" : "gi";
+      const regex = new RegExp(escapeRegExp(term), flags);
+      const matches = input.value.match(regex);
+      const count = matches ? matches.length : 0;
+      findCount.textContent = count === 0 ? "No matches" : `${count} match${count === 1 ? "" : "es"}`;
+    }
+
+    findInput.addEventListener("input", updateFindCount);
+    caseCheckbox.addEventListener("change", updateFindCount);
+
+    replaceAllBtn.addEventListener("click", () => {
+      const term = findInput.value;
+      if (!term) return;
+      const flags = caseCheckbox.checked ? "g" : "gi";
+      const regex = new RegExp(escapeRegExp(term), flags);
+      input.value = input.value.replace(regex, replaceInput.value);
+      updateFindCount();
+      showStatus("Replacement applied. Re-run Format or Minify to re-validate.", "ok");
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-json-formatter]").forEach(initJsonFormatter);
+</script>

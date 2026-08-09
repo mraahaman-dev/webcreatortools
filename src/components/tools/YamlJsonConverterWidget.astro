@@ -1,0 +1,209 @@
+---
+---
+
+<div data-yaml-json-converter-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div class="flex flex-col sm:flex-row sm:items-end gap-3 mb-4">
+    <div class="flex-1">
+      <label class="block text-xs font-medium text-gray-600 mb-1">Direction</label>
+      <select
+        data-direction-select
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+      >
+        <option value="yaml-to-json">YAML &rarr; JSON</option>
+        <option value="json-to-yaml">JSON &rarr; YAML</option>
+      </select>
+    </div>
+
+    <div class="flex-1">
+      <label class="block text-xs font-medium text-gray-600 mb-1">Indent</label>
+      <select
+        data-indent-select
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+      >
+        <option value="2" selected>2 spaces</option>
+        <option value="4">4 spaces</option>
+      </select>
+    </div>
+
+    <button
+      type="button"
+      data-swap-btn
+      title="Swap direction"
+      class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 16V4M7 4L3 8M7 4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"></path>
+      </svg>
+      Swap
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div>
+      <label data-input-label class="block text-xs font-medium text-gray-600 mb-1">YAML input</label>
+      <textarea
+        data-input
+        rows="14"
+        spellcheck="false"
+        placeholder="name: my-app
+version: 1.0.0
+services:
+  web:
+    image: nginx
+    ports:
+      - '80:80'"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-y"
+      ></textarea>
+    </div>
+
+    <div class="relative">
+      <label data-output-label class="block text-xs font-medium text-gray-600 mb-1">JSON output</label>
+      <textarea
+        data-output
+        readonly
+        rows="14"
+        spellcheck="false"
+        class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-purple-500 resize-y"
+      ></textarea>
+
+      <button
+        type="button"
+        data-copy-btn
+        class="absolute top-8 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors"
+      >
+        <svg data-copy-icon xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <svg data-copy-check xmlns="http://www.w3.org/2000/svg" class="hidden h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span data-copy-label>Copy</span>
+      </button>
+    </div>
+  </div>
+
+  <p data-error-message class="mt-3 text-xs text-red-600 whitespace-pre-wrap"></p>
+</div>
+
+<script>
+  import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
+
+  const DEBOUNCE_MS = 250;
+
+  const YAML_PLACEHOLDER = `name: my-app
+version: 1.0.0
+services:
+  web:
+    image: nginx
+    ports:
+      - '80:80'`;
+
+  const JSON_PLACEHOLDER = `{
+  "name": "my-app",
+  "version": "1.0.0"
+}`;
+
+  function initYamlJsonConverter(root: HTMLElement) {
+    const directionSelect = root.querySelector<HTMLSelectElement>("[data-direction-select]");
+    const indentSelect = root.querySelector<HTMLSelectElement>("[data-indent-select]");
+    const swapBtn = root.querySelector<HTMLButtonElement>("[data-swap-btn]");
+    const input = root.querySelector<HTMLTextAreaElement>("[data-input]");
+    const output = root.querySelector<HTMLTextAreaElement>("[data-output]");
+    const inputLabel = root.querySelector<HTMLElement>("[data-input-label]");
+    const outputLabel = root.querySelector<HTMLElement>("[data-output-label]");
+    const errorMessage = root.querySelector<HTMLElement>("[data-error-message]");
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]");
+    const copyIcon = root.querySelector<HTMLElement>("[data-copy-icon]");
+    const copyCheck = root.querySelector<HTMLElement>("[data-copy-check]");
+    const copyLabel = root.querySelector<HTMLElement>("[data-copy-label]");
+
+    if (
+      !directionSelect || !indentSelect || !swapBtn || !input || !output ||
+      !inputLabel || !outputLabel || !errorMessage || !copyBtn || !copyIcon || !copyCheck || !copyLabel
+    ) {
+      return;
+    }
+
+    let debounceTimer: number | undefined;
+
+    function syncLabelsAndPlaceholder() {
+      const isYamlToJson = directionSelect!.value === "yaml-to-json";
+      inputLabel!.textContent = isYamlToJson ? "YAML input" : "JSON input";
+      outputLabel!.textContent = isYamlToJson ? "JSON output" : "YAML output";
+      input!.placeholder = isYamlToJson ? YAML_PLACEHOLDER : JSON_PLACEHOLDER;
+    }
+
+    function convert() {
+      const raw = input!.value;
+      errorMessage!.textContent = "";
+
+      if (!raw.trim()) {
+        output!.value = "";
+        return;
+      }
+
+      const indent = parseInt(indentSelect!.value, 10) || 2;
+      const isYamlToJson = directionSelect!.value === "yaml-to-json";
+
+      try {
+        if (isYamlToJson) {
+          const doc = parseYaml(raw);
+          output!.value = JSON.stringify(doc, null, indent);
+        } else {
+          const doc = JSON.parse(raw);
+          output!.value = stringifyYaml(doc, { indent });
+        }
+      } catch (err) {
+        output!.value = "";
+        const message = err instanceof Error ? err.message : "Could not parse the input.";
+        errorMessage!.textContent = message;
+      }
+    }
+
+    function scheduleConvert() {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(convert, DEBOUNCE_MS);
+    }
+
+    directionSelect.addEventListener("change", () => {
+      syncLabelsAndPlaceholder();
+      convert();
+    });
+    indentSelect.addEventListener("change", convert);
+    input.addEventListener("input", scheduleConvert);
+
+    swapBtn.addEventListener("click", () => {
+      const currentOutput = output!.value;
+      directionSelect!.value = directionSelect!.value === "yaml-to-json" ? "json-to-yaml" : "yaml-to-json";
+      syncLabelsAndPlaceholder();
+      if (currentOutput) {
+        input!.value = currentOutput;
+      }
+      convert();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      if (!output!.value) return;
+      try {
+        await navigator.clipboard.writeText(output!.value);
+        copyIcon!.classList.add("hidden");
+        copyCheck!.classList.remove("hidden");
+        copyLabel!.textContent = "Copied!";
+        setTimeout(() => {
+          copyIcon!.classList.remove("hidden");
+          copyCheck!.classList.add("hidden");
+          copyLabel!.textContent = "Copy";
+        }, 1500);
+      } catch {
+        // clipboard write failed silently; user can still select the text manually
+      }
+    });
+
+    syncLabelsAndPlaceholder();
+  }
+
+  document
+    .querySelectorAll<HTMLElement>("[data-yaml-json-converter-widget]")
+    .forEach(initYamlJsonConverter);
+</script>

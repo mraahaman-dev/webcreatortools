@@ -1,0 +1,181 @@
+<div class="regex-tester" data-regex-tester>
+  <div class="mb-4 flex flex-col gap-3 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center">
+    <div class="flex flex-1 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2">
+      <span class="font-mono text-sm text-slate-400">/</span>
+      <input
+        type="text"
+        data-pattern-input
+        spellcheck="false"
+        placeholder="Enter regex pattern..."
+        class="min-w-0 flex-1 border-0 bg-transparent p-0 font-mono text-sm text-slate-800 focus:outline-none focus:ring-0"
+      />
+      <span class="font-mono text-sm text-slate-400">/</span>
+      <input
+        type="text"
+        data-flags-input
+        spellcheck="false"
+        placeholder="gi"
+        maxlength="6"
+        class="w-14 border-0 bg-transparent p-0 font-mono text-sm text-slate-800 focus:outline-none focus:ring-0"
+      />
+    </div>
+    <span data-match-summary class="text-xs font-medium text-slate-500 sm:whitespace-nowrap">No matches</span>
+  </div>
+
+  <div data-pattern-error class="hidden border border-b-0 border-red-200 bg-red-50 p-3 text-sm text-red-700"></div>
+
+  <div class="relative border border-b-0 border-slate-200 bg-white">
+    <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+      Sample text
+    </div>
+    <div class="relative h-56">
+      <div
+        data-highlight-layer
+        class="pointer-events-none absolute inset-0 overflow-auto whitespace-pre-wrap break-words p-4 font-mono text-sm text-transparent"
+      ></div>
+      <textarea
+        data-sample-input
+        spellcheck="false"
+        placeholder="Paste or type sample text to test your pattern against..."
+        class="absolute inset-0 h-full w-full resize-none overflow-auto whitespace-pre-wrap break-words border-0 bg-transparent p-4 font-mono text-sm text-slate-800 caret-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-200"
+      >The quick brown fox jumps over the lazy dog. Contact: fox@example.com or dog@example.org.</textarea>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Matches</h3>
+    <ul data-matches-list class="space-y-3 text-sm">
+      <li class="text-slate-400">Enter a pattern to see matches here.</li>
+    </ul>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Uses JavaScript's native regex engine. Everything runs in your browser, nothing you type is uploaded.
+  </p>
+</div>
+
+<script>
+  const HIGHLIGHT_COLORS = [
+    "bg-brand-200",
+    "bg-amber-200",
+    "bg-green-200",
+    "bg-purple-200",
+    "bg-pink-200",
+  ];
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function initRegexTester(root: HTMLElement) {
+    const patternInput = root.querySelector<HTMLInputElement>("[data-pattern-input]")!;
+    const flagsInput = root.querySelector<HTMLInputElement>("[data-flags-input]")!;
+    const patternError = root.querySelector<HTMLDivElement>("[data-pattern-error]")!;
+    const sampleInput = root.querySelector<HTMLTextAreaElement>("[data-sample-input]")!;
+    const highlightLayer = root.querySelector<HTMLDivElement>("[data-highlight-layer]")!;
+    const matchSummary = root.querySelector<HTMLSpanElement>("[data-match-summary]")!;
+    const matchesList = root.querySelector<HTMLUListElement>("[data-matches-list]")!;
+
+    function syncScroll() {
+      highlightLayer.scrollTop = sampleInput.scrollTop;
+      highlightLayer.scrollLeft = sampleInput.scrollLeft;
+    }
+
+    function run() {
+      const patternText = patternInput.value;
+      const flags = flagsInput.value.replace(/[^gimsuy]/g, "");
+      const text = sampleInput.value;
+
+      patternError.classList.add("hidden");
+      patternError.textContent = "";
+
+      if (!patternText) {
+        highlightLayer.innerHTML = escapeHtml(text);
+        matchSummary.textContent = "No pattern entered";
+        matchesList.innerHTML = '<li class="text-slate-400">Enter a pattern to see matches here.</li>';
+        return;
+      }
+
+      let regex: RegExp;
+      try {
+        regex = new RegExp(patternText, flags.includes("g") ? flags : flags + "g");
+      } catch (err) {
+        patternError.classList.remove("hidden");
+        patternError.textContent = `Invalid pattern: ${(err as Error).message}`;
+        highlightLayer.innerHTML = escapeHtml(text);
+        matchSummary.textContent = "Invalid pattern";
+        matchesList.innerHTML = '<li class="text-slate-400">Fix the pattern above to see matches.</li>';
+        return;
+      }
+
+      const matches: RegExpExecArray[] = [];
+      let match: RegExpExecArray | null;
+      let iterations = 0;
+      while ((match = regex.exec(text)) !== null && iterations < 1000) {
+        matches.push(match);
+        iterations++;
+        if (match[0] === "") regex.lastIndex++;
+      }
+
+      // Build highlighted HTML by walking the text and wrapping match spans.
+      let html = "";
+      let cursor = 0;
+      matches.forEach((m, i) => {
+        const start = m.index;
+        const end = start + m[0].length;
+        html += escapeHtml(text.slice(cursor, start));
+        const color = HIGHLIGHT_COLORS[i % HIGHLIGHT_COLORS.length];
+        html += `<mark class="${color} rounded-sm text-transparent">${escapeHtml(m[0])}</mark>`;
+        cursor = end;
+      });
+      html += escapeHtml(text.slice(cursor));
+      highlightLayer.innerHTML = html || "&nbsp;";
+
+      matchSummary.textContent =
+        matches.length === 0 ? "No matches" : `${matches.length} match${matches.length === 1 ? "" : "es"}`;
+
+      if (matches.length === 0) {
+        matchesList.innerHTML = '<li class="text-slate-400">No matches found for this pattern.</li>';
+        return;
+      }
+
+      matchesList.innerHTML = matches
+        .map((m, i) => {
+          const color = HIGHLIGHT_COLORS[i % HIGHLIGHT_COLORS.length];
+          const groups = m.slice(1);
+          const groupsHtml =
+            groups.length > 0
+              ? `<ul class="mt-1.5 space-y-1 pl-4">${groups
+                  .map(
+                    (g, gi) =>
+                      `<li class="text-xs text-slate-500">Group ${gi + 1}: <span class="font-mono text-slate-700">${
+                        g === undefined ? "(no match)" : escapeHtml(g)
+                      }</span></li>`
+                  )
+                  .join("")}</ul>`
+              : "";
+          return `
+            <li class="rounded-lg border border-slate-100 p-3">
+              <div class="flex items-center gap-2">
+                <span class="h-3 w-3 shrink-0 rounded-sm ${color}"></span>
+                <span class="font-mono text-slate-800">${escapeHtml(m[0])}</span>
+                <span class="text-xs text-slate-400">at index ${m.index}</span>
+              </div>
+              ${groupsHtml}
+            </li>`;
+        })
+        .join("");
+    }
+
+    patternInput.addEventListener("input", run);
+    flagsInput.addEventListener("input", run);
+    sampleInput.addEventListener("input", run);
+    sampleInput.addEventListener("scroll", syncScroll);
+
+    run();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-regex-tester]").forEach(initRegexTester);
+</script>

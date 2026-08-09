@@ -1,0 +1,179 @@
+<div class="jwt-decoder" data-jwt-decoder>
+  <div class="mb-4 flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <button type="button" data-sample-btn
+      class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+      Load Sample Token
+    </button>
+    <button type="button" data-clear-btn
+      class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+      Clear
+    </button>
+  </div>
+
+  <textarea
+    data-jwt-input
+    spellcheck="false"
+    placeholder="Paste your JWT here, e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    class="h-28 w-full resize-y border border-slate-200 bg-white p-4 font-mono text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-200"
+  ></textarea>
+
+  <div data-jwt-status class="hidden border border-t-0 border-red-200 bg-red-50 p-4 text-sm text-red-700"></div>
+
+  <div data-jwt-output class="hidden grid gap-4 rounded-b-2xl border border-t-0 border-slate-200 bg-white p-5 md:grid-cols-2">
+    <div>
+      <div class="mb-2 flex items-center justify-between">
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Header</h3>
+        <button type="button" data-copy-header-btn class="text-xs font-medium text-brand-600 hover:underline">Copy</button>
+      </div>
+      <pre data-header-output class="max-h-64 overflow-auto rounded-xl bg-slate-50 p-4 font-mono text-xs text-slate-800"></pre>
+    </div>
+    <div>
+      <div class="mb-2 flex items-center justify-between">
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Payload</h3>
+        <button type="button" data-copy-payload-btn class="text-xs font-medium text-brand-600 hover:underline">Copy</button>
+      </div>
+      <pre data-payload-output class="max-h-64 overflow-auto rounded-xl bg-slate-50 p-4 font-mono text-xs text-slate-800"></pre>
+    </div>
+    <div class="md:col-span-2" data-claims-panel>
+      <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Standard claims</h3>
+      <ul data-claims-list class="space-y-1 text-sm text-slate-600"></ul>
+    </div>
+    <div class="md:col-span-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700">
+      This tool decodes the token only. It does not verify the signature, so a decoded payload should not be trusted as authentic without separately checking it against the issuing server's secret or public key.
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you paste is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  const SAMPLE_JWT =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNzE2MjM5MDIyLCJleHAiOjE3NDc3NzUwMjJ9.dQw4w9WgXcQrs3JYZ0e2VbGpPfL5nH1tK9mZbYQ8xYI";
+
+  const CLAIM_LABELS: Record<string, string> = {
+    iss: "Issuer",
+    sub: "Subject",
+    aud: "Audience",
+    exp: "Expiration",
+    nbf: "Not before",
+    iat: "Issued at",
+    jti: "JWT ID",
+  };
+
+  function base64UrlDecode(segment: string): string {
+    let base64 = segment.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4 !== 0) base64 += "=";
+    const binary = atob(base64);
+    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    return new TextDecoder("utf-8").decode(bytes);
+  }
+
+  function formatClaimValue(key: string, value: unknown): string {
+    if ((key === "exp" || key === "iat" || key === "nbf") && typeof value === "number") {
+      return `${value} (${new Date(value * 1000).toLocaleString()})`;
+    }
+    return typeof value === "object" ? JSON.stringify(value) : String(value);
+  }
+
+  function initJwtDecoder(root: HTMLElement) {
+    const input = root.querySelector<HTMLTextAreaElement>("[data-jwt-input]")!;
+    const status = root.querySelector<HTMLDivElement>("[data-jwt-status]")!;
+    const output = root.querySelector<HTMLDivElement>("[data-jwt-output]")!;
+    const headerOutput = root.querySelector<HTMLPreElement>("[data-header-output]")!;
+    const payloadOutput = root.querySelector<HTMLPreElement>("[data-payload-output]")!;
+    const claimsList = root.querySelector<HTMLUListElement>("[data-claims-list]")!;
+    const claimsPanel = root.querySelector<HTMLDivElement>("[data-claims-panel]")!;
+    const sampleBtn = root.querySelector<HTMLButtonElement>("[data-sample-btn]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+    const copyHeaderBtn = root.querySelector<HTMLButtonElement>("[data-copy-header-btn]")!;
+    const copyPayloadBtn = root.querySelector<HTMLButtonElement>("[data-copy-payload-btn]")!;
+
+    function showError(message: string) {
+      status.classList.remove("hidden");
+      status.textContent = message;
+      output.classList.add("hidden");
+    }
+
+    function clearAll() {
+      status.classList.add("hidden");
+      status.textContent = "";
+      output.classList.add("hidden");
+    }
+
+    function decode() {
+      const token = input.value.trim();
+      if (!token) return clearAll();
+
+      const parts = token.split(".");
+      if (parts.length !== 3) {
+        showError("This does not look like a valid JWT. A JWT must have three dot separated segments: header, payload, and signature.");
+        return;
+      }
+
+      let header: any;
+      let payload: any;
+      try {
+        header = JSON.parse(base64UrlDecode(parts[0]));
+      } catch {
+        showError("Could not decode the header segment. It may not be valid base64url encoded JSON.");
+        return;
+      }
+      try {
+        payload = JSON.parse(base64UrlDecode(parts[1]));
+      } catch {
+        showError("Could not decode the payload segment. It may not be valid base64url encoded JSON.");
+        return;
+      }
+
+      status.classList.add("hidden");
+      output.classList.remove("hidden");
+      headerOutput.textContent = JSON.stringify(header, null, 2);
+      payloadOutput.textContent = JSON.stringify(payload, null, 2);
+
+      const claimEntries = Object.keys(CLAIM_LABELS).filter((key) => key in payload);
+      if (claimEntries.length === 0) {
+        claimsPanel.classList.add("hidden");
+      } else {
+        claimsPanel.classList.remove("hidden");
+        claimsList.innerHTML = claimEntries
+          .map((key) => {
+            const label = CLAIM_LABELS[key];
+            const value = formatClaimValue(key, payload[key]);
+            const isExpired = key === "exp" && typeof payload[key] === "number" && payload[key] * 1000 < Date.now();
+            return `<li><span class="font-medium text-slate-800">${label} (${key}):</span> ${value}${
+              isExpired ? ' <span class="ml-1 rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-600">Expired</span>' : ""
+            }</li>`;
+          })
+          .join("");
+      }
+    }
+
+    input.addEventListener("input", decode);
+
+    sampleBtn.addEventListener("click", () => {
+      input.value = SAMPLE_JWT;
+      decode();
+    });
+
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      clearAll();
+    });
+
+    copyHeaderBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(headerOutput.textContent ?? "");
+      copyHeaderBtn.textContent = "Copied!";
+      setTimeout(() => (copyHeaderBtn.textContent = "Copy"), 1500);
+    });
+
+    copyPayloadBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(payloadOutput.textContent ?? "");
+      copyPayloadBtn.textContent = "Copied!";
+      setTimeout(() => (copyPayloadBtn.textContent = "Copy"), 1500);
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-jwt-decoder]").forEach(initJwtDecoder);
+</script>
