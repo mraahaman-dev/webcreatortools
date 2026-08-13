@@ -1,0 +1,284 @@
+---
+---
+
+<div data-text-html-ratio-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div class="flex flex-wrap items-center gap-2 mb-2">
+    <input
+      type="text"
+      data-fetch-url-input
+      placeholder="Fetch from URL https://…"
+      spellcheck="false"
+      class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+    />
+    <button type="button" data-fetch-btn class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50">
+      Fetch
+    </button>
+  </div>
+  <p data-fetch-status class="hidden mb-3 text-xs"></p>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">HTML</label>
+      <textarea
+        data-html-input
+        rows="14"
+        spellcheck="false"
+        placeholder="Paste a page's full HTML here, or fetch a URL above"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-y"
+      ></textarea>
+    </div>
+
+    <div>
+      <div data-results class="hidden">
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <p class="text-xs text-gray-500">Total HTML size</p>
+            <p data-total-size class="text-lg font-semibold text-gray-900"></p>
+          </div>
+          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <p class="text-xs text-gray-500">Visible text size</p>
+            <p data-text-size class="text-lg font-semibold text-gray-900"></p>
+          </div>
+          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <p class="text-xs text-gray-500">Text-to-HTML ratio</p>
+            <p data-ratio class="text-lg font-semibold text-gray-900"></p>
+          </div>
+          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <p class="text-xs text-gray-500">Word count</p>
+            <p data-word-count class="text-lg font-semibold text-gray-900"></p>
+          </div>
+        </div>
+
+        <p class="text-xs font-medium text-gray-600 mb-1">Where the HTML weight goes</p>
+        <div data-composition-bar class="flex h-4 w-full overflow-hidden rounded-full mb-2"></div>
+        <ul data-composition-legend class="space-y-1 text-xs text-gray-600 mb-4"></ul>
+
+        <p class="text-xs text-gray-400 leading-relaxed">
+          There's no official threshold for this ratio, and Google has not confirmed text-to-HTML ratio as a ranking factor — some older SEO audit tools cited roughly 25%+ as a rough guideline, but treat this as a content-density indicator, not a pass/fail signal. External scripts and stylesheets loaded via src/href aren't counted, since only the HTML markup itself is measured here.
+        </p>
+      </div>
+      <div data-empty-state class="flex h-full min-h-[16rem] items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
+        <p class="text-sm text-gray-400">Paste HTML or fetch a URL to see the breakdown.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface Composition {
+    text: number;
+    script: number;
+    style: number;
+    comments: number;
+    hidden: number;
+    other: number;
+  }
+
+  const CATEGORY_COLORS: Record<string, string> = {
+    text: "bg-green-500",
+    markup: "bg-slate-400",
+    script: "bg-amber-500",
+    style: "bg-blue-400",
+    comments: "bg-gray-300",
+    hidden: "bg-purple-400",
+    other: "bg-pink-400",
+  };
+  const CATEGORY_LABELS: Record<string, string> = {
+    text: "Visible text",
+    markup: "Markup, attributes & <head> (incl. whitespace)",
+    script: "Inline <script> content",
+    style: "Inline <style> content",
+    comments: "HTML comments",
+    hidden: "Hidden elements (display:none, hidden, aria-hidden)",
+    other: "<noscript> content",
+  };
+
+  function byteLength(text: string): number {
+    return new Blob([text]).size;
+  }
+
+  function formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  function walk(node: Node, acc: Composition) {
+    if (node.nodeType === Node.COMMENT_NODE) {
+      acc.comments += byteLength(node.textContent || "");
+      return;
+    }
+    if (node.nodeType === Node.TEXT_NODE) {
+      acc.text += byteLength(node.textContent || "");
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+    const el = node as Element;
+    const tag = el.tagName.toLowerCase();
+
+    if (tag === "script") {
+      acc.script += byteLength(el.textContent || "");
+      return;
+    }
+    if (tag === "style") {
+      acc.style += byteLength(el.textContent || "");
+      return;
+    }
+    if (tag === "noscript") {
+      acc.other += byteLength(el.textContent || "");
+      return;
+    }
+
+    const inlineStyle = el.getAttribute("style") || "";
+    const isHidden = el.hasAttribute("hidden") || el.getAttribute("aria-hidden") === "true" || /display\s*:\s*none/i.test(inlineStyle);
+    if (isHidden) {
+      acc.hidden += byteLength(el.textContent || "");
+      return;
+    }
+
+    Array.from(el.childNodes).forEach((child) => walk(child, acc));
+  }
+
+  function analyze(html: string) {
+    const totalBytes = byteLength(html);
+    const doc = new DOMParser().parseFromString(html, "text/html");
+
+    const acc: Composition = { text: 0, script: 0, style: 0, comments: 0, hidden: 0, other: 0 };
+    if (doc.body) walk(doc.body, acc);
+
+    const accountedFor = acc.text + acc.script + acc.style + acc.comments + acc.hidden + acc.other;
+    const markup = Math.max(0, totalBytes - accountedFor);
+
+    const words = (doc.body?.textContent || "").trim().split(/\s+/).filter(Boolean).length;
+    const ratio = totalBytes > 0 ? (acc.text / totalBytes) * 100 : 0;
+
+    return { totalBytes, ratio, words, breakdown: { text: acc.text, markup, script: acc.script, style: acc.style, comments: acc.comments, hidden: acc.hidden, other: acc.other } };
+  }
+
+  async function fetchWithRedirects(url: string, maxHops = 5): Promise<{ body: string; status: number; finalUrl: string } | { error: string }> {
+    let current = url;
+    for (let i = 0; i < maxHops; i++) {
+      const res = await fetch(`/api/fetch-proxy/?url=${encodeURIComponent(current)}`);
+      if (!res.ok && res.status !== 400 && res.status !== 502) return { error: `/api/fetch-proxy responded with HTTP ${res.status}` };
+      let data: any;
+      try { data = await res.json(); } catch { return { error: "The proxy endpoint didn't return valid JSON." }; }
+      if (data.error) return { error: data.error };
+      if (data.status >= 300 && data.status < 400 && data.headers?.location) {
+        current = new URL(data.headers.location, current).toString();
+        continue;
+      }
+      return { body: data.body, status: data.status, finalUrl: data.finalUrl || current };
+    }
+    return { error: "Too many redirects" };
+  }
+
+  function initTextHtmlRatio(root: HTMLElement) {
+    const fetchUrlInput = root.querySelector<HTMLInputElement>("[data-fetch-url-input]");
+    const fetchBtn = root.querySelector<HTMLButtonElement>("[data-fetch-btn]");
+    const fetchStatus = root.querySelector<HTMLElement>("[data-fetch-status]");
+    const htmlInput = root.querySelector<HTMLTextAreaElement>("[data-html-input]");
+    const resultsEl = root.querySelector<HTMLElement>("[data-results]");
+    const emptyState = root.querySelector<HTMLElement>("[data-empty-state]");
+    const totalSizeEl = root.querySelector<HTMLElement>("[data-total-size]");
+    const textSizeEl = root.querySelector<HTMLElement>("[data-text-size]");
+    const ratioEl = root.querySelector<HTMLElement>("[data-ratio]");
+    const wordCountEl = root.querySelector<HTMLElement>("[data-word-count]");
+    const compositionBar = root.querySelector<HTMLElement>("[data-composition-bar]");
+    const compositionLegend = root.querySelector<HTMLElement>("[data-composition-legend]");
+
+    if (
+      !fetchUrlInput || !fetchBtn || !fetchStatus || !htmlInput || !resultsEl || !emptyState ||
+      !totalSizeEl || !textSizeEl || !ratioEl || !wordCountEl || !compositionBar || !compositionLegend
+    ) {
+      return;
+    }
+
+    function render() {
+      const html = htmlInput!.value.trim();
+      if (!html) {
+        resultsEl!.classList.add("hidden");
+        emptyState!.classList.remove("hidden");
+        return;
+      }
+
+      const { totalBytes, ratio, words, breakdown } = analyze(html);
+
+      resultsEl!.classList.remove("hidden");
+      emptyState!.classList.add("hidden");
+
+      totalSizeEl!.textContent = formatBytes(totalBytes);
+      textSizeEl!.textContent = formatBytes(breakdown.text);
+      ratioEl!.textContent = `${ratio.toFixed(1)}%`;
+      wordCountEl!.textContent = words.toLocaleString();
+
+      const entries = Object.entries(breakdown).filter(([, bytes]) => bytes > 0);
+      compositionBar!.innerHTML = entries
+        .map(([key, bytes]) => {
+          const pct = totalBytes > 0 ? (bytes / totalBytes) * 100 : 0;
+          return `<div class="${CATEGORY_COLORS[key]}" style="width: ${pct}%" title="${CATEGORY_LABELS[key]}: ${formatBytes(bytes)}"></div>`;
+        })
+        .join("");
+
+      compositionLegend!.innerHTML = entries
+        .map(([key, bytes]) => {
+          const pct = totalBytes > 0 ? ((bytes / totalBytes) * 100).toFixed(1) : "0.0";
+          return `<li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full ${CATEGORY_COLORS[key]} flex-shrink-0"></span><span class="flex-1">${CATEGORY_LABELS[key]}</span><span class="text-gray-400">${formatBytes(bytes)} (${pct}%)</span></li>`;
+        })
+        .join("");
+    }
+
+    htmlInput.addEventListener("input", render);
+
+    fetchBtn.addEventListener("click", async () => {
+      let target = fetchUrlInput!.value.trim();
+      if (!target) return;
+      if (!/^https?:\/\//i.test(target)) target = "https://" + target;
+
+      let parsedUrl: URL;
+      try { parsedUrl = new URL(target); } catch {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = "That doesn't look like a valid URL.";
+        return;
+      }
+
+      fetchBtn!.disabled = true;
+      fetchBtn!.textContent = "Fetching…";
+      fetchStatus!.classList.add("hidden");
+
+      let result: Awaited<ReturnType<typeof fetchWithRedirects>>;
+      try { result = await fetchWithRedirects(parsedUrl.toString()); }
+      catch (err) {
+        fetchBtn!.disabled = false; fetchBtn!.textContent = "Fetch";
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
+        return;
+      }
+      fetchBtn!.disabled = false; fetchBtn!.textContent = "Fetch";
+
+      if ("error" in result) {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = `Could not fetch: ${result.error}`;
+        return;
+      }
+      if (result.status >= 400) {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-amber-600";
+        fetchStatus!.textContent = `${result.finalUrl} returned status ${result.status}.`;
+        return;
+      }
+
+      htmlInput!.value = result.body;
+      fetchStatus!.classList.remove("hidden");
+      fetchStatus!.className = "mb-3 text-xs text-green-600";
+      fetchStatus!.textContent = `Fetched from ${result.finalUrl}`;
+      render();
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-text-html-ratio-widget]").forEach(initTextHtmlRatio);
+</script>

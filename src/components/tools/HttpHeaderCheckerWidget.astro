@@ -1,0 +1,273 @@
+<div class="http-header-checker" data-http-header-checker>
+  <div class="border border-b-0 border-slate-200 bg-white p-4">
+    <div class="mb-2 flex items-center justify-between text-xs font-medium uppercase tracking-wide text-slate-500">
+      <span>URLs to check (one per line)</span>
+    </div>
+    <textarea data-urls-input spellcheck="false"
+      class="h-32 w-full resize-y rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-200"
+      placeholder="https://example.com/&#10;https://example.com/blog/"
+    ></textarea>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 border border-b-0 border-slate-200 bg-white p-4">
+    <label class="flex items-center gap-1.5 text-xs text-slate-600">
+      <input type="checkbox" data-canonical-check class="rounded border-slate-300 text-green-600" />
+      Canonical / redirect consistency check
+    </label>
+    <label class="ml-auto flex items-center gap-2 text-xs text-slate-600">
+      <span>User-Agent</span>
+      <select data-ua-select class="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-700">
+        <option value="default">Pixelquil (default)</option>
+        <option value="chrome">Chrome (desktop browser)</option>
+        <option value="googlebot">Googlebot</option>
+        <option value="googlebot_mobile">Googlebot Mobile</option>
+        <option value="bingbot">Bingbot</option>
+        <option value="gptbot">GPTBot</option>
+        <option value="claudebot">ClaudeBot</option>
+      </select>
+    </label>
+    <button type="button" data-check-btn
+      class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50">
+      Check Status
+    </button>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div data-results-list class="space-y-4">
+      <p class="text-sm text-slate-400">Enter one or more URLs above, then click Check Status.</p>
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Fetched through a small server-side proxy. Spoofing a crawler's User-Agent here is standard practice for checking cloaking or bot-specific responses on your own site, nothing is stored.
+  </p>
+</div>
+
+<script>
+  interface Hop { url: string; status: number; location: string | null }
+  interface CheckOutcome {
+    inputUrl: string;
+    hops: Hop[];
+    finalStatus: number;
+    finalStatusText: string;
+    finalUrl: string;
+    headers: Record<string, string>;
+    error: string | null;
+  }
+
+  const NOTABLE_HEADERS = [
+    "content-type", "cache-control", "x-robots-tag", "content-security-policy",
+    "strict-transport-security", "server", "x-frame-options", "location",
+  ];
+
+  async function checkUrl(inputUrl: string, uaKey: string): Promise<CheckOutcome> {
+    const hops: Hop[] = [];
+    const visited = new Set<string>();
+    let current = inputUrl;
+    let lastHeaders: Record<string, string> = {};
+
+    for (let i = 0; i < 15; i++) {
+      if (visited.has(current)) {
+        return { inputUrl, hops, finalStatus: 0, finalStatusText: "", finalUrl: current, headers: {}, error: "Redirect loop detected" };
+      }
+      visited.add(current);
+
+      let res: Response;
+      try {
+        res = await fetch(`/api/fetch-proxy/?url=${encodeURIComponent(current)}&ua=${uaKey}`);
+      } catch {
+        return { inputUrl, hops, finalStatus: 0, finalStatusText: "", finalUrl: current, headers: {}, error: "Network error contacting proxy" };
+      }
+
+      if (!res.ok && res.status !== 400 && res.status !== 502) {
+        return { inputUrl, hops, finalStatus: 0, finalStatusText: "", finalUrl: current, headers: {}, error: `Proxy responded with HTTP ${res.status}` };
+      }
+
+      let data: any;
+      try {
+        data = await res.json();
+      } catch {
+        return { inputUrl, hops, finalStatus: 0, finalStatusText: "", finalUrl: current, headers: {}, error: "Proxy returned an invalid response" };
+      }
+
+      if (data.error) {
+        return { inputUrl, hops, finalStatus: 0, finalStatusText: "", finalUrl: current, headers: {}, error: data.error };
+      }
+
+      lastHeaders = data.headers ?? {};
+      const location = lastHeaders.location ?? null;
+      hops.push({ url: current, status: data.status, location });
+
+      if (data.status >= 300 && data.status < 400 && location) {
+        current = new URL(location, current).toString();
+        continue;
+      }
+
+      return { inputUrl, hops, finalStatus: data.status, finalStatusText: data.statusText, finalUrl: current, headers: lastHeaders, error: null };
+    }
+
+    return { inputUrl, hops, finalStatus: 0, finalStatusText: "", finalUrl: current, headers: lastHeaders, error: "Too many redirects" };
+  }
+
+  function statusColor(status: number): string {
+    if (status >= 200 && status < 300) return "bg-green-100 text-green-700";
+    if (status >= 300 && status < 400) return "bg-amber-100 text-amber-700";
+    if (status >= 400) return "bg-red-100 text-red-700";
+    return "bg-slate-100 text-slate-700";
+  }
+
+  function normalizeForCompare(u: string): { protocol: string; host: string; path: string } {
+    try {
+      const parsed = new URL(u);
+      return { protocol: parsed.protocol, host: parsed.hostname.replace(/^www\./, ""), path: parsed.pathname.replace(/\/$/, "") || "/" };
+    } catch {
+      return { protocol: "", host: "", path: "" };
+    }
+  }
+
+  function canonicalFlags(inputUrl: string, finalUrl: string): string[] {
+    const a = normalizeForCompare(inputUrl);
+    const b = normalizeForCompare(finalUrl);
+    const flags: string[] = [];
+    if (a.protocol !== b.protocol) flags.push(`Protocol changed (${a.protocol.replace(":", "")} → ${b.protocol.replace(":", "")})`);
+    if (a.host !== b.host) flags.push(`Host changed (${a.host} → ${b.host})`);
+    if (a.path !== b.path) flags.push(`Path changed (${a.path} → ${b.path})`);
+    try {
+      const rawA = new URL(inputUrl).hostname;
+      const rawB = new URL(finalUrl).hostname;
+      const wwwA = rawA.startsWith("www.");
+      const wwwB = rawB.startsWith("www.");
+      if (wwwA !== wwwB) flags.push(wwwB ? "Redirects to www subdomain" : "Redirects away from www subdomain");
+    } catch {}
+    return flags;
+  }
+
+  function buildFlags(outcome: CheckOutcome): { label: string; severity: "warn" | "info" }[] {
+    const flags: { label: string; severity: "warn" | "info" }[] = [];
+    const h = outcome.headers;
+
+    const robotsTag = h["x-robots-tag"];
+    if (robotsTag && /noindex/i.test(robotsTag)) {
+      flags.push({ label: `X-Robots-Tag: ${robotsTag} — this page is telling search engines not to index it`, severity: "warn" });
+    }
+
+    if (!h["cache-control"]) {
+      flags.push({ label: "No Cache-Control header set", severity: "info" });
+    }
+
+    try {
+      if (new URL(outcome.finalUrl).protocol === "https:" && !h["strict-transport-security"]) {
+        flags.push({ label: "HTTPS response missing Strict-Transport-Security (HSTS)", severity: "info" });
+      }
+    } catch {}
+
+    if (!h["content-security-policy"]) {
+      flags.push({ label: "No Content-Security-Policy header set", severity: "info" });
+    }
+
+    return flags;
+  }
+
+  function initHttpHeaderChecker(root: HTMLElement) {
+    const urlsInput = root.querySelector<HTMLTextAreaElement>("[data-urls-input]")!;
+    const canonicalCheck = root.querySelector<HTMLInputElement>("[data-canonical-check]")!;
+    const uaSelect = root.querySelector<HTMLSelectElement>("[data-ua-select]")!;
+    const checkBtn = root.querySelector<HTMLButtonElement>("[data-check-btn]")!;
+    const resultsList = root.querySelector<HTMLDivElement>("[data-results-list]")!;
+
+    function renderResult(outcome: CheckOutcome, index: number): string {
+      if (outcome.error) {
+        return `
+          <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+            <div class="font-mono text-sm text-slate-800 break-all">${outcome.inputUrl}</div>
+            <div class="mt-1 text-xs text-red-700">${outcome.error}</div>
+          </div>`;
+      }
+
+      const redirectCount = outcome.hops.filter((h) => h.status >= 300 && h.status < 400).length;
+      const flags = buildFlags(outcome);
+      const cFlags = canonicalCheck.checked ? canonicalFlags(outcome.inputUrl, outcome.finalUrl) : [];
+
+      const headerRows = NOTABLE_HEADERS.filter((h) => outcome.headers[h])
+        .map((h) => `<div class="flex gap-2 py-1"><span class="w-40 shrink-0 font-mono text-xs text-slate-500">${h}</span><span class="min-w-0 break-all font-mono text-xs text-slate-800">${outcome.headers[h]}</span></div>`)
+        .join("");
+
+      const allHeaderRows = Object.entries(outcome.headers)
+        .map(([k, v]) => `<div class="flex gap-2 py-1"><span class="w-40 shrink-0 font-mono text-xs text-slate-500">${k}</span><span class="min-w-0 break-all font-mono text-xs text-slate-800">${v}</span></div>`)
+        .join("");
+
+      return `
+        <div class="rounded-lg border border-slate-200 p-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="rounded-full px-2 py-0.5 text-xs font-semibold ${statusColor(outcome.finalStatus)}">${outcome.finalStatus} ${outcome.finalStatusText}</span>
+            ${redirectCount > 0 ? `<span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">${redirectCount} redirect${redirectCount === 1 ? "" : "s"}</span>` : ""}
+          </div>
+          <div class="mt-1 break-all font-mono text-sm text-slate-800">${outcome.inputUrl}</div>
+          ${redirectCount > 0 ? `<div class="mt-1 break-all text-xs text-slate-500">→ final: ${outcome.finalUrl}</div>` : ""}
+
+          ${
+            cFlags.length > 0
+              ? `<div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-700">${cFlags.join(" · ")}</div>`
+              : canonicalCheck.checked
+              ? `<div class="mt-3 rounded-lg border border-green-200 bg-green-50 p-2 text-xs text-green-700">Final URL matches input exactly, no protocol, host, or path change.</div>`
+              : ""
+          }
+
+          ${
+            flags.length > 0
+              ? `<div class="mt-3 space-y-1">${flags
+                  .map(
+                    (f) =>
+                      `<div class="rounded-lg border ${f.severity === "warn" ? "border-red-200 bg-red-50 text-red-700" : "border-slate-200 bg-slate-50 text-slate-600"} p-2 text-xs">${f.label}</div>`
+                  )
+                  .join("")}</div>`
+              : ""
+          }
+
+          ${headerRows ? `<div class="mt-3 border-t border-slate-100 pt-3">${headerRows}</div>` : ""}
+
+          <details class="mt-3">
+            <summary class="cursor-pointer text-xs font-medium text-green-600 hover:underline">Show all response headers</summary>
+            <div class="mt-2 rounded-lg bg-slate-50 p-3">${allHeaderRows || '<span class="text-xs text-slate-400">No headers returned.</span>'}</div>
+          </details>
+        </div>`;
+    }
+
+    checkBtn.addEventListener("click", async () => {
+      const urls = urlsInput.value
+        .split("\n")
+        .map((u) => u.trim())
+        .filter(Boolean)
+        .map((u) => (/^https?:\/\//i.test(u) ? u : "https://" + u));
+
+      if (urls.length === 0) return;
+
+      checkBtn.disabled = true;
+      checkBtn.textContent = "Checking...";
+      resultsList.innerHTML = '<p class="text-sm text-slate-400">Checking...</p>';
+
+      const uaKey = uaSelect.value;
+      const outcomes: CheckOutcome[] = [];
+
+      // Process with limited concurrency (3 at a time) rather than all at once.
+      const queue = [...urls];
+      async function worker() {
+        while (queue.length > 0) {
+          const url = queue.shift()!;
+          outcomes.push(await checkUrl(url, uaKey));
+        }
+      }
+      await Promise.all([worker(), worker(), worker()]);
+
+      // Restore original input order.
+      outcomes.sort((a, b) => urls.indexOf(a.inputUrl) - urls.indexOf(b.inputUrl));
+
+      resultsList.innerHTML = outcomes.map((o, i) => renderResult(o, i)).join("");
+
+      checkBtn.disabled = false;
+      checkBtn.textContent = "Check Status";
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-http-header-checker]").forEach(initHttpHeaderChecker);
+</script>

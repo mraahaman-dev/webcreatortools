@@ -1,0 +1,276 @@
+<div class="svg-gradient" data-svg-gradient>
+  <div class="mb-4 flex items-center gap-1 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <button type="button" data-type-btn data-type="linear" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium bg-purple-600 text-white">
+      Linear
+    </button>
+    <button type="button" data-type-btn data-type="radial" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">
+      Radial
+    </button>
+  </div>
+
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <!-- Live preview -->
+    <div data-preview class="mb-4 h-32 w-full rounded-xl border border-slate-200"></div>
+
+    <!-- Angle control (linear only) -->
+    <div data-angle-control class="mb-4">
+      <div class="mb-1 flex items-center justify-between text-sm text-slate-600">
+        <span>Angle</span>
+        <span data-angle-value class="font-mono font-medium text-slate-800">90°</span>
+      </div>
+      <input type="range" data-angle-input min="0" max="360" value="90" class="w-full accent-purple-600" />
+    </div>
+
+    <!-- Gradient stop bar -->
+    <div class="mb-2 text-sm text-slate-600">Color stops <span class="text-xs text-slate-400">(click the bar to add a stop, drag to reposition)</span></div>
+    <div data-stop-bar class="relative mb-4 h-10 w-full cursor-pointer rounded-lg border border-slate-200"></div>
+
+    <!-- Selected stop editor -->
+    <div data-stop-editor class="flex flex-wrap items-center gap-3 rounded-lg bg-slate-50 p-3">
+      <input type="color" data-stop-color class="h-9 w-12 cursor-pointer rounded border border-slate-300 bg-white p-0.5" />
+      <label class="flex items-center gap-2 text-sm text-slate-600">
+        <span>Position</span>
+        <input type="number" data-stop-position min="0" max="100" class="w-16 rounded-lg border border-slate-300 px-2 py-1 text-sm" />
+        <span>%</span>
+      </label>
+      <label class="flex items-center gap-2 text-sm text-slate-600">
+        <span>Opacity</span>
+        <input type="number" data-stop-opacity min="0" max="100" value="100" class="w-16 rounded-lg border border-slate-300 px-2 py-1 text-sm" />
+        <span>%</span>
+      </label>
+      <button type="button" data-remove-stop-btn class="ml-auto rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50">
+        Remove Stop
+      </button>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">SVG Markup</h3>
+      <button type="button" data-copy-btn
+        class="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-600 hover:border-purple-300 hover:bg-purple-100">
+        <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        <span data-copy-label>Copy</span>
+      </button>
+    </div>
+    <pre data-markup-output class="overflow-auto rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-800"></pre>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you build here is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  interface Stop {
+    id: number;
+    position: number; // 0-100
+    color: string; // hex
+    opacity: number; // 0-100
+  }
+
+  let nextId = 1;
+
+  function initSvgGradient(root: HTMLElement) {
+    const typeBtns = root.querySelectorAll<HTMLButtonElement>("[data-type-btn]");
+    const preview = root.querySelector<HTMLDivElement>("[data-preview]")!;
+    const angleControl = root.querySelector<HTMLDivElement>("[data-angle-control]")!;
+    const angleInput = root.querySelector<HTMLInputElement>("[data-angle-input]")!;
+    const angleValue = root.querySelector<HTMLSpanElement>("[data-angle-value]")!;
+    const stopBar = root.querySelector<HTMLDivElement>("[data-stop-bar]")!;
+    const stopColor = root.querySelector<HTMLInputElement>("[data-stop-color]")!;
+    const stopPosition = root.querySelector<HTMLInputElement>("[data-stop-position]")!;
+    const stopOpacity = root.querySelector<HTMLInputElement>("[data-stop-opacity]")!;
+    const removeStopBtn = root.querySelector<HTMLButtonElement>("[data-remove-stop-btn]")!;
+    const markupOutput = root.querySelector<HTMLPreElement>("[data-markup-output]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+
+    let type: "linear" | "radial" = "linear";
+    let stops: Stop[] = [
+      { id: nextId++, position: 0, color: "#4F46E5", opacity: 100 },
+      { id: nextId++, position: 100, color: "#EC4899", opacity: 100 },
+    ];
+    let selectedId = stops[0].id;
+    let draggingId: number | null = null;
+
+    function hexToRgba(hex: string, opacityPct: number): string {
+      const num = parseInt(hex.replace("#", ""), 16);
+      const r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
+      return `rgba(${r}, ${g}, ${b}, ${(opacityPct / 100).toFixed(2)})`;
+    }
+
+    function sortedStops(): Stop[] {
+      return [...stops].sort((a, b) => a.position - b.position);
+    }
+
+    function buildCssGradient(): string {
+      const stopStr = sortedStops().map((s) => `${hexToRgba(s.color, s.opacity)} ${s.position}%`).join(", ");
+      return type === "linear"
+        ? `linear-gradient(${angleInput.value}deg, ${stopStr})`
+        : `radial-gradient(circle, ${stopStr})`;
+    }
+
+    function buildSvgMarkup(): string {
+      const id = "gradient1";
+      const stopEls = sortedStops()
+        .map((s) => `    <stop offset="${s.position}%" stop-color="${s.color}" stop-opacity="${(s.opacity / 100).toFixed(2)}" />`)
+        .join("\n");
+
+      if (type === "linear") {
+        const rad = (parseFloat(angleInput.value) * Math.PI) / 180;
+        // Convert an angle into x1/y1/x2/y2 percentages along a unit gradient vector.
+        const x2 = 50 + Math.sin(rad) * 50;
+        const y2 = 50 - Math.cos(rad) * 50;
+        const x1 = 100 - x2;
+        const y1 = 100 - y2;
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="${id}" x1="${x1.toFixed(1)}%" y1="${y1.toFixed(1)}%" x2="${x2.toFixed(1)}%" y2="${y2.toFixed(1)}%">
+${stopEls}
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#${id})" />
+</svg>`;
+      }
+
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="${id}" cx="50%" cy="50%" r="50%">
+${stopEls}
+    </radialGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#${id})" />
+</svg>`;
+    }
+
+    function renderStopBar() {
+      const gradientCss = buildCssGradient();
+      stopBar.style.background = `linear-gradient(90deg, ${sortedStops().map((s) => `${hexToRgba(s.color, s.opacity)} ${s.position}%`).join(", ")})`;
+
+      // Clear existing handles, keep the bar's background.
+      stopBar.querySelectorAll("[data-stop-handle]").forEach((el) => el.remove());
+
+      stops.forEach((s) => {
+        const handle = document.createElement("div");
+        handle.dataset.stopHandle = String(s.id);
+        handle.className =
+          "absolute top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 bg-white shadow";
+        handle.style.left = `${s.position}%`;
+        handle.style.borderColor = s.id === selectedId ? "#9333ea" : "#cbd5e1";
+        handle.style.zIndex = s.id === selectedId ? "10" : "1";
+
+        handle.addEventListener("pointerdown", (e) => {
+          e.stopPropagation();
+          selectedId = s.id;
+          draggingId = s.id;
+          syncEditor();
+          renderStopBar();
+        });
+
+        stopBar.appendChild(handle);
+      });
+    }
+
+    function syncEditor() {
+      const s = stops.find((s) => s.id === selectedId);
+      if (!s) return;
+      stopColor.value = s.color;
+      stopPosition.value = String(Math.round(s.position));
+      stopOpacity.value = String(Math.round(s.opacity));
+    }
+
+    function update() {
+      preview.style.background = buildCssGradient();
+      renderStopBar();
+      markupOutput.textContent = buildSvgMarkup();
+    }
+
+    typeBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        type = btn.dataset.type as "linear" | "radial";
+        typeBtns.forEach((b) => {
+          const active = b.dataset.type === type;
+          b.classList.toggle("bg-purple-600", active);
+          b.classList.toggle("text-white", active);
+          b.classList.toggle("text-slate-500", !active);
+        });
+        angleControl.classList.toggle("hidden", type !== "linear");
+        update();
+      });
+    });
+
+    angleInput.addEventListener("input", () => {
+      angleValue.textContent = `${angleInput.value}°`;
+      update();
+    });
+
+    stopBar.addEventListener("click", (e) => {
+      if (draggingId !== null) return;
+      const rect = stopBar.getBoundingClientRect();
+      const pct = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
+      const newStop: Stop = { id: nextId++, position: Math.round(pct), color: "#ffffff", opacity: 100 };
+      stops.push(newStop);
+      selectedId = newStop.id;
+      syncEditor();
+      update();
+    });
+
+    window.addEventListener("pointermove", (e) => {
+      if (draggingId === null) return;
+      const rect = stopBar.getBoundingClientRect();
+      const pct = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
+      const stop = stops.find((s) => s.id === draggingId);
+      if (stop) {
+        stop.position = Math.round(pct);
+        syncEditor();
+        update();
+      }
+    });
+
+    window.addEventListener("pointerup", () => {
+      draggingId = null;
+    });
+
+    stopColor.addEventListener("input", () => {
+      const s = stops.find((s) => s.id === selectedId);
+      if (s) { s.color = stopColor.value; update(); }
+    });
+
+    stopPosition.addEventListener("input", () => {
+      const s = stops.find((s) => s.id === selectedId);
+      if (s) { s.position = Math.min(100, Math.max(0, parseFloat(stopPosition.value) || 0)); update(); }
+    });
+
+    stopOpacity.addEventListener("input", () => {
+      const s = stops.find((s) => s.id === selectedId);
+      if (s) { s.opacity = Math.min(100, Math.max(0, parseFloat(stopOpacity.value) || 0)); update(); }
+    });
+
+    removeStopBtn.addEventListener("click", () => {
+      if (stops.length <= 2) return; // keep at least 2 stops
+      stops = stops.filter((s) => s.id !== selectedId);
+      selectedId = stops[0].id;
+      syncEditor();
+      update();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(markupOutput.textContent ?? "");
+      const icon = copyBtn.querySelector("[data-copy-icon]")!;
+      const label = copyBtn.querySelector("[data-copy-label]")!;
+      icon.innerHTML = `<path d="M20 6L9 17l-5-5"/>`;
+      label.textContent = "Copied";
+      setTimeout(() => {
+        icon.innerHTML = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+        label.textContent = "Copy";
+      }, 1500);
+    });
+
+    syncEditor();
+    update();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-svg-gradient]").forEach(initSvgGradient);
+</script>

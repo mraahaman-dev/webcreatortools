@@ -1,0 +1,351 @@
+<div class="svg-path-editor" data-svg-path-editor>
+  <div class="flex flex-wrap items-center gap-3 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <button type="button" data-load-btn class="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700">Load Path</button>
+    <label class="flex items-center gap-1 text-xs text-slate-600">
+      viewBox
+      <input type="number" data-vb-w value="100" class="w-16 rounded-lg border border-slate-300 px-2 py-1 text-xs" />
+      ×
+      <input type="number" data-vb-h value="100" class="w-16 rounded-lg border border-slate-300 px-2 py-1 text-xs" />
+    </label>
+    <div data-parse-error class="hidden text-xs text-red-600"></div>
+  </div>
+
+  <div class="border border-b-0 border-slate-200 bg-white p-4">
+    <textarea data-path-input spellcheck="false" placeholder="Paste raw path 'd' data, or a full &lt;svg&gt;...&lt;/svg&gt; snippet"
+      class="h-24 w-full resize-none rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-200"
+    >M20 80 C 20 20, 80 20, 80 80</textarea>
+  </div>
+
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <p class="mb-2 text-xs text-slate-500">Drag a filled circle to move an anchor point, or a small square to adjust a curve handle.</p>
+    <div class="mx-auto flex justify-center rounded-xl border border-slate-200 bg-[repeating-conic-gradient(#f1f5f9_0%_25%,white_0%_50%)] bg-[length:20px_20px]" style="max-width:400px;">
+      <svg data-edit-svg viewBox="0 0 100 100" class="h-full w-full" style="max-height:400px;">
+        <path data-visible-path fill="none" stroke="#9333ea" stroke-width="2" />
+        <g data-handles-layer></g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Path data (d)</h3>
+      <button type="button" data-copy-btn
+        class="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-600 hover:border-purple-300 hover:bg-purple-100">
+        <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        <span data-copy-label>Copy</span>
+      </button>
+    </div>
+    <pre data-d-output class="overflow-auto rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-800"></pre>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you paste is uploaded or stored. Arc (A) commands are not currently supported for point editing.
+  </p>
+</div>
+
+<script>
+  type Cmd =
+    | { type: "M"; x: number; y: number }
+    | { type: "L"; x: number; y: number }
+    | { type: "C"; x1: number; y1: number; x2: number; y2: number; x: number; y: number }
+    | { type: "Q"; x1: number; y1: number; x: number; y: number }
+    | { type: "Z" };
+
+  function parsePathD(d: string): Cmd[] | null {
+    if (/[Aa]/.test(d)) return null; // arcs unsupported
+
+    const tokens = d.match(/[MLCQZHVSTmlcqzhvst]|-?\d*\.?\d+(?:e-?\d+)?/g);
+    if (!tokens) return null;
+
+    const commands: Cmd[] = [];
+    let i = 0;
+    let cx = 0, cy = 0, sx = 0, sy = 0;
+    let lastCubicCtrl: { x: number; y: number } | null = null;
+    let lastQuadCtrl: { x: number; y: number } | null = null;
+    let currentCmdLetter = "";
+
+    function num(): number {
+      return parseFloat(tokens![i++]);
+    }
+
+    while (i < tokens.length) {
+      const t = tokens[i];
+      if (/^[MLCQZHVSTmlcqzhvst]$/.test(t)) {
+        currentCmdLetter = t;
+        i++;
+      }
+      const isRel = currentCmdLetter === currentCmdLetter.toLowerCase();
+      const upper = currentCmdLetter.toUpperCase();
+
+      if (upper === "M") {
+        const x = num() + (isRel ? cx : 0);
+        const y = num() + (isRel ? cy : 0);
+        commands.push({ type: "M", x, y });
+        cx = x; cy = y; sx = x; sy = y;
+        currentCmdLetter = isRel ? "l" : "L"; // subsequent coords are implicit lineto
+        lastCubicCtrl = null; lastQuadCtrl = null;
+      } else if (upper === "L") {
+        const x = num() + (isRel ? cx : 0);
+        const y = num() + (isRel ? cy : 0);
+        commands.push({ type: "L", x, y });
+        cx = x; cy = y;
+        lastCubicCtrl = null; lastQuadCtrl = null;
+      } else if (upper === "H") {
+        const x = num() + (isRel ? cx : 0);
+        commands.push({ type: "L", x, y: cy });
+        cx = x;
+        lastCubicCtrl = null; lastQuadCtrl = null;
+      } else if (upper === "V") {
+        const y = num() + (isRel ? cy : 0);
+        commands.push({ type: "L", x: cx, y });
+        cy = y;
+        lastCubicCtrl = null; lastQuadCtrl = null;
+      } else if (upper === "C") {
+        const x1 = num() + (isRel ? cx : 0), y1 = num() + (isRel ? cy : 0);
+        const x2 = num() + (isRel ? cx : 0), y2 = num() + (isRel ? cy : 0);
+        const x = num() + (isRel ? cx : 0), y = num() + (isRel ? cy : 0);
+        commands.push({ type: "C", x1, y1, x2, y2, x, y });
+        lastCubicCtrl = { x: x2, y: y2 };
+        cx = x; cy = y;
+      } else if (upper === "S") {
+        const x2 = num() + (isRel ? cx : 0), y2 = num() + (isRel ? cy : 0);
+        const x = num() + (isRel ? cx : 0), y = num() + (isRel ? cy : 0);
+        const x1 = lastCubicCtrl ? cx * 2 - lastCubicCtrl.x : cx;
+        const y1 = lastCubicCtrl ? cy * 2 - lastCubicCtrl.y : cy;
+        commands.push({ type: "C", x1, y1, x2, y2, x, y });
+        lastCubicCtrl = { x: x2, y: y2 };
+        cx = x; cy = y;
+      } else if (upper === "Q") {
+        const x1 = num() + (isRel ? cx : 0), y1 = num() + (isRel ? cy : 0);
+        const x = num() + (isRel ? cx : 0), y = num() + (isRel ? cy : 0);
+        commands.push({ type: "Q", x1, y1, x, y });
+        lastQuadCtrl = { x: x1, y: y1 };
+        cx = x; cy = y;
+      } else if (upper === "T") {
+        const x = num() + (isRel ? cx : 0), y = num() + (isRel ? cy : 0);
+        const x1 = lastQuadCtrl ? cx * 2 - lastQuadCtrl.x : cx;
+        const y1 = lastQuadCtrl ? cy * 2 - lastQuadCtrl.y : cy;
+        commands.push({ type: "Q", x1, y1, x, y });
+        lastQuadCtrl = { x: x1, y: y1 };
+        cx = x; cy = y;
+      } else if (upper === "Z") {
+        commands.push({ type: "Z" });
+        cx = sx; cy = sy;
+        i++;
+        lastCubicCtrl = null; lastQuadCtrl = null;
+      } else {
+        return null; // unrecognized command
+      }
+    }
+
+    return commands;
+  }
+
+  function serializeD(commands: Cmd[]): string {
+    const fmt = (n: number) => (Math.round(n * 100) / 100).toString();
+    return commands
+      .map((c) => {
+        if (c.type === "M") return `M ${fmt(c.x)} ${fmt(c.y)}`;
+        if (c.type === "L") return `L ${fmt(c.x)} ${fmt(c.y)}`;
+        if (c.type === "C") return `C ${fmt(c.x1)} ${fmt(c.y1)}, ${fmt(c.x2)} ${fmt(c.y2)}, ${fmt(c.x)} ${fmt(c.y)}`;
+        if (c.type === "Q") return `Q ${fmt(c.x1)} ${fmt(c.y1)}, ${fmt(c.x)} ${fmt(c.y)}`;
+        return "Z";
+      })
+      .join(" ");
+  }
+
+  function extractInput(raw: string): { d: string; vbW?: number; vbH?: number } {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith("<")) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(trimmed, "image/svg+xml");
+      const pathEl = doc.querySelector("path");
+      const root = doc.documentElement;
+      const vb = root.getAttribute("viewBox");
+      let vbW: number | undefined, vbH: number | undefined;
+      if (vb) {
+        const parts = vb.split(/\s+/).map(Number);
+        vbW = parts[2]; vbH = parts[3];
+      }
+      return { d: pathEl?.getAttribute("d") ?? "", vbW, vbH };
+    }
+    return { d: trimmed };
+  }
+
+  function initSvgPathEditor(root: HTMLElement) {
+    const pathInput = root.querySelector<HTMLTextAreaElement>("[data-path-input]")!;
+    const loadBtn = root.querySelector<HTMLButtonElement>("[data-load-btn]")!;
+    const vbW = root.querySelector<HTMLInputElement>("[data-vb-w]")!;
+    const vbH = root.querySelector<HTMLInputElement>("[data-vb-h]")!;
+    const parseError = root.querySelector<HTMLDivElement>("[data-parse-error]")!;
+    const editSvg = root.querySelector<SVGSVGElement>("[data-edit-svg]")!;
+    const visiblePath = root.querySelector<SVGPathElement>("[data-visible-path]")!;
+    const handlesLayer = root.querySelector<SVGGElement>("[data-handles-layer]")!;
+    const dOutput = root.querySelector<HTMLPreElement>("[data-d-output]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+
+    let commands: Cmd[] = [];
+    let dragging: { cmdIndex: number; field: "point" | "c1" | "c2" } | null = null;
+
+    function clientToSvgPoint(clientX: number, clientY: number): { x: number; y: number } {
+      const pt = editSvg.createSVGPoint();
+      pt.x = clientX;
+      pt.y = clientY;
+      const ctm = editSvg.getScreenCTM();
+      if (!ctm) return { x: 0, y: 0 };
+      const svgPt = pt.matrixTransform(ctm.inverse());
+      return { x: svgPt.x, y: svgPt.y };
+    }
+
+    function renderHandles() {
+      handlesLayer.innerHTML = "";
+      let prevX = 0, prevY = 0;
+
+      commands.forEach((c, idx) => {
+        if (c.type === "Z") return;
+
+        if (c.type === "C") {
+          [{ x: c.x1, y: c.y1, from: { x: prevX, y: prevY } }, { x: c.x2, y: c.y2, from: { x: c.x, y: c.y } }].forEach((ctrl, ci) => {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", String(ctrl.from.x));
+            line.setAttribute("y1", String(ctrl.from.y));
+            line.setAttribute("x2", String(ctrl.x));
+            line.setAttribute("y2", String(ctrl.y));
+            line.setAttribute("stroke", "#c4b5fd");
+            line.setAttribute("stroke-width", "0.6");
+            line.setAttribute("stroke-dasharray", "1.5 1");
+            handlesLayer.appendChild(line);
+
+            const sq = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            const s = 2.4;
+            sq.setAttribute("x", String(ctrl.x - s / 2));
+            sq.setAttribute("y", String(ctrl.y - s / 2));
+            sq.setAttribute("width", String(s));
+            sq.setAttribute("height", String(s));
+            sq.setAttribute("fill", "#c4b5fd");
+            sq.setAttribute("stroke", "#7c3aed");
+            sq.setAttribute("stroke-width", "0.4");
+            sq.style.cursor = "grab";
+            sq.addEventListener("pointerdown", (e) => {
+              e.stopPropagation();
+              dragging = { cmdIndex: idx, field: ci === 0 ? "c1" : "c2" };
+            });
+            handlesLayer.appendChild(sq);
+          });
+        }
+
+        if (c.type === "Q") {
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.setAttribute("x1", String(prevX));
+          line.setAttribute("y1", String(prevY));
+          line.setAttribute("x2", String(c.x1));
+          line.setAttribute("y2", String(c.y1));
+          line.setAttribute("stroke", "#c4b5fd");
+          line.setAttribute("stroke-width", "0.6");
+          line.setAttribute("stroke-dasharray", "1.5 1");
+          handlesLayer.appendChild(line);
+
+          const sq = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          const s = 2.4;
+          sq.setAttribute("x", String(c.x1 - s / 2));
+          sq.setAttribute("y", String(c.y1 - s / 2));
+          sq.setAttribute("width", String(s));
+          sq.setAttribute("height", String(s));
+          sq.setAttribute("fill", "#c4b5fd");
+          sq.setAttribute("stroke", "#7c3aed");
+          sq.setAttribute("stroke-width", "0.4");
+          sq.style.cursor = "grab";
+          sq.addEventListener("pointerdown", (e) => {
+            e.stopPropagation();
+            dragging = { cmdIndex: idx, field: "c1" };
+          });
+          handlesLayer.appendChild(sq);
+        }
+
+        // Anchor point (on-curve)
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", String(c.x));
+        circle.setAttribute("cy", String(c.y));
+        circle.setAttribute("r", "2.2");
+        circle.setAttribute("fill", "#9333ea");
+        circle.setAttribute("stroke", "white");
+        circle.setAttribute("stroke-width", "0.6");
+        circle.style.cursor = "grab";
+        circle.addEventListener("pointerdown", (e) => {
+          e.stopPropagation();
+          dragging = { cmdIndex: idx, field: "point" };
+        });
+        handlesLayer.appendChild(circle);
+
+        prevX = c.x; prevY = c.y;
+      });
+    }
+
+    function render() {
+      const d = serializeD(commands);
+      visiblePath.setAttribute("d", d);
+      dOutput.textContent = d;
+      renderHandles();
+    }
+
+    function loadFromInput() {
+      const { d, vbW: parsedW, vbH: parsedH } = extractInput(pathInput.value);
+      const parsed = parsePathD(d);
+      if (!parsed) {
+        parseError.classList.remove("hidden");
+        parseError.textContent = "Could not parse this path (it may contain unsupported arc 'A' commands, or invalid syntax).";
+        return;
+      }
+      parseError.classList.add("hidden");
+      commands = parsed;
+      if (parsedW) vbW.value = String(parsedW);
+      if (parsedH) vbH.value = String(parsedH);
+      editSvg.setAttribute("viewBox", `0 0 ${vbW.value} ${vbH.value}`);
+      render();
+    }
+
+    loadBtn.addEventListener("click", loadFromInput);
+
+    [vbW, vbH].forEach((el) =>
+      el.addEventListener("input", () => {
+        editSvg.setAttribute("viewBox", `0 0 ${vbW.value} ${vbH.value}`);
+      })
+    );
+
+    window.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const pt = clientToSvgPoint(e.clientX, e.clientY);
+      const c = commands[dragging.cmdIndex];
+      if (dragging.field === "point" && c.type !== "Z") {
+        c.x = pt.x; c.y = pt.y;
+      } else if (dragging.field === "c1" && (c.type === "C" || c.type === "Q")) {
+        c.x1 = pt.x; c.y1 = pt.y;
+      } else if (dragging.field === "c2" && c.type === "C") {
+        c.x2 = pt.x; c.y2 = pt.y;
+      }
+      render();
+    });
+
+    window.addEventListener("pointerup", () => {
+      dragging = null;
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(dOutput.textContent ?? "");
+      const icon = copyBtn.querySelector("[data-copy-icon]")!;
+      const label = copyBtn.querySelector("[data-copy-label]")!;
+      icon.innerHTML = `<path d="M20 6L9 17l-5-5"/>`;
+      label.textContent = "Copied";
+      setTimeout(() => {
+        icon.innerHTML = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+        label.textContent = "Copy";
+      }, 1500);
+    });
+
+    loadFromInput();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-svg-path-editor]").forEach(initSvgPathEditor);
+</script>

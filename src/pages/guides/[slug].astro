@@ -1,0 +1,63 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import toolsData from '../../data/tools.json';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides');
+  return guides.map((guide) => ({
+    params: { slug: guide.id },
+    props: { guide },
+  }));
+}
+
+interface Props {
+  guide: CollectionEntry<'guides'>;
+}
+
+const { guide } = Astro.props;
+const { Content, headings } = await render(guide);
+
+const relatedTools = (guide.data.relatedTools || [])
+  .map((slug) => (toolsData as any[]).find((t) => t.slug === slug))
+  .filter(Boolean)
+  .map((t) => ({
+    slug: t.slug,
+    category: t.category,
+    title: t.title,
+    description: t.description,
+  }));
+
+const allGuides = await getCollection('guides');
+const otherGuides = allGuides
+  .filter((g) => g.id !== guide.id)
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .slice(0, 4)
+  .map((g) => ({
+    id: g.id,
+    title: g.data.title,
+    description: g.data.description,
+    image: g.data.image,
+    imageAlt: g.data.imageAlt,
+  }));
+
+const canonicalUrl = Astro.url.href;
+---
+
+<GuideLayout
+  title={guide.data.title}
+  description={guide.data.description}
+  metaTitle={guide.data.metaTitle}
+  metaDescription={guide.data.metaDescription}
+  image={guide.data.image}
+  imageAlt={guide.data.imageAlt}
+  publishDate={guide.data.publishDate}
+  updatedDate={guide.data.updatedDate}
+  relatedTools={relatedTools}
+  otherGuides={otherGuides}
+  headings={headings}
+  faqs={guide.data.faqs}
+  canonicalUrl={canonicalUrl}
+>
+  <Content />
+</GuideLayout>

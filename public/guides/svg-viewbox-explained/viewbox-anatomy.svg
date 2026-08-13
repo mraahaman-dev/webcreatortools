@@ -1,0 +1,44 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FAFAF9"/>
+  <text x="400" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#0F172A">viewBox="20 20 200 160"</text>
+
+  <!-- Outer full grid for context -->
+  <rect x="140" y="70" width="320" height="260" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- grid lines -->
+  <g stroke="#F1F5F9" stroke-width="1">
+    <line x1="180" y1="70" x2="180" y2="330"/>
+    <line x1="220" y1="70" x2="220" y2="330"/>
+    <line x1="260" y1="70" x2="260" y2="330"/>
+    <line x1="300" y1="70" x2="300" y2="330"/>
+    <line x1="340" y1="70" x2="340" y2="330"/>
+    <line x1="380" y1="70" x2="380" y2="330"/>
+    <line x1="420" y1="70" x2="420" y2="330"/>
+    <line x1="140" y1="110" x2="460" y2="110"/>
+    <line x1="140" y1="150" x2="460" y2="150"/>
+    <line x1="140" y1="190" x2="460" y2="190"/>
+    <line x1="140" y1="230" x2="460" y2="230"/>
+    <line x1="140" y1="270" x2="460" y2="270"/>
+  </g>
+
+  <!-- viewBox rectangle, offset from full grid origin -->
+  <rect x="220" y="110" width="200" height="160" fill="#EEF2FF" stroke="#4F46E5" stroke-width="2.5" stroke-dasharray="5 4"/>
+
+  <!-- origin marker -->
+  <circle cx="220" cy="110" r="5" fill="#DC2626"/>
+  <text x="230" y="102" font-family="system-ui, sans-serif" font-size="12" fill="#DC2626" font-weight="600">origin (min-x, min-y) = 20, 20</text>
+
+  <!-- width arrow -->
+  <path d="M220 292h200" stroke="#4F46E5" stroke-width="2"/>
+  <path d="M220 292l8-5v10z" fill="#4F46E5"/>
+  <path d="M420 292l-8-5v10z" fill="#4F46E5"/>
+  <text x="320" y="308" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#4338CA" font-weight="600">width = 200</text>
+
+  <!-- height arrow -->
+  <path d="M480 110v160" stroke="#4F46E5" stroke-width="2"/>
+  <path d="M480 110l-5 8h10z" fill="#4F46E5"/>
+  <path d="M480 270l-5-8h10z" fill="#4F46E5"/>
+  <text x="490" y="195" font-family="system-ui, sans-serif" font-size="12" fill="#4338CA" font-weight="600" writing-mode="vertical-rl">height = 160</text>
+
+  <!-- sample shape inside -->
+  <circle cx="320" cy="190" r="35" fill="#818CF8" opacity="0.85"/>
+</svg>

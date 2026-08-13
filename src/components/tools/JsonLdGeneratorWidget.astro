@@ -1,0 +1,319 @@
+<div class="json-ld-generator" data-json-ld-generator>
+  <div class="flex flex-wrap items-center gap-1 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <button type="button" data-type-btn data-type="Article" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium bg-purple-600 text-white">Article</button>
+    <button type="button" data-type-btn data-type="Product" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">Product</button>
+    <button type="button" data-type-btn data-type="FAQPage" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">FAQ</button>
+    <button type="button" data-type-btn data-type="Organization" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">Organization</button>
+    <button type="button" data-type-btn data-type="BreadcrumbList" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">Breadcrumb</button>
+  </div>
+
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <!-- Article -->
+    <div data-form="Article" class="grid gap-3 sm:grid-cols-2">
+      <label class="block sm:col-span-2"><span class="mb-1 block text-xs text-slate-600">Headline</span><input type="text" data-field="headline" value="How to Optimize Images for the Web" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block sm:col-span-2"><span class="mb-1 block text-xs text-slate-600">Description</span><input type="text" data-field="description" value="A practical guide to compressing and serving images faster." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block sm:col-span-2"><span class="mb-1 block text-xs text-slate-600">Image URL</span><input type="text" data-field="image" value="https://example.com/images/hero.jpg" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Author name</span><input type="text" data-field="authorName" value="Jamie Rivera" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Publisher name</span><input type="text" data-field="publisherName" value="Pixelquil" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Publisher logo URL</span><input type="text" data-field="publisherLogo" value="https://example.com/logo.png" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Date published</span><input type="date" data-field="datePublished" value="2026-01-15" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Date modified</span><input type="date" data-field="dateModified" value="2026-02-01" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+    </div>
+
+    <!-- Product -->
+    <div data-form="Product" class="hidden grid gap-3 sm:grid-cols-2">
+      <label class="block sm:col-span-2"><span class="mb-1 block text-xs text-slate-600">Product name</span><input type="text" data-field="name" value="Wireless Ergonomic Mouse" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block sm:col-span-2"><span class="mb-1 block text-xs text-slate-600">Description</span><input type="text" data-field="description" value="A comfortable wireless mouse designed for all-day use." class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block sm:col-span-2"><span class="mb-1 block text-xs text-slate-600">Image URL</span><input type="text" data-field="image" value="https://example.com/images/mouse.jpg" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Brand</span><input type="text" data-field="brand" value="Acme" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">SKU</span><input type="text" data-field="sku" value="MOU-2024" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Price</span><input type="text" data-field="price" value="29.99" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Currency</span><input type="text" data-field="priceCurrency" value="USD" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Availability</span>
+        <select data-field="availability" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <option value="InStock">In stock</option>
+          <option value="OutOfStock">Out of stock</option>
+          <option value="PreOrder">Pre-order</option>
+        </select>
+      </label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Rating value (optional)</span><input type="text" data-field="ratingValue" value="4.6" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Review count (optional)</span><input type="text" data-field="reviewCount" value="128" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+    </div>
+
+    <!-- FAQPage -->
+    <div data-form="FAQPage" class="hidden">
+      <div data-faq-rows class="space-y-3"></div>
+      <button type="button" data-add-faq-btn class="mt-2 text-xs font-medium text-purple-600 hover:underline">+ Add question</button>
+    </div>
+
+    <!-- Organization -->
+    <div data-form="Organization" class="hidden grid gap-3 sm:grid-cols-2">
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Organization name</span><input type="text" data-field="name" value="Pixelquil" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Website URL</span><input type="text" data-field="url" value="https://pixelquil.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block sm:col-span-2"><span class="mb-1 block text-xs text-slate-600">Logo URL</span><input type="text" data-field="logo" value="https://pixelquil.com/logo.png" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block sm:col-span-2"><span class="mb-1 block text-xs text-slate-600">Social profile URLs (one per line)</span>
+        <textarea data-field="sameAs" class="h-20 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" spellcheck="false">https://x.com/pixelquil
+https://github.com/pixelquil</textarea>
+      </label>
+    </div>
+
+    <!-- BreadcrumbList -->
+    <div data-form="BreadcrumbList" class="hidden">
+      <div data-breadcrumb-rows class="space-y-3"></div>
+      <button type="button" data-add-breadcrumb-btn class="mt-2 text-xs font-medium text-purple-600 hover:underline">+ Add breadcrumb</button>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">JSON-LD script tag</h3>
+      <button type="button" data-copy-btn
+        class="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-600 hover:border-purple-300 hover:bg-purple-100">
+        <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        <span data-copy-label>Copy</span>
+      </button>
+    </div>
+    <pre data-output class="overflow-auto rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-800"></pre>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you enter is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  let faqRows: { id: number; question: string; answer: string }[] = [
+    { id: 1, question: "Do you offer a free trial?", answer: "Yes, every plan includes a 14 day free trial with no credit card required." },
+    { id: 2, question: "Can I cancel anytime?", answer: "Yes, you can cancel your subscription at any time from your account settings." },
+  ];
+  let breadcrumbRows: { id: number; name: string; url: string }[] = [
+    { id: 1, name: "Home", url: "https://example.com/" },
+    { id: 2, name: "Blog", url: "https://example.com/blog/" },
+    { id: 3, name: "Current Article", url: "https://example.com/blog/current-article/" },
+  ];
+  let nextRowId = 4;
+
+  function initJsonLdGenerator(root: HTMLElement) {
+    const typeBtns = root.querySelectorAll<HTMLButtonElement>("[data-type-btn]");
+    const forms = root.querySelectorAll<HTMLDivElement>("[data-form]");
+    const output = root.querySelector<HTMLPreElement>("[data-output]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+    const faqRowsEl = root.querySelector<HTMLDivElement>("[data-faq-rows]")!;
+    const addFaqBtn = root.querySelector<HTMLButtonElement>("[data-add-faq-btn]")!;
+    const breadcrumbRowsEl = root.querySelector<HTMLDivElement>("[data-breadcrumb-rows]")!;
+    const addBreadcrumbBtn = root.querySelector<HTMLButtonElement>("[data-add-breadcrumb-btn]")!;
+
+    let activeType = "Article";
+
+    function getFields(formEl: HTMLElement): Record<string, string> {
+      const fields: Record<string, string> = {};
+      formEl.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("[data-field]").forEach((el) => {
+        fields[el.dataset.field!] = el.value;
+      });
+      return fields;
+    }
+
+    function renderFaqRows() {
+      faqRowsEl.innerHTML = faqRows
+        .map(
+          (row) => `
+        <div class="rounded-lg border border-slate-100 p-3" data-faq-row="${row.id}">
+          <div class="mb-2 flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-500">Question ${faqRows.indexOf(row) + 1}</span>
+            <button type="button" data-remove-faq="${row.id}" class="text-xs font-medium text-red-500 hover:underline">Remove</button>
+          </div>
+          <input type="text" data-faq-q="${row.id}" value="${row.question.replace(/"/g, "&quot;")}" placeholder="Question"
+            class="mb-2 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm" />
+          <textarea data-faq-a="${row.id}" placeholder="Answer" class="h-16 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm">${row.answer}</textarea>
+        </div>`
+        )
+        .join("");
+
+      faqRowsEl.querySelectorAll<HTMLInputElement>("[data-faq-q]").forEach((el) => {
+        el.addEventListener("input", () => {
+          const row = faqRows.find((r) => r.id === Number(el.dataset.faqQ));
+          if (row) { row.question = el.value; render(); }
+        });
+      });
+      faqRowsEl.querySelectorAll<HTMLTextAreaElement>("[data-faq-a]").forEach((el) => {
+        el.addEventListener("input", () => {
+          const row = faqRows.find((r) => r.id === Number(el.dataset.faqA));
+          if (row) { row.answer = el.value; render(); }
+        });
+      });
+      faqRowsEl.querySelectorAll<HTMLButtonElement>("[data-remove-faq]").forEach((el) => {
+        el.addEventListener("click", () => {
+          if (faqRows.length <= 1) return;
+          faqRows = faqRows.filter((r) => r.id !== Number(el.dataset.removeFaq));
+          renderFaqRows();
+          render();
+        });
+      });
+    }
+
+    function renderBreadcrumbRows() {
+      breadcrumbRowsEl.innerHTML = breadcrumbRows
+        .map(
+          (row, i) => `
+        <div class="flex items-center gap-2" data-breadcrumb-row="${row.id}">
+          <span class="w-5 shrink-0 text-xs text-slate-400">${i + 1}</span>
+          <input type="text" data-bc-name="${row.id}" value="${row.name.replace(/"/g, "&quot;")}" placeholder="Name"
+            class="w-32 rounded-lg border border-slate-300 px-3 py-1.5 text-sm" />
+          <input type="text" data-bc-url="${row.id}" value="${row.url.replace(/"/g, "&quot;")}" placeholder="URL"
+            class="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm" />
+          <button type="button" data-remove-bc="${row.id}" class="text-xs font-medium text-red-500 hover:underline">Remove</button>
+        </div>`
+        )
+        .join("");
+
+      breadcrumbRowsEl.querySelectorAll<HTMLInputElement>("[data-bc-name]").forEach((el) => {
+        el.addEventListener("input", () => {
+          const row = breadcrumbRows.find((r) => r.id === Number(el.dataset.bcName));
+          if (row) { row.name = el.value; render(); }
+        });
+      });
+      breadcrumbRowsEl.querySelectorAll<HTMLInputElement>("[data-bc-url]").forEach((el) => {
+        el.addEventListener("input", () => {
+          const row = breadcrumbRows.find((r) => r.id === Number(el.dataset.bcUrl));
+          if (row) { row.url = el.value; render(); }
+        });
+      });
+      breadcrumbRowsEl.querySelectorAll<HTMLButtonElement>("[data-remove-bc]").forEach((el) => {
+        el.addEventListener("click", () => {
+          if (breadcrumbRows.length <= 1) return;
+          breadcrumbRows = breadcrumbRows.filter((r) => r.id !== Number(el.dataset.removeBc));
+          renderBreadcrumbRows();
+          render();
+        });
+      });
+    }
+
+    function buildSchema(): object {
+      if (activeType === "Article") {
+        const f = getFields(root.querySelector('[data-form="Article"]')!);
+        return {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: f.headline,
+          description: f.description,
+          image: f.image,
+          author: { "@type": "Person", name: f.authorName },
+          publisher: { "@type": "Organization", name: f.publisherName, logo: { "@type": "ImageObject", url: f.publisherLogo } },
+          datePublished: f.datePublished,
+          dateModified: f.dateModified,
+        };
+      }
+      if (activeType === "Product") {
+        const f = getFields(root.querySelector('[data-form="Product"]')!);
+        const schema: any = {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: f.name,
+          description: f.description,
+          image: f.image,
+          brand: { "@type": "Brand", name: f.brand },
+          sku: f.sku,
+          offers: {
+            "@type": "Offer",
+            price: f.price,
+            priceCurrency: f.priceCurrency,
+            availability: `https://schema.org/${f.availability}`,
+          },
+        };
+        if (f.ratingValue && f.reviewCount) {
+          schema.aggregateRating = { "@type": "AggregateRating", ratingValue: f.ratingValue, reviewCount: f.reviewCount };
+        }
+        return schema;
+      }
+      if (activeType === "FAQPage") {
+        return {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqRows.map((r) => ({
+            "@type": "Question",
+            name: r.question,
+            acceptedAnswer: { "@type": "Answer", text: r.answer },
+          })),
+        };
+      }
+      if (activeType === "Organization") {
+        const f = getFields(root.querySelector('[data-form="Organization"]')!);
+        return {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: f.name,
+          url: f.url,
+          logo: f.logo,
+          sameAs: f.sameAs.split("\n").map((s) => s.trim()).filter(Boolean),
+        };
+      }
+      // BreadcrumbList
+      return {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: breadcrumbRows.map((r, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: r.name,
+          item: r.url,
+        })),
+      };
+    }
+
+    function render() {
+      const schema = buildSchema();
+      const json = JSON.stringify(schema, null, 2);
+      output.textContent = `<script type="application/ld+json">\n${json}\n<\/script>`;
+    }
+
+    typeBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeType = btn.dataset.type!;
+        typeBtns.forEach((b) => {
+          const active = b.dataset.type === activeType;
+          b.classList.toggle("bg-purple-600", active);
+          b.classList.toggle("text-white", active);
+          b.classList.toggle("text-slate-500", !active);
+        });
+        forms.forEach((f) => f.classList.toggle("hidden", f.dataset.form !== activeType));
+        render();
+      });
+    });
+
+    root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("[data-field]").forEach((el) => {
+      el.addEventListener("input", render);
+    });
+
+    addFaqBtn.addEventListener("click", () => {
+      faqRows.push({ id: nextRowId++, question: "", answer: "" });
+      renderFaqRows();
+      render();
+    });
+
+    addBreadcrumbBtn.addEventListener("click", () => {
+      breadcrumbRows.push({ id: nextRowId++, name: "", url: "" });
+      renderBreadcrumbRows();
+      render();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(output.textContent ?? "");
+      const icon = copyBtn.querySelector("[data-copy-icon]")!;
+      const label = copyBtn.querySelector("[data-copy-label]")!;
+      icon.innerHTML = `<path d="M20 6L9 17l-5-5"/>`;
+      label.textContent = "Copied";
+      setTimeout(() => {
+        icon.innerHTML = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+        label.textContent = "Copy";
+      }, 1500);
+    });
+
+    renderFaqRows();
+    renderBreadcrumbRows();
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-json-ld-generator]").forEach(initJsonLdGenerator);
+</script>

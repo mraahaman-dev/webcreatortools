@@ -1,0 +1,259 @@
+<div class="broken-link-checker" data-broken-link-checker>
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <input type="text" data-page-url-input placeholder="https://example.com/blog/some-post" spellcheck="false"
+      class="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm text-slate-800 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-100" />
+    <button type="button" data-check-btn
+      class="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50">
+      Scan Page
+    </button>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-4 border border-b-0 border-slate-200 bg-white p-3 text-xs text-slate-600">
+    <label class="flex items-center gap-1.5"><input type="checkbox" data-skip-external class="rounded border-slate-300 text-purple-600" /> Skip external links (faster, gentler)</label>
+    <label class="flex items-center gap-1.5"><input type="checkbox" data-include-images class="rounded border-slate-300 text-purple-600" /> Also check &lt;img&gt; sources</label>
+  </div>
+
+  <div data-progress-panel class="hidden border border-b-0 border-slate-200 bg-white p-4">
+    <div class="mb-2 flex items-center justify-between text-xs text-slate-500">
+      <span data-progress-label>Checking...</span>
+      <span data-progress-count></span>
+    </div>
+    <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+      <div data-progress-bar class="h-full rounded-full bg-purple-600 transition-all" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div data-status-panel class="hidden border border-b-0 border-slate-200 bg-white p-4 text-sm"></div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div data-results-panel>
+      <p class="text-sm text-slate-400">Enter a page URL above and click Scan Page.</p>
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Fetched through a small server-side proxy, with lightweight HEAD requests used where possible. Nothing is stored.
+  </p>
+</div>
+
+<script>
+  interface FoundLink { url: string; text: string; isInternal: boolean; tag: "a" | "img" }
+  interface CheckedLink extends FoundLink { status: number | null; error: string | null; via: "HEAD" | "GET" }
+
+  const MAX_LINKS = 150;
+  const CONCURRENCY = 6;
+
+  function stripFragment(u: string): string {
+    try {
+      const parsed = new URL(u);
+      parsed.hash = "";
+      return parsed.toString();
+    } catch {
+      return u;
+    }
+  }
+
+  function extractLinks(html: string, pageUrl: string, includeImages: boolean): FoundLink[] {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    const pageHost = new URL(pageUrl).hostname;
+    const found = new Map<string, FoundLink>();
+
+    doc.querySelectorAll("a[href]").forEach((el) => {
+      const href = el.getAttribute("href") ?? "";
+      if (!href || href.startsWith("#") || /^(mailto|tel|javascript|data):/i.test(href)) return;
+      let absolute: string;
+      try {
+        absolute = stripFragment(new URL(href, pageUrl).toString());
+      } catch {
+        return;
+      }
+      if (found.has(absolute)) return;
+      let isInternal = true;
+      try {
+        isInternal = new URL(absolute).hostname === pageHost;
+      } catch {}
+      found.set(absolute, { url: absolute, text: (el.textContent || "").trim().slice(0, 80) || "(no text)", isInternal, tag: "a" });
+    });
+
+    if (includeImages) {
+      doc.querySelectorAll("img[src]").forEach((el) => {
+        const src = el.getAttribute("src") ?? "";
+        if (!src || src.startsWith("data:")) return;
+        let absolute: string;
+        try {
+          absolute = stripFragment(new URL(src, pageUrl).toString());
+        } catch {
+          return;
+        }
+        if (found.has(absolute)) return;
+        let isInternal = true;
+        try {
+          isInternal = new URL(absolute).hostname === pageHost;
+        } catch {}
+        found.set(absolute, { url: absolute, text: el.getAttribute("alt")?.trim().slice(0, 80) || "(image)", isInternal, tag: "img" });
+      });
+    }
+
+    return Array.from(found.values());
+  }
+
+  async function checkOne(link: FoundLink, uaKey: string): Promise<CheckedLink> {
+    // Try a lightweight HEAD first; fall back to GET if the server rejects HEAD
+    // (405) or something goes wrong, some servers don't implement it correctly.
+    for (const method of ["HEAD", "GET"] as const) {
+      try {
+        const res = await fetch(`/api/fetch-proxy/?url=${encodeURIComponent(link.url)}&ua=${uaKey}&method=${method}`);
+        if (!res.ok) continue;
+        const data = await res.json();
+        if (data.error) continue;
+        if (method === "HEAD" && (data.status === 405 || data.status === 501)) continue;
+        return { ...link, status: data.status, error: null, via: method };
+      } catch {
+        continue;
+      }
+    }
+    return { ...link, status: null, error: "Could not reach this URL", via: "GET" };
+  }
+
+  function statusColor(status: number | null): string {
+    if (status === null) return "bg-red-100 text-red-700";
+    if (status >= 200 && status < 300) return "bg-green-100 text-green-700";
+    if (status >= 300 && status < 400) return "bg-amber-100 text-amber-700";
+    if (status >= 400) return "bg-red-100 text-red-700";
+    return "bg-slate-100 text-slate-700";
+  }
+
+  function initBrokenLinkChecker(root: HTMLElement) {
+    const pageUrlInput = root.querySelector<HTMLInputElement>("[data-page-url-input]")!;
+    const skipExternal = root.querySelector<HTMLInputElement>("[data-skip-external]")!;
+    const includeImages = root.querySelector<HTMLInputElement>("[data-include-images]")!;
+    const checkBtn = root.querySelector<HTMLButtonElement>("[data-check-btn]")!;
+    const progressPanel = root.querySelector<HTMLDivElement>("[data-progress-panel]")!;
+    const progressLabel = root.querySelector<HTMLSpanElement>("[data-progress-label]")!;
+    const progressCount = root.querySelector<HTMLSpanElement>("[data-progress-count]")!;
+    const progressBar = root.querySelector<HTMLDivElement>("[data-progress-bar]")!;
+    const statusPanel = root.querySelector<HTMLDivElement>("[data-status-panel]")!;
+    const resultsPanel = root.querySelector<HTMLDivElement>("[data-results-panel]")!;
+
+    function renderResults(checked: CheckedLink[], truncated: boolean) {
+      const broken = checked.filter((l) => l.status === null || l.status >= 400);
+      const redirects = checked.filter((l) => l.status !== null && l.status >= 300 && l.status < 400);
+      const ok = checked.filter((l) => l.status !== null && l.status >= 200 && l.status < 300);
+
+      function row(l: CheckedLink): string {
+        return `
+          <div class="flex items-start gap-3 border-b border-slate-100 py-2 last:border-b-0">
+            <span class="mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${statusColor(l.status)}">${l.status ?? "ERR"}</span>
+            <div class="min-w-0 flex-1">
+              <div class="break-all font-mono text-xs text-slate-800">${l.url}</div>
+              <div class="mt-0.5 text-xs text-slate-500">${l.tag === "img" ? "image · " : "link · "}${l.isInternal ? "internal" : "external"} · "${l.text}"${l.error ? ` · ${l.error}` : ""}</div>
+            </div>
+          </div>`;
+      }
+
+      resultsPanel.innerHTML = `
+        <div class="mb-4 flex flex-wrap gap-3 text-sm">
+          <span class="rounded-full bg-red-100 px-3 py-1 font-medium text-red-700">${broken.length} broken</span>
+          <span class="rounded-full bg-amber-100 px-3 py-1 font-medium text-amber-700">${redirects.length} redirecting</span>
+          <span class="rounded-full bg-green-100 px-3 py-1 font-medium text-green-700">${ok.length} OK</span>
+        </div>
+        ${truncated ? `<p class="mb-3 text-xs text-amber-600">Only the first ${MAX_LINKS} links found were checked.</p>` : ""}
+        ${
+          broken.length > 0
+            ? `<h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-red-600">Broken</h3><div class="mb-4 rounded-lg border border-red-100">${broken.map(row).join("")}</div>`
+            : `<p class="mb-4 text-sm text-green-700">No broken links found.</p>`
+        }
+        ${
+          redirects.length > 0
+            ? `<details class="mb-3"><summary class="cursor-pointer text-xs font-medium text-amber-600 hover:underline">Show ${redirects.length} redirecting link${redirects.length === 1 ? "" : "s"}</summary><div class="mt-2 rounded-lg border border-amber-100">${redirects.map(row).join("")}</div></details>`
+            : ""
+        }
+        ${
+          ok.length > 0
+            ? `<details><summary class="cursor-pointer text-xs font-medium text-green-700 hover:underline">Show ${ok.length} working link${ok.length === 1 ? "" : "s"}</summary><div class="mt-2 rounded-lg border border-green-100">${ok.map(row).join("")}</div></details>`
+            : ""
+        }
+      `;
+    }
+
+    checkBtn.addEventListener("click", async () => {
+      let pageUrl = pageUrlInput.value.trim();
+      if (!pageUrl) return;
+      if (!/^https?:\/\//i.test(pageUrl)) pageUrl = "https://" + pageUrl;
+
+      checkBtn.disabled = true;
+      checkBtn.textContent = "Scanning...";
+      statusPanel.classList.add("hidden");
+      resultsPanel.innerHTML = "";
+      progressPanel.classList.remove("hidden");
+      progressLabel.textContent = "Fetching page...";
+      progressCount.textContent = "";
+      progressBar.style.width = "10%";
+
+      let pageRes: Response;
+      let pageData: any;
+      try {
+        pageRes = await fetch(`/api/fetch-proxy/?url=${encodeURIComponent(pageUrl)}`);
+        pageData = await pageRes.json();
+      } catch {
+        checkBtn.disabled = false;
+        checkBtn.textContent = "Scan Page";
+        progressPanel.classList.add("hidden");
+        statusPanel.classList.remove("hidden");
+        statusPanel.className = "border border-b-0 border-red-200 bg-red-50 p-4 text-sm text-red-700";
+        statusPanel.textContent = "Could not reach the proxy.";
+        return;
+      }
+
+      if (pageData.error || pageData.status >= 400) {
+        checkBtn.disabled = false;
+        checkBtn.textContent = "Scan Page";
+        progressPanel.classList.add("hidden");
+        statusPanel.classList.remove("hidden");
+        statusPanel.className = "border border-b-0 border-red-200 bg-red-50 p-4 text-sm text-red-700";
+        statusPanel.textContent = pageData.error || `The page itself returned status ${pageData.status}, so its links couldn't be scanned.`;
+        return;
+      }
+
+      let links = extractLinks(pageData.body, pageData.finalUrl || pageUrl, includeImages.checked);
+      if (skipExternal.checked) links = links.filter((l) => l.isInternal);
+
+      const truncated = links.length > MAX_LINKS;
+      links = links.slice(0, MAX_LINKS);
+
+      if (links.length === 0) {
+        progressPanel.classList.add("hidden");
+        resultsPanel.innerHTML = '<p class="text-sm text-slate-400">No links found to check on this page.</p>';
+        checkBtn.disabled = false;
+        checkBtn.textContent = "Scan Page";
+        return;
+      }
+
+      progressLabel.textContent = "Checking links...";
+      let completed = 0;
+      const checked: CheckedLink[] = [];
+
+      const queue = [...links];
+      async function worker() {
+        while (queue.length > 0) {
+          const link = queue.shift()!;
+          const result = await checkOne(link, "default");
+          checked.push(result);
+          completed++;
+          progressCount.textContent = `${completed} / ${links.length}`;
+          progressBar.style.width = `${(completed / links.length) * 100}%`;
+        }
+      }
+      await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+
+      progressPanel.classList.add("hidden");
+      checkBtn.disabled = false;
+      checkBtn.textContent = "Scan Page";
+
+      renderResults(checked, truncated);
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-broken-link-checker]").forEach(initBrokenLinkChecker);
+</script>

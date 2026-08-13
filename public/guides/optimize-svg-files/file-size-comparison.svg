@@ -1,0 +1,27 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FAFAF9"/>
+  <text x="400" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#0F172A">Same image, dramatically less code</text>
+
+  <!-- Baseline -->
+  <line x1="140" y1="330" x2="660" y2="330" stroke="#CBD5E1" stroke-width="2"/>
+
+  <!-- Bar 1: raw -->
+  <rect x="220" y="90" width="110" height="240" rx="8" fill="#A78BFA"/>
+  <text x="275" y="80" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#5B21B6">38 KB</text>
+  <text x="275" y="358" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#334155">Raw export</text>
+
+  <!-- Bar 2: optimized -->
+  <rect x="470" y="298" width="110" height="32" rx="8" fill="#4F46E5"/>
+  <text x="525" y="288" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#3730A3">4 KB</text>
+  <text x="525" y="358" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#334155">Optimized</text>
+
+  <!-- Small identical icon rendered above each bar to show visual output is unchanged -->
+  <g transform="translate(275,60)">
+    <circle r="14" fill="#312E81" opacity="0.85"/>
+  </g>
+  <g transform="translate(525,60)">
+    <circle r="14" fill="#312E81" opacity="0.85"/>
+  </g>
+
+  <text x="400" y="400" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#64748B">Roughly a 90% size reduction, with no visible change to the rendered icon</text>
+</svg>

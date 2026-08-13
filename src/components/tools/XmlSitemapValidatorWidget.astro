@@ -1,0 +1,408 @@
+---
+---
+
+<div data-xml-sitemap-validator-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div class="flex flex-wrap items-center gap-2 mb-4">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:border-teal-400">
+      Upload sitemap.xml
+      <input type="file" accept=".xml,text/xml,application/xml" data-file-input class="hidden" />
+    </label>
+    <button type="button" data-clear-btn class="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-500 hover:text-red-600">
+      Clear
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Sitemap XML</label>
+      <textarea
+        data-xml-input
+        rows="16"
+        spellcheck="false"
+        placeholder="Paste your sitemap.xml content here, or upload a file above"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-y"
+      ></textarea>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <label class="block text-xs font-medium text-gray-600">Validation report</label>
+        <span data-report-summary class="text-xs text-gray-400"></span>
+      </div>
+      <ul data-report class="space-y-2 text-sm rounded-lg border border-gray-200 bg-gray-50 p-3 max-h-[26rem] overflow-y-auto">
+        <li class="text-gray-400">Paste or upload a sitemap to see its validation report.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface CheckResult { label: string; pass: boolean; detail: string; severity?: "warn" | "info" }
+
+  const SITEMAP_NS = "http://www.sitemaps.org/schemas/sitemap/0.9";
+  const MAX_URLS = 50000;
+  const MAX_BYTES = 50 * 1024 * 1024; // 50MB uncompressed, per sitemaps.org
+  const VALID_CHANGEFREQ = new Set(["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"]);
+  const LASTMOD_PATTERN = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2}))?$/;
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function isValidAbsoluteUrl(candidate: string): boolean {
+    try {
+      const parsed = new URL(candidate);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+      return false;
+    }
+  }
+
+  function summarizeExamples(items: string[], limit = 3): string {
+    if (items.length === 0) return "";
+    const shown = items.slice(0, limit).join(", ");
+    return items.length > limit ? `${shown}, and ${items.length - limit} more` : shown;
+  }
+
+  function directChildrenByLocalName(parent: Element, name: string): Element[] {
+    return Array.from(parent.children).filter((el) => el.localName === name);
+  }
+
+  function iconFor(pass: boolean, severity?: "warn" | "info"): string {
+    if (pass) {
+      return '<svg class="h-4 w-4 shrink-0 text-green-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+    if (severity === "info") {
+      return '<svg class="h-4 w-4 shrink-0 text-blue-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 4.5v.01" stroke-linecap="round"/></svg>';
+    }
+    return '<svg class="h-4 w-4 shrink-0 text-amber-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v4M8 11.5v.01" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5"/></svg>';
+  }
+
+  function validateUrlset(root: Element, checks: CheckResult[]) {
+    const entries = directChildrenByLocalName(root, "url");
+
+    if (entries.length === 0) {
+      checks.push({ label: "Contains URL entries", pass: false, detail: "No <url> elements were found as direct children of <urlset>." });
+      return;
+    }
+
+    checks.push({
+      label: "Contains URL entries",
+      pass: true,
+      detail: `Found ${entries.length} <url> ${entries.length === 1 ? "entry" : "entries"}.`,
+    });
+
+    const missingLoc: string[] = [];
+    const multipleLoc: string[] = [];
+    const invalidLoc: string[] = [];
+    const invalidLastmod: string[] = [];
+    const invalidChangefreq: string[] = [];
+    const invalidPriority: string[] = [];
+    const seen = new Set<string>();
+    const duplicates: string[] = [];
+    const hosts = new Set<string>();
+    const validLocs: string[] = [];
+
+    entries.forEach((entry, i) => {
+      const locEls = directChildrenByLocalName(entry, "loc");
+      const label = `entry #${i + 1}`;
+
+      if (locEls.length === 0) {
+        missingLoc.push(label);
+        return;
+      }
+      if (locEls.length > 1) {
+        multipleLoc.push(label);
+      }
+
+      const loc = (locEls[0].textContent || "").trim();
+      if (!isValidAbsoluteUrl(loc)) {
+        invalidLoc.push(`${label} (${loc || "empty"})`);
+      } else {
+        validLocs.push(loc);
+        if (seen.has(loc)) duplicates.push(loc);
+        seen.add(loc);
+        try {
+          hosts.add(new URL(loc).host);
+        } catch {
+          // already counted as invalid above if this were reachable
+        }
+      }
+
+      const lastmodEls = directChildrenByLocalName(entry, "lastmod");
+      if (lastmodEls.length > 0) {
+        const value = (lastmodEls[0].textContent || "").trim();
+        const isFormatOk = LASTMOD_PATTERN.test(value);
+        const isRealDate = isFormatOk && !isNaN(Date.parse(value));
+        if (!isFormatOk || !isRealDate) invalidLastmod.push(`${label} (${value || "empty"})`);
+      }
+
+      const changefreqEls = directChildrenByLocalName(entry, "changefreq");
+      if (changefreqEls.length > 0) {
+        const value = (changefreqEls[0].textContent || "").trim();
+        if (!VALID_CHANGEFREQ.has(value)) invalidChangefreq.push(`${label} (${value || "empty"})`);
+      }
+
+      const priorityEls = directChildrenByLocalName(entry, "priority");
+      if (priorityEls.length > 0) {
+        const value = (priorityEls[0].textContent || "").trim();
+        const num = Number(value);
+        if (value === "" || isNaN(num) || num < 0 || num > 1) invalidPriority.push(`${label} (${value || "empty"})`);
+      }
+    });
+
+    checks.push({
+      label: "Every entry has exactly one <loc>",
+      pass: missingLoc.length === 0 && multipleLoc.length === 0,
+      detail:
+        missingLoc.length === 0 && multipleLoc.length === 0
+          ? "Every entry has exactly one <loc> element."
+          : [
+              missingLoc.length > 0 ? `Missing <loc>: ${summarizeExamples(missingLoc)}.` : "",
+              multipleLoc.length > 0 ? `More than one <loc>: ${summarizeExamples(multipleLoc)}.` : "",
+            ].filter(Boolean).join(" "),
+    });
+
+    checks.push({
+      label: "All <loc> values are valid, absolute URLs",
+      pass: invalidLoc.length === 0,
+      detail: invalidLoc.length === 0
+        ? "Every <loc> is a valid, absolute http or https URL."
+        : `${invalidLoc.length} invalid: ${summarizeExamples(invalidLoc)}.`,
+    });
+
+    checks.push({
+      label: "No duplicate URLs",
+      pass: duplicates.length === 0,
+      detail: duplicates.length === 0
+        ? "No duplicate <loc> values found."
+        : `${duplicates.length} duplicate ${duplicates.length === 1 ? "value" : "values"}: ${summarizeExamples(duplicates)}.`,
+    });
+
+    checks.push({
+      label: "All URLs share the same domain",
+      pass: hosts.size <= 1,
+      detail: hosts.size <= 1
+        ? "Every URL points to the same domain."
+        : `Found ${hosts.size} different domains: ${summarizeExamples(Array.from(hosts))}. This usually means leftover staging or duplicate-domain URLs.`,
+      severity: hosts.size <= 1 ? undefined : "warn",
+    });
+
+    checks.push({
+      label: "<lastmod> values are valid dates",
+      pass: invalidLastmod.length === 0,
+      detail: invalidLastmod.length === 0
+        ? "Every <lastmod> is a valid W3C date or datetime."
+        : `${invalidLastmod.length} invalid: ${summarizeExamples(invalidLastmod)}. Expected YYYY-MM-DD or a full ISO 8601 datetime.`,
+    });
+
+    checks.push({
+      label: "<changefreq> values are valid",
+      pass: invalidChangefreq.length === 0,
+      detail: invalidChangefreq.length === 0
+        ? "Every <changefreq> uses an allowed value."
+        : `${invalidChangefreq.length} invalid: ${summarizeExamples(invalidChangefreq)}. Allowed: always, hourly, daily, weekly, monthly, yearly, never.`,
+    });
+
+    checks.push({
+      label: "<priority> values are between 0.0 and 1.0",
+      pass: invalidPriority.length === 0,
+      detail: invalidPriority.length === 0
+        ? "Every <priority> is a number between 0.0 and 1.0."
+        : `${invalidPriority.length} invalid: ${summarizeExamples(invalidPriority)}.`,
+    });
+
+    checks.push({
+      label: `URL count is within the ${MAX_URLS.toLocaleString()} limit`,
+      pass: entries.length <= MAX_URLS,
+      detail: entries.length <= MAX_URLS
+        ? `${entries.length} of ${MAX_URLS.toLocaleString()} allowed.`
+        : `${entries.length} entries found, over the sitemap protocol's ${MAX_URLS.toLocaleString()} URL limit per file. Split this into multiple sitemaps referenced by a sitemap index file.`,
+    });
+  }
+
+  function validateSitemapIndex(root: Element, checks: CheckResult[]) {
+    const entries = directChildrenByLocalName(root, "sitemap");
+
+    if (entries.length === 0) {
+      checks.push({ label: "Contains sitemap entries", pass: false, detail: "No <sitemap> elements were found as direct children of <sitemapindex>." });
+      return;
+    }
+
+    checks.push({
+      label: "Contains sitemap entries",
+      pass: true,
+      detail: `Found ${entries.length} <sitemap> ${entries.length === 1 ? "entry" : "entries"} referencing individual sitemap files.`,
+    });
+
+    const missingLoc: string[] = [];
+    const invalidLoc: string[] = [];
+    const misplacedTags: string[] = [];
+
+    entries.forEach((entry, i) => {
+      const label = `entry #${i + 1}`;
+      const locEls = directChildrenByLocalName(entry, "loc");
+
+      if (locEls.length === 0) {
+        missingLoc.push(label);
+      } else {
+        const loc = (locEls[0].textContent || "").trim();
+        if (!isValidAbsoluteUrl(loc)) invalidLoc.push(`${label} (${loc || "empty"})`);
+      }
+
+      const hasChangefreqOrPriority =
+        directChildrenByLocalName(entry, "changefreq").length > 0 ||
+        directChildrenByLocalName(entry, "priority").length > 0;
+      if (hasChangefreqOrPriority) misplacedTags.push(label);
+    });
+
+    checks.push({
+      label: "Every <sitemap> entry has a valid <loc>",
+      pass: missingLoc.length === 0 && invalidLoc.length === 0,
+      detail:
+        missingLoc.length === 0 && invalidLoc.length === 0
+          ? "Every entry has exactly one valid, absolute <loc>."
+          : [
+              missingLoc.length > 0 ? `Missing <loc>: ${summarizeExamples(missingLoc)}.` : "",
+              invalidLoc.length > 0 ? `Invalid <loc>: ${summarizeExamples(invalidLoc)}.` : "",
+            ].filter(Boolean).join(" "),
+    });
+
+    checks.push({
+      label: "No <changefreq> or <priority> in the index file",
+      pass: misplacedTags.length === 0,
+      detail: misplacedTags.length === 0
+        ? "Correct — those tags belong in individual sitemap files, not the index."
+        : `Found in: ${summarizeExamples(misplacedTags)}. These tags are only valid inside a regular sitemap's <url> entries, not a <sitemapindex>.`,
+      severity: misplacedTags.length === 0 ? undefined : "info",
+    });
+  }
+
+  function runValidation(xmlText: string): CheckResult[] {
+    const checks: CheckResult[] = [];
+
+    const byteSize = new Blob([xmlText]).size;
+    checks.push({
+      label: `File size is within the 50MB limit`,
+      pass: byteSize <= MAX_BYTES,
+      detail: `${(byteSize / 1024).toFixed(1)} KB.` + (byteSize > MAX_BYTES ? " This exceeds the sitemap protocol's 50MB uncompressed limit per file." : ""),
+    });
+
+    const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+    const parseError = doc.querySelector("parsererror");
+
+    if (parseError) {
+      checks.push({
+        label: "Well-formed XML",
+        pass: false,
+        detail: "This isn't valid XML — check for unescaped characters (like a raw & in a URL), unclosed tags, or a broken structure.",
+      });
+      return checks;
+    }
+
+    checks.push({ label: "Well-formed XML", pass: true, detail: "The document parses as valid XML." });
+
+    const root = doc.documentElement;
+    const rootName = root.localName;
+
+    if (rootName !== "urlset" && rootName !== "sitemapindex") {
+      checks.push({
+        label: "Recognized root element",
+        pass: false,
+        detail: `Root element is <${root.tagName}>. A sitemap must be either <urlset> (a regular sitemap) or <sitemapindex> (a sitemap index file).`,
+      });
+      return checks;
+    }
+
+    checks.push({
+      label: "Recognized root element",
+      pass: true,
+      detail: `Root element is <${rootName}>, ${rootName === "urlset" ? "a regular sitemap" : "a sitemap index file"}.`,
+    });
+
+    checks.push({
+      label: "Correct sitemap namespace declared",
+      pass: root.namespaceURI === SITEMAP_NS,
+      detail: root.namespaceURI === SITEMAP_NS
+        ? "The sitemap namespace is correctly declared."
+        : `Expected xmlns="${SITEMAP_NS}". Some search engines are lenient about this, but it's technically required by the spec.`,
+      severity: root.namespaceURI === SITEMAP_NS ? undefined : "info",
+    });
+
+    if (rootName === "urlset") {
+      validateUrlset(root, checks);
+    } else {
+      validateSitemapIndex(root, checks);
+    }
+
+    return checks;
+  }
+
+  function initXmlSitemapValidator(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]");
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]");
+    const xmlInput = root.querySelector<HTMLTextAreaElement>("[data-xml-input]");
+    const report = root.querySelector<HTMLUListElement>("[data-report]");
+    const reportSummary = root.querySelector<HTMLElement>("[data-report-summary]");
+
+    if (!fileInput || !clearBtn || !xmlInput || !report || !reportSummary) return;
+
+    function renderReport(checks: CheckResult[]) {
+      report!.innerHTML = checks
+        .map(
+          (check) => `
+          <li class="flex items-start gap-2">
+            ${iconFor(check.pass, check.severity)}
+            <div>
+              <span class="font-medium text-gray-800">${escapeHtml(check.label)}</span>
+              <p class="text-gray-500">${escapeHtml(check.detail)}</p>
+            </div>
+          </li>`
+        )
+        .join("");
+
+      const failCount = checks.filter((c) => !c.pass && c.severity !== "info").length;
+      reportSummary!.textContent = failCount === 0
+        ? "All checks passed"
+        : `${failCount} issue${failCount === 1 ? "" : "s"} found`;
+      reportSummary!.className = failCount === 0 ? "text-xs text-green-600" : "text-xs text-amber-600";
+    }
+
+    function run() {
+      const xml = xmlInput!.value.trim();
+      if (!xml) {
+        report!.innerHTML = '<li class="text-gray-400">Paste or upload a sitemap to see its validation report.</li>';
+        reportSummary!.textContent = "";
+        return;
+      }
+      renderReport(runValidation(xml));
+    }
+
+    xmlInput.addEventListener("input", run);
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        xmlInput!.value = String(reader.result ?? "");
+        run();
+      };
+      reader.readAsText(file);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      xmlInput!.value = "";
+      fileInput!.value = "";
+      run();
+    });
+
+    run();
+  }
+
+  document
+    .querySelectorAll<HTMLElement>("[data-xml-sitemap-validator-widget]")
+    .forEach(initXmlSitemapValidator);
+</script>

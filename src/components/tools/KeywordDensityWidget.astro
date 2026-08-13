@@ -1,0 +1,181 @@
+<div class="keyword-density-checker" data-keyword-density-checker>
+  <div class="border border-b-0 border-slate-200 bg-white p-4">
+    <div class="mb-2 flex items-center justify-between text-xs font-medium uppercase tracking-wide text-slate-500">
+      <span>Content to analyze</span>
+      <span data-word-count class="normal-case text-slate-400"></span>
+    </div>
+    <textarea data-content-input spellcheck="false"
+      class="h-56 w-full resize-y rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
+      placeholder="Paste your article, product description, or any block of text here..."
+    ></textarea>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 border border-b-0 border-slate-200 bg-white p-4">
+    <label class="flex items-center gap-2 text-sm text-slate-700">
+      <span>Target keyword or phrase (optional)</span>
+      <input type="text" data-target-input placeholder="e.g. coffee shop" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm" />
+    </label>
+    <label class="ml-auto flex items-center gap-1.5 text-xs text-slate-600">
+      <input type="checkbox" data-ignore-stopwords checked class="rounded border-slate-300 text-blue-600" />
+      Ignore common words in single-word list
+    </label>
+  </div>
+
+  <div data-target-panel class="hidden border border-b-0 border-slate-200 bg-blue-50 p-4"></div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="grid gap-6 sm:grid-cols-3">
+      <div>
+        <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Top single words</h3>
+        <div data-single-words class="space-y-1"></div>
+      </div>
+      <div>
+        <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Top 2-word phrases</h3>
+        <div data-two-word-phrases class="space-y-1"></div>
+      </div>
+      <div>
+        <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Top 3-word phrases</h3>
+        <div data-three-word-phrases class="space-y-1"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you paste is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  const STOP_WORDS = new Set([
+    "a", "an", "the", "and", "or", "but", "of", "in", "on", "at", "to", "for",
+    "with", "is", "are", "was", "were", "this", "that", "these", "those", "it",
+    "as", "by", "from", "be", "been", "being", "into", "onto", "your", "you",
+    "we", "our", "i", "he", "she", "they", "them", "his", "her", "its", "not",
+    "so", "if", "than", "then", "there", "here", "what", "which", "who", "will",
+  ]);
+
+  function tokenize(text: string): string[] {
+    return (text.toLowerCase().match(/[a-z0-9']+/g) || []).filter((w) => w.length > 0);
+  }
+
+  function countFrequency(items: string[]): Map<string, number> {
+    const map = new Map<string, number>();
+    items.forEach((item) => map.set(item, (map.get(item) || 0) + 1));
+    return map;
+  }
+
+  function topEntries(map: Map<string, number>, n: number): [string, number][] {
+    return Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, n);
+  }
+
+  function buildNgrams(tokens: string[], n: number): string[] {
+    const grams: string[] = [];
+    for (let i = 0; i <= tokens.length - n; i++) {
+      grams.push(tokens.slice(i, i + n).join(" "));
+    }
+    return grams;
+  }
+
+  function initKeywordDensityChecker(root: HTMLElement) {
+    const contentInput = root.querySelector<HTMLTextAreaElement>("[data-content-input]")!;
+    const targetInput = root.querySelector<HTMLInputElement>("[data-target-input]")!;
+    const ignoreStopwords = root.querySelector<HTMLInputElement>("[data-ignore-stopwords]")!;
+    const wordCount = root.querySelector<HTMLSpanElement>("[data-word-count]")!;
+    const targetPanel = root.querySelector<HTMLDivElement>("[data-target-panel]")!;
+    const singleWordsEl = root.querySelector<HTMLDivElement>("[data-single-words]")!;
+    const twoWordEl = root.querySelector<HTMLDivElement>("[data-two-word-phrases]")!;
+    const threeWordEl = root.querySelector<HTMLDivElement>("[data-three-word-phrases]")!;
+
+    function renderList(el: HTMLElement, entries: [string, number][], total: number) {
+      if (entries.length === 0) {
+        el.innerHTML = '<p class="text-xs text-slate-400">Not enough text yet.</p>';
+        return;
+      }
+      const maxCount = entries[0][1];
+      el.innerHTML = entries
+        .map(([word, count]) => {
+          const pct = ((count / total) * 100).toFixed(1);
+          const barWidth = Math.max(4, (count / maxCount) * 100);
+          return `
+          <div class="text-xs">
+            <div class="mb-0.5 flex items-center justify-between">
+              <span class="font-mono text-slate-700">${word}</span>
+              <span class="text-slate-400">${count} · ${pct}%</span>
+            </div>
+            <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div class="h-full rounded-full bg-blue-500" style="width:${barWidth}%"></div>
+            </div>
+          </div>`;
+        })
+        .join("");
+    }
+
+    function render() {
+      const text = contentInput.value;
+      const tokens = tokenize(text);
+      const totalWords = tokens.length;
+
+      wordCount.textContent = totalWords > 0 ? `${totalWords} words` : "";
+
+      if (totalWords === 0) {
+        singleWordsEl.innerHTML = '<p class="text-xs text-slate-400">Paste text to see word frequency.</p>';
+        twoWordEl.innerHTML = "";
+        threeWordEl.innerHTML = "";
+        targetPanel.classList.add("hidden");
+        return;
+      }
+
+      const singleTokens = ignoreStopwords.checked ? tokens.filter((t) => !STOP_WORDS.has(t) && !/^\d+$/.test(t)) : tokens;
+      const singleFreq = countFrequency(singleTokens);
+      renderList(singleWordsEl, topEntries(singleFreq, 10), totalWords);
+
+      const twoGrams = buildNgrams(tokens, 2);
+      const twoFreq = countFrequency(twoGrams);
+      const topTwo = topEntries(twoFreq, 8).filter(([, c]) => c > 1);
+      renderList(twoWordEl, topTwo.length ? topTwo : topEntries(twoFreq, 5), totalWords);
+
+      const threeGrams = buildNgrams(tokens, 3);
+      const threeFreq = countFrequency(threeGrams);
+      const topThree = topEntries(threeFreq, 8).filter(([, c]) => c > 1);
+      renderList(threeWordEl, topThree.length ? topThree : topEntries(threeFreq, 5), totalWords);
+
+      const target = targetInput.value.trim().toLowerCase();
+      if (target) {
+        const targetTokens = tokenize(target);
+        const targetPhrase = targetTokens.join(" ");
+        const candidateGrams = targetTokens.length === 1 ? tokens : buildNgrams(tokens, targetTokens.length);
+        const occurrences = candidateGrams.filter((g) => g === targetPhrase).length;
+        const density = ((occurrences / totalWords) * 100).toFixed(2);
+
+        targetPanel.classList.remove("hidden");
+        const densityNum = parseFloat(density);
+        const note =
+          densityNum > 3
+            ? "This is on the higher end. Very high repetition can read as unnatural to both readers and search engines."
+            : densityNum === 0
+            ? "This exact phrase doesn't appear in the text."
+            : "This is within a typical, natural range.";
+        targetPanel.innerHTML = `
+          <div class="flex flex-wrap items-center gap-4">
+            <div><span class="text-2xl font-bold text-blue-700">${occurrences}</span> <span class="text-sm text-blue-600">occurrence${occurrences === 1 ? "" : "s"}</span></div>
+            <div><span class="text-2xl font-bold text-blue-700">${density}%</span> <span class="text-sm text-blue-600">density</span></div>
+            <p class="text-xs text-blue-700">${note}</p>
+          </div>`;
+      } else {
+        targetPanel.classList.add("hidden");
+      }
+    }
+
+    contentInput.addEventListener("input", render);
+    targetInput.addEventListener("input", render);
+    ignoreStopwords.addEventListener("change", render);
+
+    contentInput.value =
+      "Finding the perfect coffee shop can transform your daily routine. A great coffee shop offers more than just coffee, it offers atmosphere, community, and a place to focus. When searching for a coffee shop near you, consider the quality of the coffee, the seating, and the overall vibe. The best coffee shop is one where you feel welcome every time you visit.";
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-keyword-density-checker]").forEach(initKeywordDensityChecker);
+</script>

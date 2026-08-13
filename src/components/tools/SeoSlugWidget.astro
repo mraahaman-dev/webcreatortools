@@ -1,0 +1,140 @@
+<div class="seo-slug-generator" data-seo-slug-generator>
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <label class="block">
+      <span class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Page title or phrase</span>
+      <textarea data-title-input spellcheck="false"
+        class="h-20 w-full resize-none rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-200"
+        placeholder="10 Best Cafés to Visit in São Paulo (2026 Guide)"
+      ></textarea>
+    </label>
+
+    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+      <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" data-remove-stopwords class="rounded border-slate-300 text-amber-600" /> Remove common stop words</label>
+      <label class="block">
+        <span class="mb-1 block text-xs text-slate-600">Separator</span>
+        <select data-separator-select class="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm">
+          <option value="-">Hyphen (-)</option>
+          <option value="_">Underscore (_)</option>
+        </select>
+      </label>
+      <label class="block sm:col-span-2">
+        <div class="mb-1 flex items-center justify-between text-xs text-slate-600">
+          <span>Max length</span>
+          <span data-max-length-value class="font-mono">unlimited</span>
+        </div>
+        <input type="range" data-max-length-input min="0" max="80" value="0" class="w-full accent-amber-600" />
+      </label>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Generated slug</h3>
+      <span data-char-count class="text-xs text-slate-400"></span>
+    </div>
+    <div class="flex items-center gap-2 rounded-lg bg-slate-50 p-4">
+      <span data-slug-output class="flex-1 select-all break-all font-mono text-sm text-slate-800">—</span>
+      <button type="button" data-copy-btn
+        class="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600 hover:border-amber-300 hover:bg-amber-100">
+        <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <span data-copy-label>Copy</span>
+      </button>
+    </div>
+    <div class="mt-2 break-all text-xs text-slate-400">
+      example.com/<span data-url-preview>your-slug</span>/
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you type is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  const STOP_WORDS = new Set([
+    "a", "an", "the", "and", "or", "but", "of", "in", "on", "at", "to", "for",
+    "with", "is", "are", "was", "were", "this", "that", "it", "as", "by",
+    "from", "be", "been", "being", "into", "onto", "your", "you", "we", "our",
+  ]);
+
+  function stripDiacritics(input: string): string {
+    return input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function slugify(input: string, removeStopwords: boolean, separator: string, maxLength: number): string {
+    let text = stripDiacritics(input).toLowerCase();
+
+    // Split into words on any non-alphanumeric run first, so stop-word removal
+    // compares whole words rather than fragments of a not-yet-cleaned string.
+    let words = text.split(/[^a-z0-9]+/).filter(Boolean);
+
+    if (removeStopwords) {
+      words = words.filter((w) => !STOP_WORDS.has(w));
+    }
+
+    let slug = words.join(separator);
+
+    if (maxLength > 0 && slug.length > maxLength) {
+      // Truncate at a separator boundary so we never cut a word in half.
+      const truncated = slug.slice(0, maxLength);
+      const lastSep = truncated.lastIndexOf(separator);
+      slug = lastSep > 0 ? truncated.slice(0, lastSep) : truncated;
+    }
+
+    return slug;
+  }
+
+  function initSeoSlugGenerator(root: HTMLElement) {
+    const titleInput = root.querySelector<HTMLTextAreaElement>("[data-title-input]")!;
+    const removeStopwords = root.querySelector<HTMLInputElement>("[data-remove-stopwords]")!;
+    const separatorSelect = root.querySelector<HTMLSelectElement>("[data-separator-select]")!;
+    const maxLengthInput = root.querySelector<HTMLInputElement>("[data-max-length-input]")!;
+    const maxLengthValue = root.querySelector<HTMLSpanElement>("[data-max-length-value]")!;
+    const slugOutput = root.querySelector<HTMLSpanElement>("[data-slug-output]")!;
+    const charCount = root.querySelector<HTMLSpanElement>("[data-char-count]")!;
+    const urlPreview = root.querySelector<HTMLSpanElement>("[data-url-preview]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+
+    function render() {
+      const maxLen = parseInt(maxLengthInput.value, 10);
+      maxLengthValue.textContent = maxLen === 0 ? "unlimited" : `${maxLen} chars`;
+
+      const raw = titleInput.value.trim();
+      if (!raw) {
+        slugOutput.textContent = "—";
+        charCount.textContent = "";
+        urlPreview.textContent = "your-slug";
+        return;
+      }
+
+      const slug = slugify(raw, removeStopwords.checked, separatorSelect.value, maxLen);
+      slugOutput.textContent = slug || "—";
+      charCount.textContent = `${slug.length} characters`;
+      urlPreview.textContent = slug || "your-slug";
+    }
+
+    titleInput.addEventListener("input", render);
+    removeStopwords.addEventListener("change", render);
+    separatorSelect.addEventListener("change", render);
+    maxLengthInput.addEventListener("input", render);
+
+    copyBtn.addEventListener("click", async () => {
+      const text = slugOutput.textContent ?? "";
+      if (!text || text === "—") return;
+      await navigator.clipboard.writeText(text);
+      const icon = copyBtn.querySelector("[data-copy-icon]")!;
+      const label = copyBtn.querySelector("[data-copy-label]")!;
+      icon.innerHTML = `<path d="M20 6L9 17l-5-5"/>`;
+      label.textContent = "Copied";
+      setTimeout(() => {
+        icon.innerHTML = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+        label.textContent = "Copy";
+      }, 1500);
+    });
+
+    titleInput.value = "10 Best Cafés to Visit in São Paulo (2026 Guide)";
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-seo-slug-generator]").forEach(initSeoSlugGenerator);
+</script>

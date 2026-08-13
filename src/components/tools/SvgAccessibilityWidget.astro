@@ -1,0 +1,278 @@
+<div class="svg-accessibility" data-svg-accessibility>
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-amber-400">
+      Upload SVG
+      <input type="file" accept=".svg,image/svg+xml" data-file-input class="hidden" />
+    </label>
+    <button type="button" data-clear-btn class="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-600">Clear</button>
+    <label class="ml-auto flex items-center gap-2 text-xs text-slate-600">
+      <span>Check contrast against</span>
+      <input type="color" data-bg-input value="#ffffff" class="h-8 w-10 cursor-pointer rounded border border-slate-300 bg-white p-0.5" />
+    </label>
+  </div>
+
+  <div class="grid overflow-hidden border border-b-0 border-slate-200 md:grid-cols-2">
+    <div class="border-b border-slate-200 md:border-b-0 md:border-r">
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">Code</div>
+      <textarea
+        data-code-input
+        spellcheck="false"
+        class="h-72 w-full resize-none border-0 bg-white p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-200"
+        placeholder="Paste your SVG code here, or upload a file above"
+      ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <path d="M6 38 L18 14 L28 30 L34 20 L42 38 Z" fill="#a5b4fc"/>
+</svg></textarea>
+    </div>
+    <div>
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">Preview</div>
+      <div data-preview data-bg-preview class="flex h-72 items-center justify-center overflow-auto p-4" style="background:#ffffff;">
+        <span class="text-sm text-slate-400">Nothing to preview yet</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Accessibility report</h3>
+    <ul data-report class="space-y-2 text-sm">
+      <li class="text-slate-400">Paste or upload an SVG to see its accessibility report.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  interface CheckResult { label: string; pass: boolean; detail: string; severity?: "warn" | "info" }
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Resolves any valid CSS color string — hex, named ("red"), rgb()/rgba(), hsl()/hsla() —
+  // to RGB by letting the browser's own CSS engine parse it, rather than hand-rolling
+  // a parser that would only cover hex codes.
+  function colorToRgb(color: string): [number, number, number] | null {
+    const probe = document.createElement("div");
+    probe.style.color = color;
+    document.body.appendChild(probe);
+    const computed = getComputedStyle(probe).color;
+    document.body.removeChild(probe);
+    const m = computed.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    return m ? [parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10)] : null;
+  }
+
+  function relativeLuminance([r, g, b]: [number, number, number]): number {
+    const [rs, gs, bs] = [r, g, b].map((c) => {
+      const v = c / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+  }
+
+  function contrastRatio(color1: string, color2: string): number | null {
+    const c1 = colorToRgb(color1);
+    const c2 = colorToRgb(color2);
+    if (!c1 || !c2) return null;
+    const l1 = relativeLuminance(c1);
+    const l2 = relativeLuminance(c2);
+    const lighter = Math.max(l1, l2);
+    const darker = Math.min(l1, l2);
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  function initSvgAccessibility(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]")!;
+    const codeInput = root.querySelector<HTMLTextAreaElement>("[data-code-input]")!;
+    const preview = root.querySelector<HTMLDivElement>("[data-preview]")!;
+    const report = root.querySelector<HTMLUListElement>("[data-report]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+    const bgInput = root.querySelector<HTMLInputElement>("[data-bg-input]")!;
+
+    function iconFor(pass: boolean, severity?: "warn" | "info") {
+      if (pass) {
+        return '<svg class="h-4 w-4 shrink-0 text-green-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      }
+      if (severity === "info") {
+        return '<svg class="h-4 w-4 shrink-0 text-blue-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 4.5v.01" stroke-linecap="round"/></svg>';
+      }
+      return '<svg class="h-4 w-4 shrink-0 text-amber-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v4M8 11.5v.01" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5"/></svg>';
+    }
+
+    function runChecks(doc: Document): CheckResult[] {
+      const results: CheckResult[] = [];
+      const root = doc.documentElement;
+
+      const titleEl = root.querySelector(":scope > title") ?? doc.querySelector("title");
+      const descEl = root.querySelector(":scope > desc") ?? doc.querySelector("desc");
+      const ariaLabel = root.getAttribute("aria-label");
+      const ariaHidden = root.getAttribute("aria-hidden");
+      const role = root.getAttribute("role");
+
+      const hasAccessibleName = !!titleEl || !!ariaLabel;
+
+      results.push({
+        label: "Has a <title> element or aria-label",
+        pass: hasAccessibleName,
+        detail: hasAccessibleName
+          ? titleEl
+            ? `Found a <title> element: "${titleEl.textContent?.trim().slice(0, 60)}"`
+            : `Found an aria-label attribute: "${ariaLabel}"`
+          : "No <title> element or aria-label found. Screen readers have no accessible name to announce for this graphic unless it is marked purely decorative with aria-hidden.",
+      });
+
+      results.push({
+        label: "Has a <desc> element for extended description",
+        pass: !!descEl,
+        detail: descEl
+          ? "A <desc> element provides additional context beyond the title."
+          : "No <desc> element found. This is optional, useful for complex graphics that need more explanation than a short title provides.",
+        severity: "info",
+      });
+
+      const isMarkedDecorative = ariaHidden === "true";
+      const isMarkedMeaningful = role === "img" || hasAccessibleName;
+
+      if (isMarkedDecorative) {
+        results.push({
+          label: "Decorative intent is explicit",
+          pass: true,
+          detail: "aria-hidden=\"true\" is set, correctly hiding this purely decorative graphic from screen readers.",
+        });
+      } else if (isMarkedMeaningful) {
+        results.push({
+          label: "role=\"img\" is set for a meaningful graphic",
+          pass: role === "img",
+          detail:
+            role === "img"
+              ? "role=\"img\" correctly tells assistive technology to treat this as a single image with an accessible name."
+              : "This SVG has an accessible name but no role=\"img\". Adding role=\"img\" is recommended so assistive technology announces it as a single image rather than navigating into its internal elements.",
+        });
+      } else {
+        results.push({
+          label: "Decorative vs. meaningful intent is unclear",
+          pass: false,
+          detail: "This SVG has neither an accessible name (title or aria-label) nor aria-hidden=\"true\". Screen reader behavior in this ambiguous state varies by browser and screen reader combination. Explicitly mark it one way or the other.",
+        });
+      }
+
+      if (titleEl && titleEl.id) {
+        const labelledBy = root.getAttribute("aria-labelledby");
+        results.push({
+          label: "title id is wired via aria-labelledby",
+          pass: labelledBy?.includes(titleEl.id) ?? false,
+          detail: labelledBy?.includes(titleEl.id)
+            ? "aria-labelledby correctly references the <title> element's id."
+            : "The <title> element has an id, but the root SVG's aria-labelledby doesn't reference it. Most browsers use <title> as the accessible name automatically, but explicit aria-labelledby improves consistency across assistive technology.",
+          severity: "info",
+        });
+      }
+
+      // Color contrast check: sample fill/stroke colors (hex, named, rgb/hsl — anything
+      // valid CSS) against the chosen background, skipping values with no fixed color.
+      const bg = bgInput.value;
+      const colors = new Set<string>();
+      doc.querySelectorAll("*").forEach((el) => {
+        const fill = el.getAttribute("fill");
+        const stroke = el.getAttribute("stroke");
+        [fill, stroke].forEach((c) => {
+          const v = c?.trim().toLowerCase();
+          if (v && v !== "none" && v !== "transparent" && v !== "currentcolor" && !v.startsWith("url(")) {
+            colors.add(c!);
+          }
+        });
+      });
+
+      if (colors.size === 0) {
+        results.push({
+          label: "Color contrast",
+          pass: true,
+          detail: "No fixed fill or stroke colors found to check against the background.",
+          severity: "info",
+        });
+      } else {
+        let worstRatio = Infinity;
+        let worstColor = "";
+        colors.forEach((c) => {
+          const ratio = contrastRatio(c, bg);
+          if (ratio !== null && ratio < worstRatio) {
+            worstRatio = ratio;
+            worstColor = c;
+          }
+        });
+        const passes = worstRatio >= 3;
+        results.push({
+          label: `Color contrast against ${bg}`,
+          pass: passes,
+          detail: `Lowest contrast ratio found: ${worstRatio.toFixed(2)}:1 (color ${worstColor}). WCAG recommends at least 3:1 for graphical objects and UI components. ${
+            passes ? "This passes that threshold." : "This falls below the recommended threshold."
+          }`,
+        });
+      }
+
+      return results;
+    }
+
+    function renderReport(checks: CheckResult[]) {
+      report.innerHTML = checks
+        .map(
+          (check) => `
+          <li class="flex items-start gap-2">
+            ${iconFor(check.pass, check.severity)}
+            <div>
+              <span class="font-medium text-slate-800">${escapeHtml(check.label)}</span>
+              <p class="text-slate-500">${escapeHtml(check.detail)}</p>
+            </div>
+          </li>`
+        )
+        .join("");
+    }
+
+    function renderAll() {
+      const code = codeInput.value.trim();
+      preview.style.background = bgInput.value;
+
+      if (!code) {
+        preview.innerHTML = '<span class="text-sm text-slate-400">Nothing to preview yet</span>';
+        report.innerHTML = '<li class="text-slate-400">Paste or upload an SVG to see its accessibility report.</li>';
+        return;
+      }
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, "image/svg+xml");
+      const hasParseError = !!doc.querySelector("parsererror");
+
+      if (!hasParseError && doc.documentElement.nodeName === "svg") {
+        const svgEl = doc.documentElement.cloneNode(true) as SVGElement;
+        svgEl.setAttribute("class", "max-h-full max-w-full");
+        preview.innerHTML = "";
+        preview.appendChild(svgEl);
+        renderReport(runChecks(doc));
+      } else {
+        preview.innerHTML = '<span class="text-sm text-red-500">Cannot render, check that this is valid SVG</span>';
+        report.innerHTML = '<li class="text-red-500">This does not appear to be valid, well-formed SVG.</li>';
+      }
+    }
+
+    codeInput.addEventListener("input", renderAll);
+    bgInput.addEventListener("input", renderAll);
+    renderAll();
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        codeInput.value = String(reader.result ?? "");
+        renderAll();
+      };
+      reader.readAsText(file);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      codeInput.value = "";
+      renderAll();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-svg-accessibility]").forEach(initSvgAccessibility);
+</script>

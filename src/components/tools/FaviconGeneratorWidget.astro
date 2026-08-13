@@ -1,0 +1,227 @@
+<div class="favicon-generator" data-favicon-generator>
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-amber-400">
+      Upload SVG or Image
+      <input type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/webp" data-file-input class="hidden" />
+    </label>
+    <span data-source-name class="text-xs text-slate-500"></span>
+  </div>
+
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <div class="mb-4 grid gap-4 sm:grid-cols-2">
+      <div class="flex items-center gap-4">
+        <div data-source-preview class="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-2">
+          <span class="text-xs text-slate-400">No image</span>
+        </div>
+        <p class="text-xs text-slate-500">A square source image works best. Non-square sources will be stretched to fit each icon size.</p>
+      </div>
+      <div class="space-y-2">
+        <label class="block">
+          <span class="mb-1 block text-xs text-slate-600">App name (for manifest)</span>
+          <input type="text" data-app-name value="My App" class="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-800" />
+        </label>
+        <label class="block">
+          <span class="mb-1 block text-xs text-slate-600">Theme color</span>
+          <input type="color" data-theme-color value="#4F46E5" class="h-8 w-14 cursor-pointer rounded border border-slate-300 bg-white p-0.5" />
+        </label>
+      </div>
+    </div>
+
+    <button type="button" data-generate-btn disabled
+      class="w-full rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50">
+      Generate Icon Set
+    </button>
+  </div>
+
+  <div data-results-panel class="hidden rounded-b-2xl border border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Generated files</h3>
+    <div data-results-grid class="mb-4 grid grid-cols-3 gap-3 sm:grid-cols-6"></div>
+    <button type="button" data-download-all-btn
+      class="w-full rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-100">
+      Download All Files
+    </button>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you upload is sent to a server.
+  </p>
+</div>
+
+<script>
+  const SIZES = [16, 32, 48, 180, 192, 512];
+  const ICO_SIZES = [16, 32, 48];
+
+  interface GeneratedFile {
+    name: string;
+    blob: Blob;
+  }
+
+  function canvasToPngBuffer(canvas: HTMLCanvasElement): Promise<ArrayBuffer> {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) return reject(new Error("Could not encode PNG"));
+        blob.arrayBuffer().then(resolve).catch(reject);
+      }, "image/png");
+    });
+  }
+
+  // Builds a valid .ico file by embedding PNG data directly for each size,
+  // the PNG-in-ICO format supported by Windows Vista and later, and by every
+  // modern browser, avoiding the need to implement raw BMP encoding.
+  function buildIco(pngs: { size: number; data: ArrayBuffer }[]): Blob {
+    const headerSize = 6;
+    const entrySize = 16;
+    let offset = headerSize + entrySize * pngs.length;
+
+    const header = new Uint8Array(headerSize);
+    const view = new DataView(header.buffer);
+    view.setUint16(0, 0, true); // reserved
+    view.setUint16(2, 1, true); // type: 1 = icon
+    view.setUint16(4, pngs.length, true); // image count
+
+    const entries = new Uint8Array(entrySize * pngs.length);
+    const parts: BlobPart[] = [header];
+
+    pngs.forEach((png, i) => {
+      const entryView = new DataView(entries.buffer, i * entrySize, entrySize);
+      const dim = png.size >= 256 ? 0 : png.size; // 0 encodes 256
+      entryView.setUint8(0, dim); // width
+      entryView.setUint8(1, dim); // height
+      entryView.setUint8(2, 0); // color count
+      entryView.setUint8(3, 0); // reserved
+      entryView.setUint16(4, 1, true); // color planes
+      entryView.setUint16(6, 32, true); // bits per pixel
+      entryView.setUint32(8, png.data.byteLength, true); // size of image data
+      entryView.setUint32(12, offset, true); // offset of image data
+      offset += png.data.byteLength;
+    });
+
+    parts.push(entries);
+    pngs.forEach((png) => parts.push(png.data));
+
+    return new Blob(parts, { type: "image/x-icon" });
+  }
+
+  function initFaviconGenerator(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]")!;
+    const sourceName = root.querySelector<HTMLSpanElement>("[data-source-name]")!;
+    const sourcePreview = root.querySelector<HTMLDivElement>("[data-source-preview]")!;
+    const appNameInput = root.querySelector<HTMLInputElement>("[data-app-name]")!;
+    const themeColorInput = root.querySelector<HTMLInputElement>("[data-theme-color]")!;
+    const generateBtn = root.querySelector<HTMLButtonElement>("[data-generate-btn]")!;
+    const resultsPanel = root.querySelector<HTMLDivElement>("[data-results-panel]")!;
+    const resultsGrid = root.querySelector<HTMLDivElement>("[data-results-grid]")!;
+    const downloadAllBtn = root.querySelector<HTMLButtonElement>("[data-download-all-btn]")!;
+
+    let sourceImg: HTMLImageElement | null = null;
+    let generatedFiles: GeneratedFile[] = [];
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      sourceName.textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          sourceImg = img;
+          sourcePreview.innerHTML = "";
+          const previewImg = document.createElement("img");
+          previewImg.src = img.src;
+          previewImg.className = "max-h-full max-w-full";
+          sourcePreview.appendChild(previewImg);
+          generateBtn.disabled = false;
+        };
+        img.src = String(reader.result ?? "");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function renderAtSize(size: number): HTMLCanvasElement {
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d")!;
+      ctx.clearRect(0, 0, size, size);
+      ctx.drawImage(sourceImg!, 0, 0, size, size);
+      return canvas;
+    }
+
+    async function generate() {
+      if (!sourceImg) return;
+      generatedFiles = [];
+      resultsGrid.innerHTML = "";
+
+      const pngBuffers: { size: number; data: ArrayBuffer }[] = [];
+
+      for (const size of SIZES) {
+        const canvas = renderAtSize(size);
+        const buffer = await canvasToPngBuffer(canvas);
+        const blob = new Blob([buffer], { type: "image/png" });
+        const name = size === 180 ? "apple-touch-icon.png" : `icon-${size}x${size}.png`;
+        generatedFiles.push({ name, blob });
+
+        if (ICO_SIZES.includes(size)) pngBuffers.push({ size, data: buffer });
+
+        const card = document.createElement("div");
+        card.className = "flex flex-col items-center gap-1 rounded-lg border border-slate-100 p-2";
+        card.innerHTML = `
+          <div class="flex h-12 w-12 items-center justify-center rounded bg-slate-50 p-1">
+            <img src="${URL.createObjectURL(blob)}" class="max-h-full max-w-full" alt="${size}px icon" />
+          </div>
+          <span class="text-[10px] text-slate-500">${size}px</span>
+        `;
+        resultsGrid.appendChild(card);
+      }
+
+      // Build the combined multi-size favicon.ico
+      const icoBlob = buildIco(pngBuffers);
+      generatedFiles.push({ name: "favicon.ico", blob: icoBlob });
+
+      // Build web manifest referencing the 192 and 512 icons.
+      const manifest = {
+        name: appNameInput.value || "My App",
+        short_name: appNameInput.value || "My App",
+        icons: [
+          { src: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+          { src: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
+        ],
+        theme_color: themeColorInput.value,
+        background_color: "#ffffff",
+        display: "standalone",
+      };
+      const manifestBlob = new Blob([JSON.stringify(manifest, null, 2)], { type: "application/manifest+json" });
+      generatedFiles.push({ name: "site.webmanifest", blob: manifestBlob });
+
+      const icoCard = document.createElement("div");
+      icoCard.className = "flex flex-col items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 p-2";
+      icoCard.innerHTML = `<div class="flex h-12 w-12 items-center justify-center text-amber-600"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div><span class="text-[10px] text-slate-500">favicon.ico</span>`;
+      resultsGrid.appendChild(icoCard);
+
+      const manifestCard = document.createElement("div");
+      manifestCard.className = "flex flex-col items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 p-2";
+      manifestCard.innerHTML = `<div class="flex h-12 w-12 items-center justify-center text-amber-600"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div><span class="text-[10px] text-slate-500">manifest</span>`;
+      resultsGrid.appendChild(manifestCard);
+
+      resultsPanel.classList.remove("hidden");
+    }
+
+    generateBtn.addEventListener("click", generate);
+
+    downloadAllBtn.addEventListener("click", async () => {
+      for (const file of generatedFiles) {
+        const url = URL.createObjectURL(file.blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(url);
+        // Small delay between downloads so the browser doesn't block them as a popup flood.
+        await new Promise((r) => setTimeout(r, 300));
+      }
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-favicon-generator]").forEach(initFaviconGenerator);
+</script>

@@ -1,0 +1,321 @@
+<div class="stroke-to-fill" data-stroke-to-fill>
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-teal-400">
+      Upload SVG
+      <input type="file" accept=".svg,image/svg+xml" data-file-input class="hidden" />
+    </label>
+    <button type="button" data-clear-btn class="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-600">Clear</button>
+    <label class="ml-auto flex items-center gap-2 text-xs text-slate-600">
+      <span>Cap style</span>
+      <select data-cap-select class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700">
+        <option value="round">Round</option>
+        <option value="butt">Butt (flat)</option>
+      </select>
+    </label>
+    <button type="button" data-convert-btn
+      class="rounded-lg bg-teal-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-teal-700">
+      Convert
+    </button>
+  </div>
+
+  <div class="grid overflow-hidden border border-b-0 border-slate-200 md:grid-cols-2">
+    <div class="border-b border-slate-200 md:border-b-0 md:border-r">
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">Original (stroke)</div>
+      <textarea
+        data-code-input
+        spellcheck="false"
+        class="h-72 w-full resize-none border-0 bg-white p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-200"
+        placeholder="Paste your SVG code here, or upload a file above"
+      ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <path d="M15 75 Q 50 10 85 75" fill="none" stroke="#0D9488" stroke-width="8" stroke-linecap="round"/>
+</svg></textarea>
+    </div>
+    <div>
+      <div class="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">Converted (fill)</div>
+      <div data-preview class="flex h-72 items-center justify-center overflow-auto bg-white p-4">
+        <span class="text-sm text-slate-400">Click Convert to see the result</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Converted SVG markup</h3>
+      <div class="flex gap-2">
+        <button type="button" data-copy-btn
+          class="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-600 hover:border-teal-300 hover:bg-teal-100">
+          <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          <span data-copy-label>Copy</span>
+        </button>
+        <button type="button" data-download-btn class="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Download</button>
+      </div>
+    </div>
+    <pre data-markup-output class="max-h-40 overflow-auto rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-800">—</pre>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you paste is uploaded or stored. This is an approximation using dense polyline sampling, not exact analytic curve offsetting.
+  </p>
+</div>
+
+<script>
+  interface Pt { x: number; y: number }
+
+  const NS = "http://www.w3.org/2000/svg";
+
+  // Converts basic shape elements into equivalent path "d" strings so they can
+  // all be flattened and offset using the same code path.
+  function shapeToD(el: Element): { d: string; closed: boolean } | null {
+    const tag = el.tagName.toLowerCase();
+    const num = (name: string, fallback = 0) => parseFloat(el.getAttribute(name) ?? String(fallback));
+
+    if (tag === "path") {
+      const d = el.getAttribute("d") ?? "";
+      return { d, closed: /z\s*$/i.test(d.trim()) };
+    }
+    if (tag === "line") {
+      return { d: `M ${num("x1")} ${num("y1")} L ${num("x2")} ${num("y2")}`, closed: false };
+    }
+    if (tag === "polyline" || tag === "polygon") {
+      const pts = (el.getAttribute("points") ?? "").trim().split(/\s+|,/).map(Number);
+      let d = "";
+      for (let i = 0; i < pts.length; i += 2) d += `${i === 0 ? "M" : "L"} ${pts[i]} ${pts[i + 1]} `;
+      if (tag === "polygon") d += "Z";
+      return { d, closed: tag === "polygon" };
+    }
+    if (tag === "rect") {
+      const x = num("x"), y = num("y"), w = num("width"), h = num("height");
+      return { d: `M ${x} ${y} L ${x + w} ${y} L ${x + w} ${y + h} L ${x} ${y + h} Z`, closed: true };
+    }
+    if (tag === "circle") {
+      const cx = num("cx"), cy = num("cy"), r = num("r");
+      return { d: `M ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy} Z`, closed: true };
+    }
+    if (tag === "ellipse") {
+      const cx = num("cx"), cy = num("cy"), rx = num("rx"), ry = num("ry");
+      return { d: `M ${cx + rx} ${cy} A ${rx} ${ry} 0 1 1 ${cx - rx} ${cy} A ${rx} ${ry} 0 1 1 ${cx + rx} ${cy} Z`, closed: true };
+    }
+    return null;
+  }
+
+  // Renders a "d" string in a hidden, real DOM SVG so getTotalLength/getPointAtLength
+  // work (they require layout), then samples it densely into a polyline.
+  function flattenD(d: string): Pt[] {
+    const hiddenSvg = document.createElementNS(NS, "svg");
+    hiddenSvg.setAttribute("style", "position:absolute;width:0;height:0;overflow:hidden;");
+    const pathEl = document.createElementNS(NS, "path");
+    pathEl.setAttribute("d", d);
+    hiddenSvg.appendChild(pathEl);
+    document.body.appendChild(hiddenSvg);
+
+    const length = pathEl.getTotalLength();
+    const steps = Math.max(24, Math.min(400, Math.round(length / 1.5)));
+    const points: Pt[] = [];
+    for (let i = 0; i <= steps; i++) {
+      const p = pathEl.getPointAtLength((length * i) / steps);
+      points.push({ x: p.x, y: p.y });
+    }
+
+    document.body.removeChild(hiddenSvg);
+    return points;
+  }
+
+  function normalize(v: Pt): Pt {
+    const len = Math.hypot(v.x, v.y) || 1;
+    return { x: v.x / len, y: v.y / len };
+  }
+
+  function perpendicular(v: Pt): Pt {
+    return { x: -v.y, y: v.x };
+  }
+
+  function computeNormals(points: Pt[], closed: boolean): Pt[] {
+    const n = points.length;
+    const normals: Pt[] = [];
+    for (let i = 0; i < n; i++) {
+      const prev = closed ? points[(i - 1 + n) % n] : points[Math.max(0, i - 1)];
+      const next = closed ? points[(i + 1) % n] : points[Math.min(n - 1, i + 1)];
+      const dir1 = normalize({ x: points[i].x - prev.x, y: points[i].y - prev.y });
+      const dir2 = normalize({ x: next.x - points[i].x, y: next.y - points[i].y });
+      const avgDir = normalize({ x: dir1.x + dir2.x, y: dir1.y + dir2.y });
+      normals.push(normalize(perpendicular(avgDir)));
+    }
+    return normals;
+  }
+
+  function fmt(n: number): string {
+    return n.toFixed(2);
+  }
+
+  function buildCapArc(center: Pt, from: Pt, to: Pt, throughDir: Pt, r: number, steps = 8): string {
+    const angleFrom = Math.atan2(from.y - center.y, from.x - center.x);
+    let angleThrough = Math.atan2(throughDir.y, throughDir.x);
+    let diff = angleThrough - angleFrom;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    const dir = diff >= 0 ? 1 : -1;
+
+    let d = "";
+    for (let i = 1; i <= steps; i++) {
+      const angle = angleFrom + dir * Math.PI * (i / steps);
+      const x = center.x + r * Math.cos(angle);
+      const y = center.y + r * Math.sin(angle);
+      d += `L ${fmt(x)} ${fmt(y)} `;
+    }
+    return d;
+  }
+
+  function strokeToFillOutline(points: Pt[], closed: boolean, strokeWidth: number, cap: "round" | "butt"): { d: string; evenOdd: boolean } {
+    const r = strokeWidth / 2;
+    const normals = computeNormals(points, closed);
+    const outer = points.map((p, i) => ({ x: p.x + normals[i].x * r, y: p.y + normals[i].y * r }));
+    const inner = points.map((p, i) => ({ x: p.x - normals[i].x * r, y: p.y - normals[i].y * r }));
+
+    if (closed) {
+      const outerD = "M " + outer.map((p) => `${fmt(p.x)} ${fmt(p.y)}`).join(" L ") + " Z";
+      const innerD = "M " + [...inner].reverse().map((p) => `${fmt(p.x)} ${fmt(p.y)}`).join(" L ") + " Z";
+      return { d: `${outerD} ${innerD}`, evenOdd: true };
+    }
+
+    // Open path: outer forward, cap, inner backward, cap, close.
+    let d = "M " + outer.map((p) => `${fmt(p.x)} ${fmt(p.y)}`).join(" L ") + " ";
+
+    const n = points.length;
+    const endTangent = normalize({ x: points[n - 1].x - points[n - 2].x, y: points[n - 1].y - points[n - 2].y });
+    if (cap === "round") {
+      d += buildCapArc(points[n - 1], outer[n - 1], inner[n - 1], endTangent, r);
+    } else {
+      d += `L ${fmt(inner[n - 1].x)} ${fmt(inner[n - 1].y)} `;
+    }
+
+    d += [...inner].reverse().map((p) => `L ${fmt(p.x)} ${fmt(p.y)}`).join(" ") + " ";
+
+    const startTangent = normalize({ x: points[0].x - points[1].x, y: points[0].y - points[1].y });
+    if (cap === "round") {
+      d += buildCapArc(points[0], inner[0], outer[0], startTangent, r);
+    } else {
+      d += `L ${fmt(outer[0].x)} ${fmt(outer[0].y)} `;
+    }
+
+    d += "Z";
+    return { d, evenOdd: false };
+  }
+
+  function initStrokeToFill(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]")!;
+    const codeInput = root.querySelector<HTMLTextAreaElement>("[data-code-input]")!;
+    const capSelect = root.querySelector<HTMLSelectElement>("[data-cap-select]")!;
+    const convertBtn = root.querySelector<HTMLButtonElement>("[data-convert-btn]")!;
+    const preview = root.querySelector<HTMLDivElement>("[data-preview]")!;
+    const markupOutput = root.querySelector<HTMLPreElement>("[data-markup-output]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+    const downloadBtn = root.querySelector<HTMLButtonElement>("[data-download-btn]")!;
+
+    function convert() {
+      const code = codeInput.value.trim();
+      if (!code) return;
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(code, "image/svg+xml");
+      if (doc.querySelector("parsererror") || doc.documentElement.nodeName !== "svg") {
+        preview.innerHTML = '<span class="text-sm text-red-500">Could not parse this as valid SVG</span>';
+        return;
+      }
+
+      const svgEl = doc.documentElement as unknown as SVGSVGElement;
+      const strokedEls = Array.from(svgEl.querySelectorAll("path, line, polyline, polygon, rect, circle, ellipse")).filter((el) => {
+        const stroke = el.getAttribute("stroke") ?? (el as SVGElement).style?.stroke;
+        return stroke && stroke !== "none";
+      });
+
+      const cap = capSelect.value as "round" | "butt";
+
+      strokedEls.forEach((el) => {
+        const shape = shapeToD(el);
+        if (!shape) return;
+        const strokeColor = el.getAttribute("stroke") ?? "#000000";
+        const strokeWidth = parseFloat(el.getAttribute("stroke-width") ?? "1") || 1;
+        const fill = el.getAttribute("fill");
+
+        const points = flattenD(shape.d);
+        if (points.length < 2) return;
+
+        const outline = strokeToFillOutline(points, shape.closed, strokeWidth, cap);
+
+        const outlinePath = document.createElementNS(NS, "path");
+        outlinePath.setAttribute("d", outline.d);
+        outlinePath.setAttribute("fill", strokeColor);
+        if (outline.evenOdd) outlinePath.setAttribute("fill-rule", "evenodd");
+
+        el.removeAttribute("stroke");
+        el.removeAttribute("stroke-width");
+        el.removeAttribute("stroke-linecap");
+        el.removeAttribute("stroke-linejoin");
+
+        if (!fill || fill === "none") {
+          el.replaceWith(outlinePath);
+        } else {
+          el.after(outlinePath);
+        }
+      });
+
+      const serializer = new XMLSerializer();
+      const outputMarkup = serializer.serializeToString(svgEl);
+
+      markupOutput.textContent = outputMarkup;
+      preview.innerHTML = "";
+      const clone = svgEl.cloneNode(true) as SVGElement;
+      clone.setAttribute("class", "max-h-full max-w-full");
+      preview.appendChild(clone);
+    }
+
+    convertBtn.addEventListener("click", convert);
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        codeInput.value = String(reader.result ?? "");
+      };
+      reader.readAsText(file);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      codeInput.value = "";
+      preview.innerHTML = '<span class="text-sm text-slate-400">Click Convert to see the result</span>';
+      markupOutput.textContent = "—";
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      const text = markupOutput.textContent ?? "";
+      if (!text || text === "—") return;
+      await navigator.clipboard.writeText(text);
+      const icon = copyBtn.querySelector("[data-copy-icon]")!;
+      const label = copyBtn.querySelector("[data-copy-label]")!;
+      icon.innerHTML = `<path d="M20 6L9 17l-5-5"/>`;
+      label.textContent = "Copied";
+      setTimeout(() => {
+        icon.innerHTML = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+        label.textContent = "Copy";
+      }, 1500);
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      const text = markupOutput.textContent ?? "";
+      if (!text || text === "—") return;
+      const blob = new Blob([text], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "stroke-to-fill.svg";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-stroke-to-fill]").forEach(initStrokeToFill);
+</script>

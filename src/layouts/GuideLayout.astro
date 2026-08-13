@@ -1,0 +1,315 @@
+---
+import MainLayout from './MainLayout.astro';
+
+interface RelatedTool {
+  slug: string;
+  category: string;
+  title: string;
+  description: string;
+}
+
+interface OtherGuide {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+}
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Faq {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  image: string;
+  imageAlt: string;
+  publishDate: Date;
+  updatedDate?: Date;
+  relatedTools?: RelatedTool[];
+  otherGuides?: OtherGuide[];
+  headings?: Heading[];
+  faqs?: Faq[];
+  canonicalUrl: string;
+}
+
+const {
+  title,
+  description,
+  metaTitle,
+  metaDescription,
+  image,
+  imageAlt,
+  publishDate,
+  updatedDate,
+  relatedTools = [],
+  otherGuides = [],
+  headings = [],
+  faqs = [],
+  canonicalUrl,
+} = Astro.props;
+
+const formattedPublish = publishDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+const formattedUpdated = updatedDate
+  ? updatedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  : null;
+
+const absoluteImage = new URL(image, canonicalUrl).toString();
+
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description,
+  image: absoluteImage,
+  datePublished: publishDate.toISOString(),
+  ...(updatedDate ? { dateModified: updatedDate.toISOString() } : {}),
+  author: { '@type': 'Organization', name: 'Pixelquil' },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Pixelquil',
+    logo: { '@type': 'ImageObject', url: new URL('/favicon.svg', canonicalUrl).toString() },
+  },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: '/' },
+    { '@type': 'ListItem', position: 2, name: 'Guides', item: '/guides/' },
+    { '@type': 'ListItem', position: 3, name: title },
+  ],
+};
+
+const faqJsonLd =
+  faqs.length > 0
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.question,
+          acceptedAnswer: { '@type': 'Answer', text: f.answer },
+        })),
+      }
+    : null;
+---
+
+<MainLayout title={metaTitle || title} description={metaDescription || description}>
+  <link rel="canonical" href={canonicalUrl} slot="head" />
+  <meta property="og:type" content="article" slot="head" />
+  <meta property="og:title" content={metaTitle || title} slot="head" />
+  <meta property="og:description" content={metaDescription || description} slot="head" />
+  <meta property="og:image" content={absoluteImage} slot="head" />
+  <meta property="og:url" content={canonicalUrl} slot="head" />
+  <meta name="twitter:card" content="summary_large_image" slot="head" />
+  <meta name="twitter:title" content={metaTitle || title} slot="head" />
+  <meta name="twitter:description" content={metaDescription || description} slot="head" />
+  <meta name="twitter:image" content={absoluteImage} slot="head" />
+
+  <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  {faqJsonLd && <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />}
+
+  <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+    <nav class="mb-6 text-sm text-slate-500" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-brand-600">Home</a>
+      <span class="mx-1.5">/</span>
+      <a href="/guides/" class="hover:text-brand-600">Guides</a>
+      <span class="mx-1.5">/</span>
+      <span class="text-slate-700">{title}</span>
+    </nav>
+
+    <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">{title}</h1>
+    <p class="text-lg text-slate-600 mb-4">{description}</p>
+    <p class="text-xs text-slate-400 mb-6">
+      Published {formattedPublish}
+      {formattedUpdated ? <> &middot; Updated {formattedUpdated}</> : null}
+    </p>
+
+    <figure class="mb-8">
+      <img
+        src={image}
+        alt={imageAlt}
+        class="w-full rounded-xl border border-slate-200"
+        width="1200"
+        height="630"
+        loading="eager"
+      />
+    </figure>
+
+    {tocHeadings.length > 0 && (
+      <nav class="mb-10 rounded-xl border border-slate-200 bg-slate-50 p-5" aria-label="Table of contents">
+        <p class="text-sm font-semibold text-slate-800 mb-2">In this guide</p>
+        <ul class="space-y-1.5 text-sm">
+          {tocHeadings.map((h) => (
+            <li class={h.depth === 3 ? 'pl-4' : ''}>
+              <a href={`#${h.slug}`} class="text-brand-600 hover:underline">{h.text}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    <div class="article-body">
+      <slot />
+    </div>
+
+    {faqs.length > 0 && (
+      <div class="mt-14 border-t border-slate-200 pt-8">
+        <h2 class="text-xl font-semibold text-slate-900 mb-4">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faqs.map((faq) => (
+            <div class="rounded-lg border border-slate-200 p-4">
+              <p class="font-medium text-slate-900 mb-1">{faq.question}</p>
+              <p class="text-sm text-slate-600">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {relatedTools.length > 0 && (
+      <div class="mt-14 border-t border-slate-200 pt-8">
+        <h2 class="text-xl font-semibold text-slate-900 mb-4">Related tools</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {relatedTools.map((tool) => (
+            <a
+              href={`/${tool.category}/${tool.slug}/`}
+              class="block rounded-xl border border-slate-200 p-4 hover:border-brand-400 hover:shadow-sm transition-all"
+            >
+              <p class="font-medium text-slate-900">{tool.title}</p>
+              <p class="text-sm text-slate-500 mt-1">{tool.description}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <div class="mt-14 border-t border-slate-200 pt-8">
+      <h2 class="text-xl font-semibold text-slate-900 mb-4">Read more guides</h2>
+      {otherGuides.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {otherGuides.map((guide) => (
+            <a
+              href={`/guides/${guide.id}/`}
+              class="block rounded-xl border border-slate-200 overflow-hidden hover:border-brand-400 hover:shadow-sm transition-all"
+            >
+              <img src={guide.image} alt="" class="w-full h-32 object-cover" />
+              <div class="p-4">
+                <p class="font-medium text-slate-900">{guide.title}</p>
+                <p class="text-sm text-slate-500 mt-1">{guide.description}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <a
+          href="/guides/"
+          class="block rounded-xl border border-dashed border-slate-300 p-5 text-center hover:border-brand-400 transition-colors"
+        >
+          <p class="font-medium text-slate-700">More guides are on the way</p>
+          <p class="text-sm text-slate-500 mt-1">Browse all guides →</p>
+        </a>
+      )}
+    </div>
+  </div>
+
+  <style>
+    /* Slotted content comes from a separate markdown file, which Astro's
+       normal scoped styles never reach — :global() is required here on
+       purpose, not a mistake, so these rules actually apply to it. */
+    .article-body :global(h2) {
+      font-size: 1.5rem;
+      line-height: 1.3;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .article-body :global(h3) {
+      font-size: 1.25rem;
+      line-height: 1.35;
+      font-weight: 600;
+      color: #0f172a;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    .article-body :global(p) {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #334155;
+      margin-bottom: 1.35rem;
+    }
+    .article-body :global(ul),
+    .article-body :global(ol) {
+      margin-bottom: 1.35rem;
+      padding-left: 1.5rem;
+    }
+    .article-body :global(ul) {
+      list-style-type: disc;
+    }
+    .article-body :global(ol) {
+      list-style-type: decimal;
+    }
+    .article-body :global(li) {
+      line-height: 1.75;
+      color: #334155;
+      margin-bottom: 0.5rem;
+    }
+    .article-body :global(li > p) {
+      margin-bottom: 0.25rem;
+    }
+    .article-body :global(a) {
+      color: #4f46e5;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .article-body :global(a:hover) {
+      text-decoration: underline;
+    }
+    .article-body :global(strong) {
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .article-body :global(figure) {
+      margin: 2rem 0;
+    }
+    .article-body :global(figure img) {
+      border-radius: 0.75rem;
+      border: 1px solid #e2e8f0;
+      width: 100%;
+    }
+    .article-body :global(figcaption) {
+      text-align: center;
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-top: 0.5rem;
+    }
+    .article-body :global(pre) {
+      margin-bottom: 1.5rem;
+      border-radius: 0.75rem;
+    }
+    .article-body :global(code) {
+      font-size: 0.9em;
+    }
+  </style>
+</MainLayout>

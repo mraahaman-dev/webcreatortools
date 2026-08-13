@@ -2,6 +2,11 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import CategoryCard from '../components/home/CategoryCard.astro';
 import ToolCard from '../components/home/ToolCard.astro';
+import HeroVisual from '../components/home/HeroVisual.astro';
+import RecentTools from '../components/home/RecentTools.astro';
+import WhyChooseUs from '../components/home/WhyChooseUs.astro';
+import UseCases from '../components/home/UseCases.astro';
+import HomeFaq from '../components/home/HomeFaq.astro';
 
 const tools = [
   {
@@ -76,36 +81,42 @@ const categories = [
 <MainLayout>
 
   <!-- Hero -->
-  <section class="mx-auto max-w-6xl px-4 py-20 text-center">
-    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
-      Powerful web tools. Zero installs.
-    </span>
+  <section class="mx-auto max-w-6xl px-4 py-20">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+      <div>
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
+          Powerful web tools. Zero installs.
+        </span>
 
-    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">
-      Edit SVGs. Build Faster.
-      <span class="text-brand-600"> Fix Technical SEO.</span>
-    </h1>
+        <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">
+          Edit SVGs. Build Faster.
+          <span class="text-brand-600"> Fix Technical SEO.</span>
+        </h1>
 
-    <p class="mx-auto mt-4 max-w-xl text-slate-600">
-      A privacy first toolkit for designers, developers, and website owners. Edit SVG files, generate website configs, and run technical SEO checks, right in your browser.
-    </p>
+        <p class="mt-4 max-w-xl text-slate-600">
+          A privacy first toolkit for designers, developers, and website owners. Edit SVG files, generate website configs, and run technical SEO checks, right in your browser.
+        </p>
 
-    <div class="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
-      <a href="/svg-tools/svg-editor/"
-        class="rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-      >
-        Try SVG Editor
-      </a>
-      <a href="/tools/"
-        class="rounded-lg border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-500 hover:text-brand-600"
-      >
-        Explore All Tools
-      </a>
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <a href="/svg-tools/svg-editor/"
+            class="rounded-lg bg-brand-600 px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-700"
+          >
+            Try SVG Editor
+          </a>
+          <a href="/tools/"
+            class="rounded-lg border border-slate-300 px-6 py-3 text-center text-sm font-semibold text-slate-700 transition-colors hover:border-brand-500 hover:text-brand-600"
+          >
+            Explore All Tools
+          </a>
+        </div>
+
+        <p class="mt-6 text-xs text-slate-500">
+          No signup for basic tools &middot; Browser based &middot; Fast exports
+        </p>
+      </div>
+
+      <HeroVisual />
     </div>
-
-    <p class="mt-6 text-xs text-slate-500">
-      No signup for basic tools &middot; Browser based &middot; Fast exports
-    </p>
   </section>
 
   <!-- Explore by Category -->
@@ -145,5 +156,13 @@ const categories = [
       {tools.map((tool) => <ToolCard {...tool} />)}
     </div>
   </section>
+
+<RecentTools />
+
+  <WhyChooseUs />
+
+  <UseCases />
+
+  <HomeFaq />
 
 </MainLayout>

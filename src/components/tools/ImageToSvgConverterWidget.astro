@@ -1,0 +1,280 @@
+---
+---
+
+<div data-image-to-svg-converter-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div
+    data-drop-zone
+    class="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50/40 transition-colors"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M4 6h16v12H4V6z"></path>
+    </svg>
+    <p class="text-sm text-gray-600">
+      <span class="font-semibold text-purple-600">Click to upload</span> or drag and drop
+    </p>
+    <p class="text-xs text-gray-400">PNG, JPG, or WEBP</p>
+    <input type="file" data-file-input accept="image/png,image/jpeg,image/webp" class="hidden" />
+  </div>
+
+  <div data-workspace class="hidden mt-5">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Style</label>
+        <select
+          data-preset-select
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+        >
+          <option value="default">Default</option>
+          <option value="sharp">Sharp</option>
+          <option value="smoothed">Smoothed</option>
+          <option value="curvy">Curvy</option>
+          <option value="detailed">Detailed</option>
+          <option value="posterized2">Posterized</option>
+          <option value="grayscale">Grayscale</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Colors</label>
+        <input
+          type="number"
+          data-colors-input
+          min="2"
+          max="64"
+          value="16"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">Output scale</label>
+        <input
+          type="number"
+          data-scale-input
+          min="1"
+          max="8"
+          step="0.5"
+          value="1"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+        />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+      <div>
+        <p class="text-xs font-medium text-gray-600 mb-1">Original</p>
+        <div class="rounded-lg border border-gray-200 bg-gray-50 p-2 flex items-center justify-center min-h-[180px]">
+          <img data-original-preview class="max-h-56 max-w-full object-contain" alt="Uploaded image preview" />
+        </div>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-gray-600 mb-1">Traced SVG</p>
+        <div data-svg-preview class="rounded-lg border border-gray-200 bg-gray-50 p-2 flex items-center justify-center min-h-[180px]">
+          <p data-preview-hint class="text-sm text-gray-400">Click Trace to generate the SVG</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-2">
+      <button
+        type="button"
+        data-trace-btn
+        class="flex-1 inline-flex items-center justify-center rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-700 transition-colors"
+      >
+        Trace Image
+      </button>
+      <button
+        type="button"
+        data-download-btn
+        disabled
+        class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        Download SVG
+      </button>
+      <button
+        type="button"
+        data-reset-btn
+        class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        New Image
+      </button>
+    </div>
+
+    <p data-status-message class="mt-3 text-xs text-gray-500"></p>
+  </div>
+</div>
+
+<script>
+  // @ts-ignore - imagetracerjs ships no TypeScript declarations
+  import * as ImageTracerModule from "imagetracerjs";
+  const ImageTracer: any = (ImageTracerModule as any).default ?? ImageTracerModule;
+
+  const MAX_DIMENSION = 1000;
+
+  function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(img);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("Could not load this image file."));
+      };
+      img.src = url;
+    });
+  }
+
+  function drawToCanvas(img: HTMLImageElement): HTMLCanvasElement {
+    let { width, height } = img;
+    if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+      const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+      width = Math.round(width * ratio);
+      height = Math.round(height * ratio);
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas is not supported in this browser.");
+    ctx.drawImage(img, 0, 0, width, height);
+    return canvas;
+  }
+
+  function initImageToSvgConverter(root: HTMLElement) {
+    const dropZone = root.querySelector<HTMLElement>("[data-drop-zone]");
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]");
+    const workspace = root.querySelector<HTMLElement>("[data-workspace]");
+    const presetSelect = root.querySelector<HTMLSelectElement>("[data-preset-select]");
+    const colorsInput = root.querySelector<HTMLInputElement>("[data-colors-input]");
+    const scaleInput = root.querySelector<HTMLInputElement>("[data-scale-input]");
+    const originalPreview = root.querySelector<HTMLImageElement>("[data-original-preview]");
+    const svgPreview = root.querySelector<HTMLElement>("[data-svg-preview]");
+    const previewHint = root.querySelector<HTMLElement>("[data-preview-hint]");
+    const traceBtn = root.querySelector<HTMLButtonElement>("[data-trace-btn]");
+    const downloadBtn = root.querySelector<HTMLButtonElement>("[data-download-btn]");
+    const resetBtn = root.querySelector<HTMLButtonElement>("[data-reset-btn]");
+    const statusMessage = root.querySelector<HTMLElement>("[data-status-message]");
+
+    if (
+      !dropZone || !fileInput || !workspace || !presetSelect || !colorsInput || !scaleInput ||
+      !originalPreview || !svgPreview || !previewHint || !traceBtn || !downloadBtn || !resetBtn || !statusMessage
+    ) {
+      return;
+    }
+
+    let currentFile: File | null = null;
+    let lastSvgString = "";
+
+    function setStatus(message: string, isError = false) {
+      statusMessage!.textContent = message;
+      statusMessage!.classList.toggle("text-red-600", isError);
+      statusMessage!.classList.toggle("text-gray-500", !isError);
+    }
+
+    function handleFile(file: File) {
+      if (!file.type.startsWith("image/")) {
+        setStatus("Please choose a PNG, JPG, or WEBP image.", true);
+        return;
+      }
+      currentFile = file;
+      lastSvgString = "";
+      downloadBtn!.disabled = true;
+      originalPreview!.src = URL.createObjectURL(file);
+      svgPreview!.innerHTML = "";
+      svgPreview!.appendChild(previewHint!);
+      previewHint!.textContent = "Click Trace to generate the SVG";
+      workspace!.classList.remove("hidden");
+      setStatus("");
+    }
+
+    async function trace() {
+      if (!currentFile) return;
+      traceBtn!.disabled = true;
+      setStatus("Tracing image, this can take a few seconds for detailed images…");
+
+      try {
+        const img = await loadImageFromFile(currentFile);
+        const canvas = drawToCanvas(img);
+        const ctx = canvas.getContext("2d")!;
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        const preset = ImageTracer.optionpresets?.[presetSelect!.value] ?? {};
+        const numberofcolors = Math.max(2, Math.min(64, parseInt(colorsInput!.value, 10) || 16));
+        const scale = Math.max(1, Math.min(8, parseFloat(scaleInput!.value) || 1));
+        const options = Object.assign({}, preset, { numberofcolors, scale, viewbox: true });
+
+        const svgString = ImageTracer.imagedataToSVG(imageData, options);
+
+        svgPreview!.innerHTML = svgString;
+        const svgEl = svgPreview!.querySelector("svg");
+        if (svgEl) {
+          svgEl.style.width = "100%";
+          svgEl.style.height = "auto";
+        }
+
+        lastSvgString = svgString;
+        downloadBtn!.disabled = false;
+        setStatus(`Done — ${(svgString.length / 1024).toFixed(1)} KB of SVG generated.`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Could not trace this image.";
+        setStatus(message, true);
+      } finally {
+        traceBtn!.disabled = false;
+      }
+    }
+
+    dropZone.addEventListener("click", () => fileInput!.click());
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone!.classList.add("border-purple-400", "bg-purple-50/40");
+    });
+    dropZone.addEventListener("dragleave", () => {
+      dropZone!.classList.remove("border-purple-400", "bg-purple-50/40");
+    });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone!.classList.remove("border-purple-400", "bg-purple-50/40");
+      const file = e.dataTransfer?.files?.[0];
+      if (file) handleFile(file);
+    });
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput!.files?.[0];
+      if (file) handleFile(file);
+    });
+
+    traceBtn.addEventListener("click", trace);
+    presetSelect.addEventListener("change", () => {
+      if (lastSvgString) trace();
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      if (!lastSvgString) return;
+      const blob = new Blob([lastSvgString], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "traced-image.svg";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    });
+
+    resetBtn.addEventListener("click", () => {
+      currentFile = null;
+      lastSvgString = "";
+      fileInput!.value = "";
+      workspace!.classList.add("hidden");
+      downloadBtn!.disabled = true;
+      setStatus("");
+    });
+  }
+
+  document
+    .querySelectorAll<HTMLElement>("[data-image-to-svg-converter-widget]")
+    .forEach(initImageToSvgConverter);
+</script>

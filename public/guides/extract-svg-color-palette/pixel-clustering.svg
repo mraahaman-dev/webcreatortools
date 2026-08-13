@@ -1,0 +1,42 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FAFAF9"/>
+  <text x="400" y="40" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#0F172A">Clustering pixels into a palette</text>
+
+  <!-- Scattered pixel dots representing sampled colors, grouped by proximity -->
+  <g>
+    <!-- cluster 1 (blue-ish) -->
+    <circle cx="140" cy="120" r="7" fill="#4F46E5"/>
+    <circle cx="160" cy="105" r="7" fill="#4E45E3"/>
+    <circle cx="120" cy="140" r="7" fill="#524FE8"/>
+    <circle cx="155" cy="145" r="7" fill="#4D44E2"/>
+    <circle cx="130" cy="105" r="7" fill="#5148E6"/>
+
+    <!-- cluster 2 (amber-ish) -->
+    <circle cx="320" cy="180" r="7" fill="#F59E0B"/>
+    <circle cx="340" cy="165" r="7" fill="#F7A31A"/>
+    <circle cx="305" cy="195" r="7" fill="#EE9605"/>
+    <circle cx="335" cy="200" r="7" fill="#F5A012"/>
+
+    <!-- cluster 3 (dark-ish) -->
+    <circle cx="220" cy="250" r="7" fill="#0F172A"/>
+    <circle cx="240" cy="240" r="7" fill="#131A30"/>
+    <circle cx="205" cy="265" r="7" fill="#0C1424"/>
+  </g>
+
+  <!-- arrows converging to swatches -->
+  <path d="M145 140 C 250 220, 350 280, 440 300" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+  <path d="M325 190 C 380 250, 420 280, 440 340" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+  <path d="M225 255 C 320 300, 400 320, 440 380" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+
+  <!-- resulting clean swatches -->
+  <g>
+    <rect x="450" y="280" width="220" height="40" rx="8" fill="#4F46E5"/>
+    <text x="680" y="305" font-family="monospace" font-size="12" fill="#4338CA">#4F46E5</text>
+
+    <rect x="450" y="330" width="220" height="40" rx="8" fill="#F59E0B"/>
+    <text x="680" y="355" font-family="monospace" font-size="12" fill="#B45309">#F59E0B</text>
+
+    <rect x="450" y="380" width="220" height="20" rx="6" fill="#0F172A"/>
+  </g>
+  <text x="560" y="415" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#64748B">One representative swatch per cluster</text>
+</svg>

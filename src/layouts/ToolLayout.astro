@@ -21,15 +21,7 @@ interface Props {
   howTo?: HowToStep[];
 }
 
-const {
-  title,
-  description,
-  category,
-  categorySlug,
-  toolSlug,
-  faqs = [],
-  howTo = [],
-} = Astro.props;
+const { title, description, category, categorySlug, toolSlug, faqs, howTo, iconPath, badgeColor } = Astro.props;
 
 const siteUrl = "https://webcreatortools.com"; // update once domain is live
 const pageUrl = `${siteUrl}/${categorySlug}/${toolSlug}/`;
@@ -135,6 +127,33 @@ const howToSchema = howTo.length > 0 ? {
   <section class="mx-auto max-w-6xl px-4 py-10">
     <slot name="content" />
   </section>
+
+  <script define:vars={{ title, categorySlug, toolSlug, iconPath, badgeColor }}>
+  (function () {
+    const STORAGE_KEY = "pixelquil-recent-tools";
+    const MAX_ENTRIES = 8;
+
+    try {
+      const href = `/${categorySlug}/${toolSlug}/`;
+      const entry = { title, href, iconPath, badgeColor, visitedAt: Date.now() };
+
+      let recent = [];
+      try {
+        recent = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch {
+        recent = [];
+      }
+
+      recent = recent.filter((r) => r.href !== href);
+      recent.unshift(entry);
+      recent = recent.slice(0, MAX_ENTRIES);
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(recent));
+    } catch {
+      // localStorage unavailable (private browsing, etc.) — fail silently.
+    }
+  })();
+</script>
 
   <!-- FAQ -->
   {faqs.length > 0 && (

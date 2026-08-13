@@ -24,7 +24,44 @@ import MarkdownPreviewWidget from '../../components/tools/MarkdownPreviewWidget.
 import PlaceholderTextGeneratorWidget from '../../components/tools/PlaceholderTextGeneratorWidget.astro';
 import QrCodeGeneratorWidget from '../../components/tools/QrCodeGeneratorWidget.astro';
 import YamlJsonConverterWidget from '../../components/tools/YamlJsonConverterWidget.astro';
+import SvgOptimizerWidget from '../../components/tools/SvgOptimizerWidget.astro';
+import SvgGradientWidget from '../../components/tools/SvgGradientWidget.astro';
+import SvgPatternWidget from '../../components/tools/SvgPatternWidget.astro';
+import BlobGeneratorWidget from '../../components/tools/BlobGeneratorWidget.astro';
+import ClipPathWidget from '../../components/tools/ClipPathWidget.astro';
+import SvgAccessibilityWidget from '../../components/tools/SvgAccessibilityWidget.astro';
+import ImageToSvgConverterWidget from '../../components/tools/ImageToSvgConverterWidget.astro';
+import SvgToPngBatchWidget from '../../components/tools/SvgToPngBatchWidget.astro';
 import ComingSoonWidget from '../../components/tools/ComingSoonWidget.astro';
+import SvgToReactWidget from '../../components/tools/SvgToReactWidget.astro';
+import BatchColorReplacerWidget from '../../components/tools/BatchColorReplacerWidget.astro';
+import FaviconGeneratorWidget from '../../components/tools/FaviconGeneratorWidget.astro';
+import SvgSpriteGeneratorWidget from '../../components/tools/SvgSpriteGeneratorWidget.astro';
+import SvgPathEditorWidget from '../../components/tools/SvgPathEditorWidget.astro';
+import StrokeToFillWidget from '../../components/tools/StrokeToFillWidget.astro';
+import TextToSvgPathWidget from '../../components/tools/TextToSvgPathWidget.astro';
+import RobotsTxtTesterWidget from '../../components/tools/RobotsTxtTesterWidget.astro';
+import AiCrawlerCheckerWidget from '../../components/tools/AiCrawlerCheckerWidget.astro';
+import XmlSitemapGeneratorWidget from '../../components/tools/XmlSitemapGeneratorWidget.astro';
+import XmlSitemapValidatorWidget from '../../components/tools/XmlSitemapValidatorWidget.astro';
+import SerpSnippetPreviewWidget from '../../components/tools/SerpSnippetPreviewWidget.astro';
+import OgGeneratorWidget from '../../components/tools/OgGeneratorWidget.astro';
+import JsonLdGeneratorWidget from '../../components/tools/JsonLdGeneratorWidget.astro';
+import SchemaValidatorWidget from '../../components/tools/SchemaValidatorWidget.astro';
+import TwitterCardValidatorWidget from '../../components/tools/TwitterCardValidatorWidget.astro';
+import CanonicalTagCheckerWidget from '../../components/tools/CanonicalTagCheckerWidget.astro';
+import HreflangToolWidget from '../../components/tools/HreflangToolWidget.astro';
+import RedirectChainWidget from '../../components/tools/RedirectChainWidget.astro';
+import HttpHeaderCheckerWidget from '../../components/tools/HttpHeaderCheckerWidget.astro';
+import BrokenLinkCheckerWidget from '../../components/tools/BrokenLinkCheckerWidget.astro';
+import RobotsMetaTagWidget from '../../components/tools/RobotsMetaTagWidget.astro';
+import HtaccessRedirectWidget from '../../components/tools/HtaccessRedirectWidget.astro';
+import SeoSlugWidget from '../../components/tools/SeoSlugWidget.astro';
+import KeywordDensityWidget from '../../components/tools/KeywordDensityWidget.astro';
+import SlugGeneratorWidget from '../../components/tools/SlugGeneratorWidget.astro';
+import TextHtmlRatioWidget from '../../components/tools/TextHtmlRatioWidget.astro';
+import AltTextAuditorWidget from '../../components/tools/AltTextAuditorWidget.astro';
+import MetaTagExtractorWidget from '../../components/tools/MetaTagExtractorWidget.astro';
 
 
 export function getStaticPaths() {
@@ -62,6 +99,43 @@ const widgets: Record<string, any> = {
   "placeholder-text-generator": PlaceholderTextGeneratorWidget,
   "qr-code-generator": QrCodeGeneratorWidget,
   "yaml-json-converter": YamlJsonConverterWidget,
+  "svg-optimizer": SvgOptimizerWidget,
+  "svg-gradient-generator": SvgGradientWidget,
+  "svg-pattern-generator": SvgPatternWidget,
+  "blob-shape-generator": BlobGeneratorWidget,
+  "clip-path-generator": ClipPathWidget,
+  "svg-accessibility-checker": SvgAccessibilityWidget,
+  "image-to-svg-converter": ImageToSvgConverterWidget,
+  "svg-to-png-batch": SvgToPngBatchWidget,
+  "svg-sprite-generator": SvgSpriteGeneratorWidget,
+  "svg-to-react-component": SvgToReactWidget,
+  "batch-color-replacer": BatchColorReplacerWidget,
+  "favicon-generator": FaviconGeneratorWidget,
+  "stroke-to-fill-converter": StrokeToFillWidget,
+  "svg-path-editor": SvgPathEditorWidget,
+  "text-to-svg-path": TextToSvgPathWidget,
+  "robots-txt-tester": RobotsTxtTesterWidget,
+  "ai-crawler-access-checker": AiCrawlerCheckerWidget,
+  "xml-sitemap-generator": XmlSitemapGeneratorWidget,
+  "xml-sitemap-validator": XmlSitemapValidatorWidget,
+  "serp-snippet-preview": SerpSnippetPreviewWidget,
+  "open-graph-generator": OgGeneratorWidget,
+  "json-ld-schema-generator": JsonLdGeneratorWidget,
+  "schema-markup-validator": SchemaValidatorWidget,
+  "twitter-card-validator": TwitterCardValidatorWidget,
+   "canonical-tag-checker": CanonicalTagCheckerWidget,
+   "hreflang-tag-generator": HreflangToolWidget,
+   "redirect-chain-checker": RedirectChainWidget,
+   "http-header-checker": HttpHeaderCheckerWidget,
+   "broken-link-checker": BrokenLinkCheckerWidget,
+   "robots-meta-tag-generator": RobotsMetaTagWidget,
+   "htaccess-redirect-generator": HtaccessRedirectWidget,
+   "seo-url-slug-generator": SeoSlugWidget,
+   "keyword-density-checker": KeywordDensityWidget,
+   "seo-url-slug-generator": SlugGeneratorWidget,
+   "text-to-html-ratio-checker": TextHtmlRatioWidget,
+   "image-alt-text-auditor": AltTextAuditorWidget,
+   "meta-tag-extractor": MetaTagExtractorWidget,
 };
 
 const Widget = widgets[tool.slug] ?? ComingSoonWidget;
@@ -75,6 +149,8 @@ const Widget = widgets[tool.slug] ?? ComingSoonWidget;
   toolSlug={tool.slug}
   faqs={tool.faqs}
   howTo={tool.howTo}
+  iconPath={tool.iconPath}
+  badgeColor={tool.badgeColor}
 >
   <Widget />
 

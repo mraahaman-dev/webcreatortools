@@ -1,0 +1,27 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#F5F3FF"/>
+
+  <!-- Logo mark on the left -->
+  <g transform="translate(190,190)">
+    <circle cx="0" cy="0" r="70" fill="#4F46E5"/>
+    <path d="M-30 10a30 30 0 1160 0" fill="none" stroke="#F59E0B" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="0" cy="-25" r="10" fill="#0F172A"/>
+  </g>
+
+  <!-- Dashed extraction lines -->
+  <path d="M255 155 C 350 120, 420 110, 470 108" stroke="#A78BFA" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
+  <path d="M260 195 C 350 195, 420 195, 470 195" stroke="#A78BFA" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
+  <path d="M245 235 C 350 270, 420 280, 470 282" stroke="#A78BFA" stroke-width="2" stroke-dasharray="5 4" fill="none"/>
+
+  <!-- Extracted swatches on the right -->
+  <g>
+    <rect x="480" y="88" width="200" height="40" rx="8" fill="#4F46E5"/>
+    <text x="690" y="113" font-family="monospace" font-size="13" fill="#4338CA">#4F46E5</text>
+
+    <rect x="480" y="175" width="200" height="40" rx="8" fill="#F59E0B"/>
+    <text x="690" y="200" font-family="monospace" font-size="13" fill="#B45309">#F59E0B</text>
+
+    <rect x="480" y="262" width="200" height="40" rx="8" fill="#0F172A"/>
+    <text x="690" y="287" font-family="monospace" font-size="13" fill="#334155">#0F172A</text>
+  </g>
+</svg>

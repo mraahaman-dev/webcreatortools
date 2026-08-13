@@ -1,0 +1,349 @@
+---
+---
+
+<div data-svg-to-react-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Component name</label>
+      <input
+        type="text"
+        data-component-name
+        value="Icon"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+      />
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Framework</label>
+      <select
+        data-framework-select
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+      >
+        <option value="react-tsx">React (TSX)</option>
+        <option value="react-jsx">React (JSX)</option>
+        <option value="vue">Vue 3 (SFC)</option>
+      </select>
+    </div>
+
+    <div class="flex items-end">
+      <label class="flex items-center gap-2 text-xs text-gray-600 mb-2 select-none">
+        <input type="checkbox" data-current-color-checkbox class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+        Replace fill/stroke with currentColor
+      </label>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Paste SVG markup</label>
+      <textarea
+        data-svg-input
+        rows="14"
+        spellcheck="false"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y"
+      ></textarea>
+    </div>
+
+    <div class="relative">
+      <label class="block text-xs font-medium text-gray-600 mb-1">Component output</label>
+      <textarea
+        data-output
+        readonly
+        rows="14"
+        spellcheck="false"
+        class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y"
+      ></textarea>
+
+      <button
+        type="button"
+        data-copy-btn
+        class="absolute top-8 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors"
+      >
+        <svg data-copy-icon xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        <svg data-copy-check xmlns="http://www.w3.org/2000/svg" class="hidden h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span data-copy-label>Copy</span>
+      </button>
+    </div>
+  </div>
+
+  <p data-error-message class="mt-3 text-xs text-red-600 whitespace-pre-wrap"></p>
+</div>
+
+<script>
+  const DEBOUNCE_MS = 250;
+
+  const EXAMPLE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M20 6L9 17l-5-5" />
+</svg>`;
+
+  const XLINK_MAP: Record<string, string> = {
+    "xlink:href": "xlinkHref",
+    "xlink:show": "xlinkShow",
+    "xlink:role": "xlinkRole",
+    "xlink:title": "xlinkTitle",
+    "xlink:type": "xlinkType",
+    "xlink:actuate": "xlinkActuate",
+    "xlink:arcrole": "xlinkArcrole",
+    "xml:base": "xmlBase",
+    "xml:lang": "xmlLang",
+    "xml:space": "xmlSpace",
+  };
+
+  function isValidJsIdentifier(key: string): boolean {
+    return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key);
+  }
+
+  function cssTextToObjectLiteral(styleText: string): string {
+    const declarations = styleText.split(";").map((s) => s.trim()).filter(Boolean);
+    const entries: string[] = [];
+    for (const decl of declarations) {
+      const idx = decl.indexOf(":");
+      if (idx === -1) continue;
+      const rawProp = decl.slice(0, idx).trim();
+      const rawValue = decl.slice(idx + 1).trim();
+      if (!rawProp || !rawValue) continue;
+      let propKey: string;
+      if (rawProp.startsWith("--")) {
+        propKey = JSON.stringify(rawProp);
+      } else {
+        const camel = rawProp.replace(/-([a-z])/g, (_m, c) => c.toUpperCase());
+        propKey = isValidJsIdentifier(camel) ? camel : JSON.stringify(rawProp);
+      }
+      entries.push(`${propKey}: ${JSON.stringify(rawValue)}`);
+    }
+    return entries.length ? `{ ${entries.join(", ")} }` : "{}";
+  }
+
+  function reactAttrName(name: string): string | null {
+    if (name.startsWith("aria-") || name.startsWith("data-")) return name;
+    if (name === "class") return "className";
+    if (name === "for") return "htmlFor";
+    if (XLINK_MAP[name]) return XLINK_MAP[name];
+    if (name === "xmlns:xlink") return null;
+    if (name.includes(":")) return null;
+    if (name.includes("-")) {
+      return name.replace(/-([a-z0-9])/g, (_m, c) => c.toUpperCase());
+    }
+    return name;
+  }
+
+  function elementChildren(el: Element): ChildNode[] {
+    return Array.from(el.childNodes).filter(
+      (n) => n.nodeType === 1 || (n.nodeType === 3 && !!n.textContent && n.textContent.trim().length > 0)
+    );
+  }
+
+  function elementToJsx(el: Element, depth: number, useCurrentColor: boolean, isRoot: boolean): string {
+    const indent = "  ".repeat(depth);
+    const tag = el.tagName;
+    const attrParts: string[] = [];
+
+    for (const attr of Array.from(el.attributes)) {
+      const name = attr.name;
+      let value = attr.value;
+
+      if (useCurrentColor && (name === "fill" || name === "stroke") && value && value.toLowerCase() !== "none") {
+        value = "currentColor";
+      }
+
+      if (name === "style") {
+        attrParts.push(`style={${cssTextToObjectLiteral(value)}}`);
+        continue;
+      }
+
+      const reactName = reactAttrName(name);
+      if (reactName === null) continue;
+      attrParts.push(`${reactName}="${value.replace(/"/g, "&quot;")}"`);
+    }
+
+    if (isRoot) attrParts.push("{...props}");
+
+    const attrsStr = attrParts.length ? " " + attrParts.join(" ") : "";
+    const children = elementChildren(el);
+
+    if (children.length === 0) {
+      return `${indent}<${tag}${attrsStr} />`;
+    }
+
+    const childrenJsx = children
+      .map((child) => {
+        if (child.nodeType === 3) {
+          return `${"  ".repeat(depth + 1)}${(child.textContent || "").trim()}`;
+        }
+        return elementToJsx(child as Element, depth + 1, useCurrentColor, false);
+      })
+      .join("\n");
+
+    return `${indent}<${tag}${attrsStr}>\n${childrenJsx}\n${indent}</${tag}>`;
+  }
+
+  function elementToVueTemplate(el: Element, depth: number, useCurrentColor: boolean): string {
+    const indent = "  ".repeat(depth);
+    const tag = el.tagName;
+    const attrParts: string[] = [];
+
+    for (const attr of Array.from(el.attributes)) {
+      const name = attr.name;
+      let value = attr.value;
+      if (useCurrentColor && (name === "fill" || name === "stroke") && value && value.toLowerCase() !== "none") {
+        value = "currentColor";
+      }
+      attrParts.push(`${name}="${value.replace(/"/g, "&quot;")}"`);
+    }
+
+    const attrsStr = attrParts.length ? " " + attrParts.join(" ") : "";
+    const children = elementChildren(el);
+
+    if (children.length === 0) {
+      return `${indent}<${tag}${attrsStr} />`;
+    }
+
+    const childrenTpl = children
+      .map((child) => {
+        if (child.nodeType === 3) {
+          return `${"  ".repeat(depth + 1)}${(child.textContent || "").trim()}`;
+        }
+        return elementToVueTemplate(child as Element, depth + 1, useCurrentColor);
+      })
+      .join("\n");
+
+    return `${indent}<${tag}${attrsStr}>\n${childrenTpl}\n${indent}</${tag}>`;
+  }
+
+  function parseSvgRoot(svgText: string): Element {
+    const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
+    if (doc.querySelector("parsererror")) throw new Error("This doesn't look like valid SVG markup.");
+    const root = doc.documentElement;
+    if (root.tagName.toLowerCase() !== "svg") throw new Error("Paste markup starting with an <svg> element.");
+    return root;
+  }
+
+  function convertToReact(
+    svgText: string,
+    componentName: string,
+    useTypescript: boolean,
+    useCurrentColor: boolean
+  ): string {
+    const root = parseSvgRoot(svgText);
+    const jsx = elementToJsx(root, 2, useCurrentColor, true);
+
+    if (useTypescript) {
+      return `import * as React from "react";
+
+export interface ${componentName}Props extends React.SVGProps<SVGSVGElement> {}
+
+export function ${componentName}(props: ${componentName}Props) {
+  return (
+${jsx}
+  );
+}
+
+export default ${componentName};
+`;
+    }
+
+    return `import * as React from "react";
+
+export function ${componentName}(props) {
+  return (
+${jsx}
+  );
+}
+
+export default ${componentName};
+`;
+  }
+
+  function convertToVue(svgText: string, componentName: string, useCurrentColor: boolean): string {
+    const root = parseSvgRoot(svgText);
+    const template = elementToVueTemplate(root, 1, useCurrentColor);
+
+    return `<template>
+${template}
+</template>
+
+<script setup lang="ts">
+// ${componentName}.vue — class, style, and other attributes fall through to the root <svg> automatically.
+<\/script>
+`;
+  }
+
+  function initSvgToReact(root: HTMLElement) {
+    const svgInput = root.querySelector<HTMLTextAreaElement>("[data-svg-input]");
+    const componentNameInput = root.querySelector<HTMLInputElement>("[data-component-name]");
+    const frameworkSelect = root.querySelector<HTMLSelectElement>("[data-framework-select]");
+    const currentColorCheckbox = root.querySelector<HTMLInputElement>("[data-current-color-checkbox]");
+    const output = root.querySelector<HTMLTextAreaElement>("[data-output]");
+    const errorMessage = root.querySelector<HTMLElement>("[data-error-message]");
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]");
+    const copyIcon = root.querySelector<HTMLElement>("[data-copy-icon]");
+    const copyCheck = root.querySelector<HTMLElement>("[data-copy-check]");
+    const copyLabel = root.querySelector<HTMLElement>("[data-copy-label]");
+
+    if (
+      !svgInput || !componentNameInput || !frameworkSelect || !currentColorCheckbox ||
+      !output || !errorMessage || !copyBtn || !copyIcon || !copyCheck || !copyLabel
+    ) {
+      return;
+    }
+
+    let debounceTimer: number | undefined;
+
+    function convert() {
+      errorMessage!.textContent = "";
+      const svgText = svgInput!.value.trim();
+
+      if (!svgText) {
+        output!.value = "";
+        return;
+      }
+
+      const componentName = componentNameInput!.value.trim() || "Icon";
+      const useCurrentColor = currentColorCheckbox!.checked;
+      const framework = frameworkSelect!.value;
+
+      try {
+        if (framework === "vue") {
+          output!.value = convertToVue(svgText, componentName, useCurrentColor);
+        } else {
+          output!.value = convertToReact(svgText, componentName, framework === "react-tsx", useCurrentColor);
+        }
+      } catch (err) {
+        output!.value = "";
+        errorMessage!.textContent = err instanceof Error ? err.message : "Could not convert this SVG.";
+      }
+    }
+
+    function scheduleConvert() {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(convert, DEBOUNCE_MS);
+    }
+
+    svgInput.addEventListener("input", scheduleConvert);
+    componentNameInput.addEventListener("input", scheduleConvert);
+    frameworkSelect.addEventListener("change", convert);
+    currentColorCheckbox.addEventListener("change", convert);
+
+    copyBtn.addEventListener("click", async () => {
+      if (!output!.value) return;
+      try {
+        await navigator.clipboard.writeText(output!.value);
+        copyIcon!.classList.add("hidden");
+        copyCheck!.classList.remove("hidden");
+        copyLabel!.textContent = "Copied!";
+        setTimeout(() => {
+          copyIcon!.classList.remove("hidden");
+          copyCheck!.classList.add("hidden");
+          copyLabel!.textContent = "Copy";
+        }, 1500);
+      } catch {
+        // clipboard write failed silently; user can still select the text manually
+      }
+    });
+
+    svgInput.value = EXAMPLE_SVG;
+    convert();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-svg-to-react-widget]").forEach(initSvgToReact);
+</script>

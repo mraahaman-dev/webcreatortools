@@ -1,0 +1,161 @@
+<div class="clip-path-generator" data-clip-path-generator>
+  <div class="mb-4 flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Presets</span>
+    <button type="button" data-preset-btn data-preset="triangle" class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Triangle</button>
+    <button type="button" data-preset-btn data-preset="trapezoid" class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Trapezoid</button>
+    <button type="button" data-preset-btn data-preset="pentagon" class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Pentagon</button>
+    <button type="button" data-preset-btn data-preset="hexagon" class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Hexagon</button>
+    <button type="button" data-preset-btn data-preset="star" class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Star</button>
+    <button type="button" data-preset-btn data-preset="arrow" class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Arrow</button>
+    <button type="button" data-preset-btn data-preset="cross" class="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Cross</button>
+    <button type="button" data-reset-btn class="ml-auto rounded-lg border border-red-200 bg-white px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50">Reset</button>
+  </div>
+
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <p class="mb-2 text-xs text-slate-500">Click anywhere on the image to add a point. Drag a point to reposition it. Double-click a point to remove it.</p>
+    <div data-clip-preview
+      class="relative mx-auto h-72 w-full max-w-md cursor-crosshair overflow-hidden rounded-xl border border-slate-200"
+      style="background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 45%, #EC4899 100%);">
+      <svg data-clip-svg class="pointer-events-none absolute inset-0 h-full w-full">
+        <polygon data-clip-polygon fill="rgba(255,255,255,0.15)" stroke="white" stroke-width="2" stroke-dasharray="4 3" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">CSS clip-path</h3>
+      <button type="button" data-copy-btn
+        class="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600 hover:border-blue-300 hover:bg-blue-100">
+        <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        <span data-copy-label>Copy</span>
+      </button>
+    </div>
+    <pre data-css-output class="overflow-auto rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-800"></pre>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you build here is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  interface Point { id: number; x: number; y: number } // x, y as 0-100 percentages
+
+  let nextId = 1;
+
+  const PRESETS: Record<string, [number, number][]> = {
+    triangle: [[50, 0], [100, 100], [0, 100]],
+    trapezoid: [[20, 0], [80, 0], [100, 100], [0, 100]],
+    pentagon: [[50, 0], [100, 38], [82, 100], [18, 100], [0, 38]],
+    hexagon: [[25, 0], [75, 0], [100, 50], [75, 100], [25, 100], [0, 50]],
+    star: [[50, 0], [61, 35], [98, 35], [68, 57], [79, 91], [50, 70], [21, 91], [32, 57], [2, 35], [39, 35]],
+    arrow: [[0, 30], [55, 30], [55, 0], [100, 50], [55, 100], [55, 70], [0, 70]],
+    cross: [[35, 0], [65, 0], [65, 35], [100, 35], [100, 65], [65, 65], [65, 100], [35, 100], [35, 65], [0, 65], [0, 35], [35, 35]],
+  };
+
+  function initClipPathGenerator(root: HTMLElement) {
+    const previewEl = root.querySelector<HTMLDivElement>("[data-clip-preview]")!;
+    const svgEl = root.querySelector<SVGSVGElement>("[data-clip-svg]")!;
+    const polygonEl = root.querySelector<SVGPolygonElement>("[data-clip-polygon]")!;
+    const cssOutput = root.querySelector<HTMLPreElement>("[data-css-output]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+    const resetBtn = root.querySelector<HTMLButtonElement>("[data-reset-btn]")!;
+    const presetBtns = root.querySelectorAll<HTMLButtonElement>("[data-preset-btn]");
+
+    let points: Point[] = PRESETS.pentagon.map(([x, y]) => ({ id: nextId++, x, y }));
+    let draggingId: number | null = null;
+
+    function render() {
+      // Update the visual polygon overlay.
+      polygonEl.setAttribute("points", points.map((p) => `${p.x},${p.y}`).join(" "));
+      svgEl.setAttribute("viewBox", "0 0 100 100");
+      svgEl.setAttribute("preserveAspectRatio", "none");
+
+      // Apply the actual clip-path to the preview background so it's a live demo, not just an outline.
+      const clipValue = `polygon(${points.map((p) => `${p.x.toFixed(1)}% ${p.y.toFixed(1)}%`).join(", ")})`;
+      cssOutput.textContent = `clip-path: ${clipValue};`;
+
+      // Render draggable handles as HTML elements positioned absolutely (easier to hit-test than SVG circles here).
+      previewEl.querySelectorAll("[data-point-handle]").forEach((el) => el.remove());
+      points.forEach((p) => {
+        const handle = document.createElement("div");
+        handle.dataset.pointHandle = String(p.id);
+        handle.className = "absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 border-blue-600 bg-white shadow";
+        handle.style.left = `${p.x}%`;
+        handle.style.top = `${p.y}%`;
+
+        handle.addEventListener("pointerdown", (e) => {
+          e.stopPropagation();
+          draggingId = p.id;
+        });
+        handle.addEventListener("dblclick", (e) => {
+          e.stopPropagation();
+          if (points.length > 3) {
+            points = points.filter((pt) => pt.id !== p.id);
+            render();
+          }
+        });
+
+        previewEl.appendChild(handle);
+      });
+    }
+
+    previewEl.addEventListener("click", (e) => {
+      if (draggingId !== null) return;
+      const rect = previewEl.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      points.push({ id: nextId++, x: Math.min(100, Math.max(0, x)), y: Math.min(100, Math.max(0, y)) });
+      render();
+    });
+
+    window.addEventListener("pointermove", (e) => {
+      if (draggingId === null) return;
+      const rect = previewEl.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      const point = points.find((p) => p.id === draggingId);
+      if (point) {
+        point.x = Math.min(100, Math.max(0, x));
+        point.y = Math.min(100, Math.max(0, y));
+        render();
+      }
+    });
+
+    window.addEventListener("pointerup", () => {
+      draggingId = null;
+    });
+
+    presetBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const preset = PRESETS[btn.dataset.preset!];
+        points = preset.map(([x, y]) => ({ id: nextId++, x, y }));
+        render();
+      });
+    });
+
+    resetBtn.addEventListener("click", () => {
+      points = PRESETS.pentagon.map(([x, y]) => ({ id: nextId++, x, y }));
+      render();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(cssOutput.textContent ?? "");
+      const icon = copyBtn.querySelector("[data-copy-icon]")!;
+      const label = copyBtn.querySelector("[data-copy-label]")!;
+      icon.innerHTML = `<path d="M20 6L9 17l-5-5"/>`;
+      label.textContent = "Copied";
+      setTimeout(() => {
+        icon.innerHTML = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+        label.textContent = "Copy";
+      }, 1500);
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-clip-path-generator]").forEach(initClipPathGenerator);
+</script>

@@ -1,0 +1,215 @@
+<div class="batch-color-replacer" data-batch-color-replacer>
+  <div class="flex flex-wrap items-center gap-2 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-amber-400">
+      Upload SVG Files
+      <input type="file" accept=".svg,image/svg+xml" multiple data-file-input class="hidden" />
+    </label>
+    <button type="button" data-clear-btn class="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-600">Clear All</button>
+    <span data-file-count class="ml-auto text-xs text-slate-500"></span>
+  </div>
+
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Color pairs to find and replace</h3>
+      <button type="button" data-add-pair-btn class="text-xs font-medium text-amber-600 hover:underline">+ Add pair</button>
+    </div>
+    <div data-pairs-list class="space-y-2"></div>
+
+    <button type="button" data-apply-btn
+      class="mt-4 w-full rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-700">
+      Apply to All Files
+    </button>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Files</h3>
+    <div data-files-list class="space-y-2 text-sm text-slate-400">
+      No files uploaded yet.
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you upload is sent to a server.
+  </p>
+</div>
+
+<script>
+  interface UploadedFile {
+    id: number;
+    name: string;
+    originalContent: string;
+    currentContent: string;
+    replacementCount: number;
+  }
+
+  let nextFileId = 1;
+  let nextPairId = 1;
+
+  function escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function initBatchColorReplacer(root: HTMLElement) {
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]")!;
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]")!;
+    const fileCount = root.querySelector<HTMLSpanElement>("[data-file-count]")!;
+    const pairsList = root.querySelector<HTMLDivElement>("[data-pairs-list]")!;
+    const addPairBtn = root.querySelector<HTMLButtonElement>("[data-add-pair-btn]")!;
+    const applyBtn = root.querySelector<HTMLButtonElement>("[data-apply-btn]")!;
+    const filesList = root.querySelector<HTMLDivElement>("[data-files-list]")!;
+
+    let files: UploadedFile[] = [];
+    let pairs: { id: number; from: string; to: string }[] = [{ id: nextPairId++, from: "#000000", to: "#4F46E5" }];
+
+    function renderPairs() {
+      pairsList.innerHTML = "";
+      pairs.forEach((pair) => {
+        const row = document.createElement("div");
+        row.className = "flex items-center gap-2";
+        row.innerHTML = `
+          <input type="color" data-pair-from="${pair.id}" value="${/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(pair.from) ? pair.from : "#000000"}" class="h-9 w-11 cursor-pointer rounded border border-slate-300 bg-white p-0.5" />
+          <input type="text" data-pair-from-text="${pair.id}" value="${pair.from}" spellcheck="false"
+            class="w-24 rounded-lg border border-slate-300 px-2 py-1.5 font-mono text-xs text-slate-800" />
+          <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <input type="color" data-pair-to="${pair.id}" value="${/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(pair.to) ? pair.to : "#000000"}" class="h-9 w-11 cursor-pointer rounded border border-slate-300 bg-white p-0.5" />
+          <input type="text" data-pair-to-text="${pair.id}" value="${pair.to}" spellcheck="false"
+            class="w-24 rounded-lg border border-slate-300 px-2 py-1.5 font-mono text-xs text-slate-800" />
+          <button type="button" data-remove-pair="${pair.id}" class="ml-auto text-xs font-medium text-red-500 hover:underline">Remove</button>
+        `;
+        pairsList.appendChild(row);
+      });
+
+      pairsList.querySelectorAll<HTMLInputElement>("[data-pair-from]").forEach((el) => {
+        el.addEventListener("input", () => {
+          const pair = pairs.find((p) => p.id === Number(el.dataset.pairFrom));
+          if (pair) {
+            pair.from = el.value;
+            const textInput = pairsList.querySelector<HTMLInputElement>(`[data-pair-from-text="${pair.id}"]`);
+            if (textInput) textInput.value = el.value;
+          }
+        });
+      });
+      pairsList.querySelectorAll<HTMLInputElement>("[data-pair-from-text]").forEach((el) => {
+        el.addEventListener("input", () => {
+          const pair = pairs.find((p) => p.id === Number(el.dataset.pairFromText));
+          if (pair) pair.from = el.value;
+        });
+      });
+      pairsList.querySelectorAll<HTMLInputElement>("[data-pair-to]").forEach((el) => {
+        el.addEventListener("input", () => {
+          const pair = pairs.find((p) => p.id === Number(el.dataset.pairTo));
+          if (pair) {
+            pair.to = el.value;
+            const textInput = pairsList.querySelector<HTMLInputElement>(`[data-pair-to-text="${pair.id}"]`);
+            if (textInput) textInput.value = el.value;
+          }
+        });
+      });
+      pairsList.querySelectorAll<HTMLInputElement>("[data-pair-to-text]").forEach((el) => {
+        el.addEventListener("input", () => {
+          const pair = pairs.find((p) => p.id === Number(el.dataset.pairToText));
+          if (pair) pair.to = el.value;
+        });
+      });
+      pairsList.querySelectorAll<HTMLButtonElement>("[data-remove-pair]").forEach((el) => {
+        el.addEventListener("click", () => {
+          if (pairs.length <= 1) return;
+          pairs = pairs.filter((p) => p.id !== Number(el.dataset.removePair));
+          renderPairs();
+        });
+      });
+    }
+
+    function renderFiles() {
+      fileCount.textContent = files.length ? `${files.length} file${files.length === 1 ? "" : "s"}` : "";
+
+      if (files.length === 0) {
+        filesList.innerHTML = '<p class="text-sm text-slate-400">No files uploaded yet.</p>';
+        return;
+      }
+
+      filesList.innerHTML = files
+        .map(
+          (f) => `
+        <div class="flex items-center justify-between gap-3 rounded-lg border border-slate-100 p-3">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-1" data-thumb="${f.id}"></div>
+            <div>
+              <div class="text-sm font-medium text-slate-800">${f.name}</div>
+              <div class="text-xs text-slate-500">${f.replacementCount > 0 ? `${f.replacementCount} replacement${f.replacementCount === 1 ? "" : "s"} applied` : "No replacements applied yet"}</div>
+            </div>
+          </div>
+          <button type="button" data-download-file="${f.id}" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">Download</button>
+        </div>`
+        )
+        .join("");
+
+      files.forEach((f) => {
+        const thumb = filesList.querySelector(`[data-thumb="${f.id}"]`);
+        if (thumb) thumb.innerHTML = f.currentContent;
+      });
+
+      filesList.querySelectorAll<HTMLButtonElement>("[data-download-file]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const f = files.find((file) => file.id === Number(btn.dataset.downloadFile));
+          if (!f) return;
+          const blob = new Blob([f.currentContent], { type: "image/svg+xml" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = f.name;
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+      });
+    }
+
+    fileInput.addEventListener("change", () => {
+      const selected = Array.from(fileInput.files ?? []);
+      let pending = selected.length;
+      selected.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const content = String(reader.result ?? "");
+          files.push({ id: nextFileId++, name: file.name, originalContent: content, currentContent: content, replacementCount: 0 });
+          pending--;
+          if (pending === 0) renderFiles();
+        };
+        reader.readAsText(file);
+      });
+    });
+
+    clearBtn.addEventListener("click", () => {
+      files = [];
+      fileInput.value = "";
+      renderFiles();
+    });
+
+    addPairBtn.addEventListener("click", () => {
+      pairs.push({ id: nextPairId++, from: "#000000", to: "#ffffff" });
+      renderPairs();
+    });
+
+    applyBtn.addEventListener("click", () => {
+      files.forEach((f) => {
+        let content = f.originalContent;
+        let count = 0;
+        pairs.forEach((pair) => {
+          if (!pair.from || !pair.to) return;
+          const regex = new RegExp(escapeRegExp(pair.from), "gi");
+          const matches = content.match(regex);
+          if (matches) count += matches.length;
+          content = content.replace(regex, pair.to);
+        });
+        f.currentContent = content;
+        f.replacementCount = count;
+      });
+      renderFiles();
+    });
+
+    renderPairs();
+    renderFiles();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-batch-color-replacer]").forEach(initBatchColorReplacer);
+</script>

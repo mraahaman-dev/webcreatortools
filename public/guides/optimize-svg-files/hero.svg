@@ -1,0 +1,38 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#F5F3FF"/>
+
+  <!-- Left side: messy, oversized tangled path -->
+  <g opacity="0.9">
+    <path d="M120 210 C160 120, 220 90, 260 140 C300 190, 180 220, 210 280 C240 340, 320 300, 300 230 C280 160, 380 150, 360 220 C340 290, 260 330, 200 300 C140 270, 100 220, 120 210 Z"
+          fill="none" stroke="#818CF8" stroke-width="3" opacity="0.55"/>
+    <path d="M130 200 C170 130, 210 100, 250 145 C290 190, 190 210, 215 270"
+          fill="none" stroke="#4F46E5" stroke-width="3"/>
+    <!-- scattered anchor points to suggest excess data -->
+    <circle cx="120" cy="210" r="4" fill="#C4B5FD"/>
+    <circle cx="160" cy="150" r="4" fill="#C4B5FD"/>
+    <circle cx="220" cy="110" r="4" fill="#C4B5FD"/>
+    <circle cx="260" cy="140" r="4" fill="#C4B5FD"/>
+    <circle cx="300" cy="190" r="4" fill="#C4B5FD"/>
+    <circle cx="210" cy="280" r="4" fill="#C4B5FD"/>
+    <circle cx="240" cy="340" r="4" fill="#C4B5FD"/>
+    <circle cx="300" cy="230" r="4" fill="#C4B5FD"/>
+    <circle cx="360" cy="220" r="4" fill="#C4B5FD"/>
+    <circle cx="200" cy="300" r="4" fill="#C4B5FD"/>
+  </g>
+
+  <text x="220" y="380" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#6D28D9" font-weight="600">42 KB, raw export</text>
+
+  <!-- Arrow -->
+  <g>
+    <path d="M400 210h90" stroke="#A78BFA" stroke-width="4" stroke-linecap="round"/>
+    <path d="M478 195l20 15-20 15" fill="none" stroke="#A78BFA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Right side: clean compact shape -->
+  <g>
+    <circle cx="620" cy="210" r="55" fill="#4F46E5"/>
+    <circle cx="620" cy="210" r="55" fill="none" stroke="#312E81" stroke-width="1" opacity="0.15"/>
+  </g>
+
+  <text x="620" y="380" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#6D28D9" font-weight="600">3 KB, optimized</text>
+</svg>

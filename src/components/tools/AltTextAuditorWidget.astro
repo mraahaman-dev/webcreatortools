@@ -1,0 +1,324 @@
+---
+---
+
+<div data-alt-text-auditor-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div class="flex flex-wrap items-center gap-2 mb-2">
+    <input
+      type="text"
+      data-fetch-url-input
+      placeholder="Fetch from URL https://…"
+      spellcheck="false"
+      class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+    />
+    <button type="button" data-fetch-btn class="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50">
+      Fetch
+    </button>
+  </div>
+  <p data-fetch-status class="hidden mb-3 text-xs"></p>
+
+  <div class="mb-3">
+    <label class="block text-xs font-medium text-gray-600 mb-1">Page URL (for resolving relative image paths)</label>
+    <input
+      type="text"
+      data-page-url-input
+      placeholder="https://example.com/page"
+      spellcheck="false"
+      class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+    />
+  </div>
+
+  <label class="block text-xs font-medium text-gray-600 mb-1">HTML</label>
+  <textarea
+    data-html-input
+    rows="8"
+    spellcheck="false"
+    placeholder="Paste a page's HTML here, or fetch a URL above"
+    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-y mb-4"
+  ></textarea>
+
+  <div data-summary class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+    <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+      <p class="text-xs text-gray-500">Images found</p>
+      <p data-count-total class="text-lg font-semibold text-gray-900"></p>
+    </div>
+    <div class="rounded-lg border border-red-200 bg-red-50 p-3">
+      <p class="text-xs text-red-600">Missing alt</p>
+      <p data-count-missing class="text-lg font-semibold text-red-700"></p>
+    </div>
+    <div class="rounded-lg border border-amber-200 bg-amber-50 p-3">
+      <p class="text-xs text-amber-600">Flagged text</p>
+      <p data-count-flagged class="text-lg font-semibold text-amber-700"></p>
+    </div>
+    <div class="rounded-lg border border-green-200 bg-green-50 p-3">
+      <p class="text-xs text-green-600">Clean</p>
+      <p data-count-clean class="text-lg font-semibold text-green-700"></p>
+    </div>
+  </div>
+
+  <label data-issues-only-label class="hidden items-center gap-2 text-xs text-gray-600 mb-2 select-none">
+    <input type="checkbox" data-issues-only-checkbox class="rounded border-gray-300 text-purple-600 focus:ring-purple-500" />
+    Show only images with issues
+  </label>
+
+  <ul data-image-list class="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-gray-50">
+    <li class="p-3 text-sm text-gray-400">Paste HTML or fetch a URL to audit its images.</li>
+  </ul>
+</div>
+
+<script>
+  interface ImageFinding {
+    src: string;
+    resolvedSrc: string;
+    altAttr: string | null;
+    status: "missing" | "empty" | "present";
+    flags: { label: string; severity?: "warn" | "info" }[];
+    isClean: boolean;
+  }
+
+  const FILENAME_PATTERN = /\.(jpe?g|png|gif|svg|webp|bmp|avif)(\?.*)?$/i;
+  const REDUNDANT_PREFIX = /^(image|picture|photo|graphic|icon)\s+of\b/i;
+  const LOW_INFO_VALUES = new Set(["img", "image", "photo", "pic", "icon", "graphic"]);
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function resolveUrl(src: string, base: string): string {
+    try { return new URL(src, base || undefined).toString(); } catch { return src; }
+  }
+
+  function auditImages(html: string, pageUrl: string): ImageFinding[] {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const imgs = Array.from(doc.querySelectorAll("img"));
+
+    const altValues = new Map<string, number>();
+    imgs.forEach((img) => {
+      const alt = img.getAttribute("alt")?.trim();
+      if (alt) altValues.set(alt.toLowerCase(), (altValues.get(alt.toLowerCase()) || 0) + 1);
+    });
+
+    return imgs.map((img) => {
+      const src = img.getAttribute("src") || img.getAttribute("data-src") || "";
+      const altAttr = img.hasAttribute("alt") ? img.getAttribute("alt") : null;
+      const role = img.getAttribute("role");
+      const ariaHidden = img.getAttribute("aria-hidden");
+      const flags: { label: string; severity?: "warn" | "info" }[] = [];
+
+      let status: ImageFinding["status"];
+      if (altAttr === null) {
+        status = "missing";
+        flags.push({ label: "No alt attribute at all — screen readers will announce the filename or nothing useful." });
+      } else if (altAttr.trim() === "") {
+        status = "empty";
+        if (role !== "presentation" && ariaHidden !== "true") {
+          flags.push({ label: "Empty alt (\"\") — correct if this image is purely decorative, otherwise add descriptive text.", severity: "info" });
+        }
+      } else {
+        status = "present";
+        const trimmed = altAttr.trim();
+
+        if (role === "presentation") {
+          flags.push({ label: `role="presentation" should have empty alt, but this has text: "${trimmed}".` });
+        }
+        if (FILENAME_PATTERN.test(trimmed)) {
+          flags.push({ label: "Alt text looks like a filename, not a description." });
+        }
+        if (REDUNDANT_PREFIX.test(trimmed)) {
+          flags.push({ label: "Starts with \"image of\" / \"photo of\" — redundant, since screen readers already announce it's an image.", severity: "info" });
+        }
+        if (trimmed.length <= 3 || LOW_INFO_VALUES.has(trimmed.toLowerCase())) {
+          flags.push({ label: `Alt text ("${trimmed}") isn't descriptive.` });
+        }
+        if (trimmed.length > 125) {
+          flags.push({ label: `${trimmed.length} characters — longer than the commonly recommended ~125.`, severity: "info" });
+        }
+        if ((altValues.get(trimmed.toLowerCase()) || 0) > 1) {
+          flags.push({ label: "Same alt text used on more than one image on this page.", severity: "info" });
+        }
+      }
+
+      const isClean = flags.filter((f) => f.severity !== "info").length === 0 && status !== "missing";
+
+      return {
+        src: src || "(no src)",
+        resolvedSrc: src ? resolveUrl(src, pageUrl) : "",
+        altAttr,
+        status,
+        flags,
+        isClean,
+      };
+    });
+  }
+
+  async function fetchWithRedirects(url: string, maxHops = 5): Promise<{ body: string; status: number; finalUrl: string } | { error: string }> {
+    let current = url;
+    for (let i = 0; i < maxHops; i++) {
+      const res = await fetch(`/api/fetch-proxy/?url=${encodeURIComponent(current)}`);
+      if (!res.ok && res.status !== 400 && res.status !== 502) return { error: `/api/fetch-proxy responded with HTTP ${res.status}` };
+      let data: any;
+      try { data = await res.json(); } catch { return { error: "The proxy endpoint didn't return valid JSON." }; }
+      if (data.error) return { error: data.error };
+      if (data.status >= 300 && data.status < 400 && data.headers?.location) {
+        current = new URL(data.headers.location, current).toString();
+        continue;
+      }
+      return { body: data.body, status: data.status, finalUrl: data.finalUrl || current };
+    }
+    return { error: "Too many redirects" };
+  }
+
+  function initAltTextAuditor(root: HTMLElement) {
+    const fetchUrlInput = root.querySelector<HTMLInputElement>("[data-fetch-url-input]");
+    const fetchBtn = root.querySelector<HTMLButtonElement>("[data-fetch-btn]");
+    const fetchStatus = root.querySelector<HTMLElement>("[data-fetch-status]");
+    const pageUrlInput = root.querySelector<HTMLInputElement>("[data-page-url-input]");
+    const htmlInput = root.querySelector<HTMLTextAreaElement>("[data-html-input]");
+    const summary = root.querySelector<HTMLElement>("[data-summary]");
+    const countTotal = root.querySelector<HTMLElement>("[data-count-total]");
+    const countMissing = root.querySelector<HTMLElement>("[data-count-missing]");
+    const countFlagged = root.querySelector<HTMLElement>("[data-count-flagged]");
+    const countClean = root.querySelector<HTMLElement>("[data-count-clean]");
+    const issuesOnlyLabel = root.querySelector<HTMLElement>("[data-issues-only-label]");
+    const issuesOnlyCheckbox = root.querySelector<HTMLInputElement>("[data-issues-only-checkbox]");
+    const imageList = root.querySelector<HTMLElement>("[data-image-list]");
+
+    if (
+      !fetchUrlInput || !fetchBtn || !fetchStatus || !pageUrlInput || !htmlInput || !summary ||
+      !countTotal || !countMissing || !countFlagged || !countClean || !issuesOnlyLabel ||
+      !issuesOnlyCheckbox || !imageList
+    ) {
+      return;
+    }
+
+    let lastFindings: ImageFinding[] = [];
+
+    function statusBadge(finding: ImageFinding): string {
+      if (finding.status === "missing") return '<span class="inline-block rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">Missing alt</span>';
+      if (finding.status === "empty") return '<span class="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">Empty alt</span>';
+      if (!finding.isClean) return '<span class="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Flagged</span>';
+      return '<span class="inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Clean</span>';
+    }
+
+    function renderList() {
+      const showIssuesOnly = issuesOnlyCheckbox!.checked;
+      const visible = showIssuesOnly ? lastFindings.filter((f) => !f.isClean) : lastFindings;
+
+      if (visible.length === 0) {
+        imageList!.innerHTML = `<li class="p-3 text-sm text-gray-400">${lastFindings.length === 0 ? "No <img> elements found." : "No images match the current filter."}</li>`;
+        return;
+      }
+
+      imageList!.innerHTML = visible
+        .map((f) => {
+          const thumb = f.resolvedSrc
+            ? `<img src="${escapeHtml(f.resolvedSrc)}" alt="" class="h-12 w-12 flex-shrink-0 rounded object-cover bg-white border border-gray-200" onerror="this.style.visibility='hidden'" />`
+            : `<div class="h-12 w-12 flex-shrink-0 rounded bg-gray-200"></div>`;
+          const altDisplay = f.altAttr === null ? "(no alt attribute)" : f.altAttr.trim() === "" ? "(empty)" : f.altAttr;
+          const flagsHtml = f.flags
+            .map((flag) => `<p class="text-xs ${flag.severity === "info" ? "text-blue-600" : "text-amber-600"}">• ${escapeHtml(flag.label)}</p>`)
+            .join("");
+
+          return `
+          <li class="flex gap-3 p-3">
+            ${thumb}
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 mb-0.5">
+                ${statusBadge(f)}
+                <span class="truncate text-xs text-gray-400" title="${escapeHtml(f.src)}">${escapeHtml(f.src)}</span>
+              </div>
+              <p class="text-sm text-gray-800 break-words">${escapeHtml(altDisplay)}</p>
+              ${flagsHtml}
+            </div>
+          </li>`;
+        })
+        .join("");
+    }
+
+    function run() {
+      const html = htmlInput!.value.trim();
+      if (!html) {
+        summary!.classList.add("hidden");
+        issuesOnlyLabel!.classList.add("hidden");
+        imageList!.innerHTML = '<li class="p-3 text-sm text-gray-400">Paste HTML or fetch a URL to audit its images.</li>';
+        lastFindings = [];
+        return;
+      }
+
+      lastFindings = auditImages(html, pageUrlInput!.value.trim());
+
+      const missing = lastFindings.filter((f) => f.status === "missing").length;
+      const flagged = lastFindings.filter((f) => f.status !== "missing" && !f.isClean).length;
+      const clean = lastFindings.filter((f) => f.isClean).length;
+
+      summary!.classList.remove("hidden");
+      issuesOnlyLabel!.classList.toggle("hidden", lastFindings.length === 0);
+      issuesOnlyLabel!.classList.toggle("flex", lastFindings.length > 0);
+
+      countTotal!.textContent = String(lastFindings.length);
+      countMissing!.textContent = String(missing);
+      countFlagged!.textContent = String(flagged);
+      countClean!.textContent = String(clean);
+
+      renderList();
+    }
+
+    htmlInput.addEventListener("input", run);
+    pageUrlInput.addEventListener("input", run);
+    issuesOnlyCheckbox.addEventListener("change", renderList);
+
+    fetchBtn.addEventListener("click", async () => {
+      let target = fetchUrlInput!.value.trim();
+      if (!target) return;
+      if (!/^https?:\/\//i.test(target)) target = "https://" + target;
+
+      let parsedUrl: URL;
+      try { parsedUrl = new URL(target); } catch {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = "That doesn't look like a valid URL.";
+        return;
+      }
+
+      fetchBtn!.disabled = true;
+      fetchBtn!.textContent = "Fetching…";
+      fetchStatus!.classList.add("hidden");
+
+      let result: Awaited<ReturnType<typeof fetchWithRedirects>>;
+      try { result = await fetchWithRedirects(parsedUrl.toString()); }
+      catch (err) {
+        fetchBtn!.disabled = false; fetchBtn!.textContent = "Fetch";
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
+        return;
+      }
+      fetchBtn!.disabled = false; fetchBtn!.textContent = "Fetch";
+
+      if ("error" in result) {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = `Could not fetch: ${result.error}`;
+        return;
+      }
+      if (result.status >= 400) {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-amber-600";
+        fetchStatus!.textContent = `${result.finalUrl} returned status ${result.status}.`;
+        return;
+      }
+
+      pageUrlInput!.value = result.finalUrl;
+      htmlInput!.value = result.body;
+      fetchStatus!.classList.remove("hidden");
+      fetchStatus!.className = "mb-3 text-xs text-green-600";
+      fetchStatus!.textContent = `Fetched from ${result.finalUrl}`;
+      run();
+    });
+
+    run();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-alt-text-auditor-widget]").forEach(initAltTextAuditor);
+</script>

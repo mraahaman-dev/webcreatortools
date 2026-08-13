@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="heroTitle">
+  <title id="heroTitle">An abstract curved path with visible anchor points and bezier handles, representing how vector graphics are constructed</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#EEF2FF"/>
+      <stop offset="100%" stop-color="#E0E7FF"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- main curved path -->
+  <path d="M180 420 C 300 180, 520 180, 620 340 C 720 500, 940 480, 1040 300"
+        fill="none" stroke="#4F46E5" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- bezier handle lines (dashed) -->
+  <line x1="180" y1="420" x2="300" y2="180" stroke="#A5B4FC" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="620" y1="340" x2="520" y2="180" stroke="#A5B4FC" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="620" y1="340" x2="720" y2="500" stroke="#A5B4FC" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="1040" y1="300" x2="940" y2="480" stroke="#A5B4FC" stroke-width="2" stroke-dasharray="6 6"/>
+
+  <!-- handle endpoints -->
+  <circle cx="300" cy="180" r="6" fill="#C7D2FE"/>
+  <circle cx="520" cy="180" r="6" fill="#C7D2FE"/>
+  <circle cx="720" cy="500" r="6" fill="#C7D2FE"/>
+  <circle cx="940" cy="480" r="6" fill="#C7D2FE"/>
+
+  <!-- anchor points on the path -->
+  <circle cx="180" cy="420" r="9" fill="#ffffff" stroke="#4F46E5" stroke-width="4"/>
+  <circle cx="620" cy="340" r="9" fill="#ffffff" stroke="#4F46E5" stroke-width="4"/>
+  <circle cx="1040" cy="300" r="9" fill="#ffffff" stroke="#4F46E5" stroke-width="4"/>
+
+  <!-- emphasized focal anchor -->
+  <circle cx="620" cy="340" r="16" fill="none" stroke="#4F46E5" stroke-width="2" opacity="0.4"/>
+</svg>

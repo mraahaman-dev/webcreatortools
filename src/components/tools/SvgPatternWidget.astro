@@ -1,0 +1,241 @@
+<div class="svg-pattern" data-svg-pattern>
+  <div class="mb-4 flex flex-wrap items-center gap-1 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <button type="button" data-type-btn data-type="dots" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium bg-green-600 text-white">Dots</button>
+    <button type="button" data-type-btn data-type="stripes" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">Stripes</button>
+    <button type="button" data-type-btn data-type="grid" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">Grid</button>
+    <button type="button" data-type-btn data-type="checkerboard" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">Checkerboard</button>
+  </div>
+
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <div data-preview class="mb-4 h-48 w-full rounded-xl border border-slate-200"></div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="block">
+        <div class="mb-1 flex items-center justify-between text-sm text-slate-600">
+          <span>Spacing</span>
+          <span data-spacing-value class="font-mono font-medium text-slate-800">24px</span>
+        </div>
+        <input type="range" data-spacing-input min="8" max="80" value="24" class="w-full accent-green-600" />
+      </label>
+      <label class="block">
+        <div class="mb-1 flex items-center justify-between text-sm text-slate-600">
+          <span data-size-label>Dot size</span>
+          <span data-size-value class="font-mono font-medium text-slate-800">3px</span>
+        </div>
+        <input type="range" data-size-input min="1" max="20" value="3" class="w-full accent-green-600" />
+      </label>
+      <label class="flex items-center gap-2 text-sm text-slate-600">
+        <span>Background</span>
+        <input type="color" data-bg-color value="#f8fafc" class="h-9 w-12 cursor-pointer rounded border border-slate-300 bg-white p-0.5" />
+      </label>
+      <label class="flex items-center gap-2 text-sm text-slate-600">
+        <span>Foreground</span>
+        <input type="color" data-fg-color value="#4F46E5" class="h-9 w-12 cursor-pointer rounded border border-slate-300 bg-white p-0.5" />
+      </label>
+      <label data-direction-wrap class="hidden sm:col-span-2 block">
+        <span class="mb-1 block text-sm text-slate-600">Direction</span>
+        <select data-direction-select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+          <option value="horizontal">Horizontal</option>
+          <option value="vertical">Vertical</option>
+          <option value="diagonal">Diagonal (45°)</option>
+          <option value="diagonal-reverse">Diagonal (-45°)</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">SVG Markup</h3>
+      <div class="flex gap-2">
+        <button type="button" data-copy-btn
+          class="inline-flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-600 hover:border-green-300 hover:bg-green-100">
+          <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          <span data-copy-label>Copy</span>
+        </button>
+        <button type="button" data-download-btn
+          class="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
+          Download
+        </button>
+      </div>
+    </div>
+    <pre data-markup-output class="overflow-auto rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-800"></pre>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you build here is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  type PatternType = "dots" | "stripes" | "grid" | "checkerboard";
+  type Direction = "horizontal" | "vertical" | "diagonal" | "diagonal-reverse";
+
+  function buildTile(
+    type: PatternType,
+    spacing: number,
+    size: number,
+    bg: string,
+    fg: string,
+    direction: Direction
+  ): { width: number; height: number; inner: string } {
+    if (type === "dots") {
+      return {
+        width: spacing,
+        height: spacing,
+        inner: `<rect width="100%" height="100%" fill="${bg}"/><circle cx="${spacing / 2}" cy="${spacing / 2}" r="${size}" fill="${fg}"/>`,
+      };
+    }
+
+    if (type === "grid") {
+      return {
+        width: spacing,
+        height: spacing,
+        inner: `<rect width="100%" height="100%" fill="${bg}"/><path d="M ${spacing} 0 L 0 0 0 ${spacing}" fill="none" stroke="${fg}" stroke-width="${size}"/>`,
+      };
+    }
+
+    if (type === "checkerboard") {
+      const w = spacing * 2;
+      return {
+        width: w,
+        height: w,
+        inner: `<rect width="100%" height="100%" fill="${bg}"/><rect width="${spacing}" height="${spacing}" fill="${fg}"/><rect x="${spacing}" y="${spacing}" width="${spacing}" height="${spacing}" fill="${fg}"/>`,
+      };
+    }
+
+    // Stripes
+    if (direction === "horizontal") {
+      return {
+        width: spacing,
+        height: spacing,
+        inner: `<rect width="100%" height="100%" fill="${bg}"/><rect x="0" y="0" width="${spacing}" height="${size}" fill="${fg}"/>`,
+      };
+    }
+    if (direction === "vertical") {
+      return {
+        width: spacing,
+        height: spacing,
+        inner: `<rect width="100%" height="100%" fill="${bg}"/><rect x="0" y="0" width="${size}" height="${spacing}" fill="${fg}"/>`,
+      };
+    }
+    // Diagonal stripes: three parallel lines offset by the tile size on each side,
+    // the standard trick that guarantees the pattern wraps seamlessly at 45 degrees.
+    const s = spacing;
+    if (direction === "diagonal") {
+      return {
+        width: spacing,
+        height: spacing,
+        inner: `<rect width="100%" height="100%" fill="${bg}"/><path d="M -1,1 l2,-2 M 0,${s} l${s},-${s} M ${s - 1},${s + 1} l2,-2" stroke="${fg}" stroke-width="${size}"/>`,
+      };
+    }
+    return {
+      width: spacing,
+      height: spacing,
+      inner: `<rect width="100%" height="100%" fill="${bg}"/><path d="M ${s + 1},1 l-2,-2 M ${s},${s} l-${s},-${s} M 1,${s + 1} l-2,-2" stroke="${fg}" stroke-width="${size}"/>`,
+    };
+  }
+
+  function initSvgPattern(root: HTMLElement) {
+    const typeBtns = root.querySelectorAll<HTMLButtonElement>("[data-type-btn]");
+    const preview = root.querySelector<HTMLDivElement>("[data-preview]")!;
+    const spacingInput = root.querySelector<HTMLInputElement>("[data-spacing-input]")!;
+    const spacingValue = root.querySelector<HTMLSpanElement>("[data-spacing-value]")!;
+    const sizeInput = root.querySelector<HTMLInputElement>("[data-size-input]")!;
+    const sizeValue = root.querySelector<HTMLSpanElement>("[data-size-value]")!;
+    const sizeLabel = root.querySelector<HTMLSpanElement>("[data-size-label]")!;
+    const bgColor = root.querySelector<HTMLInputElement>("[data-bg-color]")!;
+    const fgColor = root.querySelector<HTMLInputElement>("[data-fg-color]")!;
+    const directionWrap = root.querySelector<HTMLElement>("[data-direction-wrap]")!;
+    const directionSelect = root.querySelector<HTMLSelectElement>("[data-direction-select]")!;
+    const markupOutput = root.querySelector<HTMLPreElement>("[data-markup-output]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+    const downloadBtn = root.querySelector<HTMLButtonElement>("[data-download-btn]")!;
+
+    let type: PatternType = "dots";
+
+    const SIZE_LABELS: Record<PatternType, string> = {
+      dots: "Dot size",
+      stripes: "Stripe width",
+      grid: "Line width",
+      checkerboard: "Square size (uses spacing)",
+    };
+
+    function update() {
+      const spacing = parseInt(spacingInput.value, 10);
+      const size = parseInt(sizeInput.value, 10);
+      const bg = bgColor.value;
+      const fg = fgColor.value;
+      const direction = directionSelect.value as Direction;
+
+      const tile = buildTile(type, spacing, size, bg, fg, direction);
+
+      const tileSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${tile.width}" height="${tile.height}">${tile.inner}</svg>`;
+      const dataUri = `data:image/svg+xml,${encodeURIComponent(tileSvg)}`;
+      preview.style.backgroundImage = `url("${dataUri}")`;
+      preview.style.backgroundSize = `${tile.width}px ${tile.height}px`;
+      preview.style.backgroundRepeat = "repeat";
+
+      const fullMarkup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <pattern id="pattern1" width="${tile.width}" height="${tile.height}" patternUnits="userSpaceOnUse">
+      ${tile.inner}
+    </pattern>
+  </defs>
+  <rect width="200" height="200" fill="url(#pattern1)" />
+</svg>`;
+      markupOutput.textContent = fullMarkup;
+    }
+
+    typeBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        type = btn.dataset.type as PatternType;
+        typeBtns.forEach((b) => {
+          const active = b.dataset.type === type;
+          b.classList.toggle("bg-green-600", active);
+          b.classList.toggle("text-white", active);
+          b.classList.toggle("text-slate-500", !active);
+        });
+        directionWrap.classList.toggle("hidden", type !== "stripes");
+        sizeLabel.textContent = SIZE_LABELS[type];
+        update();
+      });
+    });
+
+    [spacingInput, sizeInput, bgColor, fgColor, directionSelect].forEach((el) => {
+      el.addEventListener("input", () => {
+        spacingValue.textContent = `${spacingInput.value}px`;
+        sizeValue.textContent = `${sizeInput.value}px`;
+        update();
+      });
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(markupOutput.textContent ?? "");
+      const icon = copyBtn.querySelector("[data-copy-icon]")!;
+      const label = copyBtn.querySelector("[data-copy-label]")!;
+      icon.innerHTML = `<path d="M20 6L9 17l-5-5"/>`;
+      label.textContent = "Copied";
+      setTimeout(() => {
+        icon.innerHTML = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+        label.textContent = "Copy";
+      }, 1500);
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      const blob = new Blob([markupOutput.textContent ?? ""], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pattern.svg";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    update();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-svg-pattern]").forEach(initSvgPattern);
+</script>

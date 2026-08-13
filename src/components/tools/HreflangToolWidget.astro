@@ -1,0 +1,542 @@
+---
+---
+
+<div data-hreflang-tool-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <!-- ============ GENERATOR ============ -->
+  <p class="text-sm font-semibold text-gray-800 mb-1">Generate hreflang tags</p>
+  <p class="text-xs text-gray-500 mb-3">Add every language/region version of a page. Up to 50 URLs.</p>
+
+  <div class="flex flex-wrap items-center gap-2 mb-3">
+    <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:border-amber-400">
+      Upload CSV
+      <input type="file" accept=".csv,text/csv" data-csv-input class="hidden" />
+    </label>
+    <span class="text-xs text-gray-400">One row per URL: url,language,country (country optional)</span>
+  </div>
+
+  <div data-rows-container class="space-y-2 mb-3"></div>
+
+  <div class="flex flex-wrap items-center gap-2 mb-4">
+    <button type="button" data-add-row-btn class="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700">
+      + Add URL
+    </button>
+    <button type="button" data-clear-rows-btn class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+      Remove all
+    </button>
+  </div>
+
+  <div class="flex items-center gap-1 mb-3 rounded-lg bg-gray-100 p-1 w-fit">
+    <button type="button" data-output-format="html" class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors">HTML &lt;link&gt; tags</button>
+    <button type="button" data-output-format="sitemap" class="rounded-md px-3 py-1.5 text-xs font-medium transition-colors">XML sitemap attributes</button>
+  </div>
+
+  <ul data-generate-warnings class="hidden space-y-1.5 text-sm rounded-lg border border-gray-200 bg-gray-50 p-3 mb-3"></ul>
+
+  <div class="relative mb-8">
+    <textarea
+      data-generated-output
+      readonly
+      rows="10"
+      spellcheck="false"
+      placeholder="Fill in at least two URLs above to generate tags"
+      class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-500 resize-y"
+    ></textarea>
+    <button type="button" data-copy-generated-btn class="absolute top-2.5 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors">
+      <svg data-copy-icon xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+      <svg data-copy-check xmlns="http://www.w3.org/2000/svg" class="hidden h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <span data-copy-label>Copy</span>
+    </button>
+  </div>
+
+  <!-- ============ VALIDATOR ============ -->
+  <div class="border-t border-gray-200 pt-6">
+    <p class="text-sm font-semibold text-gray-800 mb-1">Validate existing hreflang tags</p>
+    <p class="text-xs text-gray-500 mb-3">Fetch a live page or paste HTML to check its hreflang tags, including whether alternate pages return the tag correctly.</p>
+
+    <div class="flex flex-wrap items-center gap-2 mb-2">
+      <input type="text" data-fetch-url-input placeholder="Fetch from URL https://…" spellcheck="false" class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+      <button type="button" data-fetch-btn class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50">Fetch</button>
+    </div>
+    <p data-fetch-status class="hidden mb-3 text-xs"></p>
+
+    <div class="mb-3">
+      <label class="block text-xs font-medium text-gray-600 mb-1">Page URL (required if pasting HTML directly)</label>
+      <input type="text" data-page-url-input placeholder="https://example.com/en/page" spellcheck="false" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+    </div>
+
+    <label class="block text-xs font-medium text-gray-600 mb-1">HTML</label>
+    <textarea
+      data-html-input
+      rows="8"
+      spellcheck="false"
+      placeholder='Paste the page&#39;s HTML or &lt;head&gt;, e.g.
+&lt;link rel="alternate" hreflang="en-us" href="https://example.com/en/" /&gt;'
+      class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-y mb-3"
+    ></textarea>
+
+    <div class="flex items-center justify-between mb-1">
+      <p class="text-xs font-medium text-gray-600">Validation report</p>
+      <span data-report-summary class="text-xs text-gray-400"></span>
+    </div>
+    <ul data-report class="space-y-2 text-sm rounded-lg border border-gray-200 bg-gray-50 p-3 mb-3">
+      <li class="text-gray-400">Paste HTML or fetch a URL to validate its hreflang tags.</li>
+    </ul>
+
+    <button type="button" data-check-returns-btn disabled class="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50">
+      Check return tags on alternate pages
+    </button>
+    <p data-return-status class="hidden mt-2 text-xs"></p>
+    <ul data-return-report class="hidden mt-2 space-y-1.5 text-sm rounded-lg border border-gray-200 bg-gray-50 p-3"></ul>
+  </div>
+</div>
+
+<script>
+  interface CheckResult { label: string; pass: boolean; detail: string; severity?: "warn" | "info" }
+  interface RowData { id: string; url: string; lang: string; country: string; xDefault: boolean }
+
+  const LANGUAGES = ["en","es","fr","de","it","pt","nl","ru","ja","zh","ko","ar","hi","bn","pa","ta","ur","th","vi","id","ms","tl","tr","pl","uk","ro","el","cs","sv","da","no","fi","hu","bg","sk","hr","sr","lt","lv","et","he","fa","sw","af"];
+  const COUNTRIES = ["US","GB","CA","AU","NZ","IE","IN","ZA","MX","ES","AR","CO","CL","PE","FR","BE","CH","DE","AT","IT","PT","BR","NL","RU","JP","KR","CN","TW","HK","SG","MY","ID","TH","VN","PH","TR","PL","SE","NO","DK","FI","GR","CZ","HU","RO","BG","UA","IL","SA","AE","EG"];
+  const MAX_RETURN_CHECKS = 20;
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+  function escapeAttr(text: string): string {
+    return text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function iconFor(pass: boolean, severity?: "warn" | "info"): string {
+    if (pass) return '<svg class="h-4 w-4 shrink-0 text-green-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    if (severity === "info") return '<svg class="h-4 w-4 shrink-0 text-blue-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 4.5v.01" stroke-linecap="round"/></svg>';
+    return '<svg class="h-4 w-4 shrink-0 text-amber-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v4M8 11.5v.01" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5"/></svg>';
+  }
+
+  function hreflangValueFor(row: RowData): string {
+    if (row.xDefault) return "x-default";
+    return row.country ? `${row.lang}-${row.country}` : row.lang;
+  }
+
+  function isValidHreflangFormat(value: string): boolean {
+    if (value.toLowerCase() === "x-default") return true;
+    return /^[a-z]{2,3}(-[a-z]{2,4})?$/i.test(value);
+  }
+
+  async function fetchWithRedirects(url: string, maxHops = 5): Promise<{ body: string; status: number; finalUrl: string } | { error: string }> {
+    let current = url;
+    for (let i = 0; i < maxHops; i++) {
+      const res = await fetch(`/api/fetch-proxy/?url=${encodeURIComponent(current)}`);
+      if (!res.ok && res.status !== 400 && res.status !== 502) return { error: `/api/fetch-proxy responded with HTTP ${res.status}` };
+      let data: any;
+      try { data = await res.json(); } catch { return { error: "The proxy endpoint didn't return valid JSON." }; }
+      if (data.error) return { error: data.error };
+      if (data.status >= 300 && data.status < 400 && data.headers?.location) {
+        current = new URL(data.headers.location, current).toString();
+        continue;
+      }
+      return { body: data.body, status: data.status, finalUrl: data.finalUrl || current };
+    }
+    return { error: "Too many redirects" };
+  }
+
+  function extractHreflangs(doc: Document): { hreflang: string; href: string }[] {
+    return Array.from(doc.querySelectorAll('link[rel="alternate"][hreflang]'))
+      .map((el) => ({
+        hreflang: (el.getAttribute("hreflang") || "").trim(),
+        href: (el.getAttribute("href") || "").trim(),
+      }))
+      .filter((t) => t.hreflang && t.href);
+  }
+
+  function parseCsvLine(line: string): string[] {
+    return line.split(",").map((cell) => cell.trim().replace(/^"|"$/g, ""));
+  }
+
+  function initHreflangTool(root: HTMLElement) {
+    const rowsContainer = root.querySelector<HTMLElement>("[data-rows-container]");
+    const addRowBtn = root.querySelector<HTMLButtonElement>("[data-add-row-btn]");
+    const clearRowsBtn = root.querySelector<HTMLButtonElement>("[data-clear-rows-btn]");
+    const csvInput = root.querySelector<HTMLInputElement>("[data-csv-input]");
+    const outputFormatBtns = root.querySelectorAll<HTMLButtonElement>("[data-output-format]");
+    const generateWarnings = root.querySelector<HTMLElement>("[data-generate-warnings]");
+    const generatedOutput = root.querySelector<HTMLTextAreaElement>("[data-generated-output]");
+    const copyGeneratedBtn = root.querySelector<HTMLButtonElement>("[data-copy-generated-btn]");
+    const copyIcon = root.querySelector<HTMLElement>("[data-copy-icon]");
+    const copyCheck = root.querySelector<HTMLElement>("[data-copy-check]");
+    const copyLabel = root.querySelector<HTMLElement>("[data-copy-label]");
+
+    const fetchUrlInput = root.querySelector<HTMLInputElement>("[data-fetch-url-input]");
+    const fetchBtn = root.querySelector<HTMLButtonElement>("[data-fetch-btn]");
+    const fetchStatus = root.querySelector<HTMLElement>("[data-fetch-status]");
+    const pageUrlInput = root.querySelector<HTMLInputElement>("[data-page-url-input]");
+    const htmlInput = root.querySelector<HTMLTextAreaElement>("[data-html-input]");
+    const report = root.querySelector<HTMLUListElement>("[data-report]");
+    const reportSummary = root.querySelector<HTMLElement>("[data-report-summary]");
+    const checkReturnsBtn = root.querySelector<HTMLButtonElement>("[data-check-returns-btn]");
+    const returnStatus = root.querySelector<HTMLElement>("[data-return-status]");
+    const returnReport = root.querySelector<HTMLUListElement>("[data-return-report]");
+
+    if (
+      !rowsContainer || !addRowBtn || !clearRowsBtn || !csvInput || outputFormatBtns.length === 0 ||
+      !generateWarnings || !generatedOutput || !copyGeneratedBtn || !copyIcon || !copyCheck || !copyLabel ||
+      !fetchUrlInput || !fetchBtn || !fetchStatus || !pageUrlInput || !htmlInput || !report || !reportSummary ||
+      !checkReturnsBtn || !returnStatus || !returnReport
+    ) {
+      return;
+    }
+
+    let rows: RowData[] = [];
+    let rowIdCounter = 0;
+    let outputFormat: "html" | "sitemap" = "html";
+    let lastExtractedHreflangs: { hreflang: string; href: string }[] = [];
+    let lastPageUrl = "";
+
+    function langOptions(selected: string): string {
+      return `<option value="">Language</option>` + LANGUAGES.map((l) => `<option value="${l}"${l === selected ? " selected" : ""}>${l}</option>`).join("");
+    }
+    function countryOptions(selected: string): string {
+      return `<option value="">None (language only)</option>` + COUNTRIES.map((c) => `<option value="${c}"${c === selected ? " selected" : ""}>${c}</option>`).join("");
+    }
+
+    function renderRows() {
+      rowsContainer!.innerHTML = rows
+        .map(
+          (row) => `
+        <div class="flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 p-2" data-row-id="${row.id}">
+          <input type="text" data-row-url value="${escapeAttr(row.url)}" placeholder="Add a valid URL like https://example.com" class="min-w-[200px] flex-1 rounded-md border border-gray-300 px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          <select data-row-lang ${row.xDefault ? "disabled" : ""} class="rounded-md border border-gray-300 px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500">${langOptions(row.lang)}</select>
+          <select data-row-country ${row.xDefault ? "disabled" : ""} class="rounded-md border border-gray-300 px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500">${countryOptions(row.country)}</select>
+          <label class="flex items-center gap-1 text-xs text-gray-600">
+            <input type="checkbox" data-row-xdefault ${row.xDefault ? "checked" : ""} class="rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+            x-default
+          </label>
+          <button type="button" data-row-remove class="text-xs font-medium text-red-500 hover:text-red-700">Remove</button>
+        </div>`
+        )
+        .join("");
+
+      rowsContainer!.querySelectorAll<HTMLElement>("[data-row-id]").forEach((el) => {
+        const id = el.dataset.rowId!;
+        const row = rows.find((r) => r.id === id)!;
+        el.querySelector<HTMLInputElement>("[data-row-url]")!.addEventListener("input", (e) => {
+          row.url = (e.target as HTMLInputElement).value;
+          generate();
+        });
+        el.querySelector<HTMLSelectElement>("[data-row-lang]")!.addEventListener("change", (e) => {
+          row.lang = (e.target as HTMLSelectElement).value;
+          generate();
+        });
+        el.querySelector<HTMLSelectElement>("[data-row-country]")!.addEventListener("change", (e) => {
+          row.country = (e.target as HTMLSelectElement).value;
+          generate();
+        });
+        el.querySelector<HTMLInputElement>("[data-row-xdefault]")!.addEventListener("change", (e) => {
+          row.xDefault = (e.target as HTMLInputElement).checked;
+          renderRows();
+          generate();
+        });
+        el.querySelector<HTMLButtonElement>("[data-row-remove]")!.addEventListener("click", () => {
+          rows = rows.filter((r) => r.id !== id);
+          renderRows();
+          generate();
+        });
+      });
+    }
+
+    function addRow(prefill?: Partial<RowData>) {
+      rowIdCounter += 1;
+      rows.push({
+        id: `row-${rowIdCounter}`,
+        url: prefill?.url || "",
+        lang: prefill?.lang || "",
+        country: prefill?.country || "",
+        xDefault: prefill?.xDefault || false,
+      });
+    }
+
+    function setOutputFormatButtons() {
+      outputFormatBtns.forEach((btn) => {
+        const active = btn.dataset.outputFormat === outputFormat;
+        btn.className = active
+          ? "rounded-md px-3 py-1.5 text-xs font-medium transition-colors bg-white text-amber-700 shadow-sm"
+          : "rounded-md px-3 py-1.5 text-xs font-medium transition-colors text-gray-500 hover:text-gray-700";
+      });
+    }
+
+    function generate() {
+      const validRows = rows.filter((r) => r.url.trim() && (r.xDefault || r.lang));
+      const warnings: CheckResult[] = [];
+
+      const xDefaultCount = validRows.filter((r) => r.xDefault).length;
+      if (xDefaultCount > 1) {
+        warnings.push({ label: "Multiple x-default rows", pass: false, detail: "Only one URL should be marked x-default. Extra ones are ignored below." });
+      }
+
+      const seenCodes = new Map<string, number>();
+      validRows.forEach((r) => {
+        const code = hreflangValueFor(r).toLowerCase();
+        seenCodes.set(code, (seenCodes.get(code) || 0) + 1);
+      });
+      const duplicates = Array.from(seenCodes.entries()).filter(([, count]) => count > 1).map(([code]) => code);
+      if (duplicates.length > 0) {
+        warnings.push({ label: "Duplicate hreflang codes", pass: false, detail: `Used more than once: ${duplicates.join(", ")}. Each code should point to only one URL.` });
+      }
+
+      const invalidUrls = validRows.filter((r) => !/^https?:\/\//i.test(r.url.trim()));
+      if (invalidUrls.length > 0) {
+        warnings.push({ label: "Non-absolute URLs", pass: false, detail: `${invalidUrls.length} URL${invalidUrls.length === 1 ? "" : "s"} aren't absolute http/https URLs.`, severity: "info" });
+      }
+
+      if (validRows.length > 0 && validRows.length < 2) {
+        warnings.push({ label: "Only one URL entered", pass: false, detail: "hreflang is meant to connect multiple language/region versions of a page — add at least one more.", severity: "info" });
+      }
+
+      if (validRows.length >= 2 && xDefaultCount === 0) {
+        warnings.push({ label: "No x-default set", pass: false, detail: "Optional, but recommended: mark one URL as x-default to serve as the fallback for unmatched languages.", severity: "info" });
+      }
+
+      if (warnings.length > 0) {
+        generateWarnings!.classList.remove("hidden");
+        generateWarnings!.innerHTML = warnings.map((w) => `<li class="flex items-start gap-2">${iconFor(w.pass, w.severity)}<div><span class="font-medium text-gray-800">${escapeHtml(w.label)}</span><p class="text-gray-500">${escapeHtml(w.detail)}</p></div></li>`).join("");
+      } else {
+        generateWarnings!.classList.add("hidden");
+      }
+
+      const usableRows = validRows.filter((r) => seenCodes.get(hreflangValueFor(r).toLowerCase()) === 1 || r.xDefault);
+      // dedupe: if x-default duplicated, keep first only
+      let xDefaultUsed = false;
+      const finalRows = usableRows.filter((r) => {
+        if (r.xDefault) {
+          if (xDefaultUsed) return false;
+          xDefaultUsed = true;
+        }
+        return true;
+      });
+
+      if (finalRows.length < 2) {
+        generatedOutput!.value = "";
+        return;
+      }
+
+      if (outputFormat === "html") {
+        const lines = finalRows.map((r) => `<link rel="alternate" hreflang="${escapeAttr(hreflangValueFor(r))}" href="${escapeAttr(r.url.trim())}" />`);
+        generatedOutput!.value = `<!-- Paste this exact block into the <head> of every URL listed below -->\n${lines.join("\n")}`;
+      } else {
+        const urlBlocks = finalRows.map((r) => {
+          const altLines = finalRows.map((alt) => `    <xhtml:link rel="alternate" hreflang="${escapeAttr(hreflangValueFor(alt))}" href="${escapeAttr(alt.url.trim())}" />`).join("\n");
+          return `  <url>\n    <loc>${escapeAttr(r.url.trim())}</loc>\n${altLines}\n  </url>`;
+        });
+        generatedOutput!.value = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urlBlocks.join("\n")}\n</urlset>`;
+      }
+    }
+
+    addRowBtn.addEventListener("click", () => { addRow(); renderRows(); generate(); });
+    clearRowsBtn.addEventListener("click", () => { rows = []; addRow(); addRow(); renderRows(); generate(); });
+
+    outputFormatBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        outputFormat = (btn.dataset.outputFormat as "html" | "sitemap") || "html";
+        setOutputFormatButtons();
+        generate();
+      });
+    });
+
+    csvInput.addEventListener("change", async () => {
+      const file = csvInput.files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+      if (lines.length === 0) return;
+      rows = [];
+      lines.forEach((line) => {
+        const cells = parseCsvLine(line);
+        if (!cells[0] || !/^https?:\/\//i.test(cells[0])) return; // skip header/invalid rows
+        addRow({ url: cells[0], lang: cells[1] || "", country: cells[2] || "" });
+      });
+      if (rows.length === 0) addRow();
+      renderRows();
+      generate();
+      csvInput.value = "";
+    });
+
+    copyGeneratedBtn.addEventListener("click", async () => {
+      if (!generatedOutput!.value) return;
+      try {
+        await navigator.clipboard.writeText(generatedOutput!.value);
+        copyIcon!.classList.add("hidden");
+        copyCheck!.classList.remove("hidden");
+        copyLabel!.textContent = "Copied!";
+        setTimeout(() => { copyIcon!.classList.remove("hidden"); copyCheck!.classList.add("hidden"); copyLabel!.textContent = "Copy"; }, 1500);
+      } catch {}
+    });
+
+    // ============ VALIDATOR ============
+    function renderReport(checks: CheckResult[]) {
+      report!.innerHTML = checks.map((c) => `<li class="flex items-start gap-2">${iconFor(c.pass, c.severity)}<div><span class="font-medium text-gray-800">${escapeHtml(c.label)}</span><p class="text-gray-500">${escapeHtml(c.detail)}</p></div></li>`).join("");
+      const failCount = checks.filter((c) => !c.pass && c.severity !== "info").length;
+      reportSummary!.textContent = failCount === 0 ? "All checks passed" : `${failCount} issue${failCount === 1 ? "" : "s"} found`;
+      reportSummary!.className = failCount === 0 ? "text-xs text-green-600" : "text-xs text-amber-600";
+    }
+
+    function runPageValidation() {
+      const html = htmlInput!.value.trim();
+      const pageUrlRaw = pageUrlInput!.value.trim();
+      returnReport!.classList.add("hidden");
+      returnStatus!.classList.add("hidden");
+      checkReturnsBtn!.disabled = true;
+      lastExtractedHreflangs = [];
+      lastPageUrl = pageUrlRaw;
+
+      if (!html) {
+        report!.innerHTML = '<li class="text-gray-400">Paste HTML or fetch a URL to validate its hreflang tags.</li>';
+        reportSummary!.textContent = "";
+        return;
+      }
+
+      const checks: CheckResult[] = [];
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const tags = extractHreflangs(doc);
+
+      checks.push({ label: "Hreflang tags found", pass: tags.length > 0, detail: tags.length > 0 ? `Found ${tags.length} hreflang tag${tags.length === 1 ? "" : "s"}.` : "No <link rel=\"alternate\" hreflang=\"…\"> tags found." });
+      if (tags.length === 0) { renderReport(checks); return; }
+
+      const invalidFormat = tags.filter((t) => !isValidHreflangFormat(t.hreflang));
+      checks.push({ label: "Hreflang values are correctly formatted", pass: invalidFormat.length === 0, detail: invalidFormat.length === 0 ? "All values look like valid language or language-region codes." : `Invalid: ${invalidFormat.map((t) => t.hreflang).join(", ")}. Expected a 2-letter language code, optionally with a region like en-US.` });
+
+      const nonAbsolute = tags.filter((t) => !/^https?:\/\//i.test(t.href));
+      checks.push({ label: "All hreflang URLs are absolute", pass: nonAbsolute.length === 0, detail: nonAbsolute.length === 0 ? "Every href is an absolute URL." : `${nonAbsolute.length} URL${nonAbsolute.length === 1 ? "" : "s"} aren't absolute.`, severity: nonAbsolute.length === 0 ? undefined : "info" });
+
+      const codeCounts = new Map<string, number>();
+      tags.forEach((t) => codeCounts.set(t.hreflang.toLowerCase(), (codeCounts.get(t.hreflang.toLowerCase()) || 0) + 1));
+      const dupes = Array.from(codeCounts.entries()).filter(([, c]) => c > 1).map(([code]) => code);
+      checks.push({ label: "No duplicate hreflang codes", pass: dupes.length === 0, detail: dupes.length === 0 ? "Every code appears only once." : `Duplicated: ${dupes.join(", ")}.` });
+
+      const hasXDefault = tags.some((t) => t.hreflang.toLowerCase() === "x-default");
+      checks.push({ label: "x-default is set", pass: hasXDefault, detail: hasXDefault ? "An x-default fallback is present." : "No x-default found. Optional, but recommended as a fallback for unmatched languages.", severity: hasXDefault ? undefined : "info" });
+
+      if (pageUrlRaw) {
+        try {
+          const pageUrl = new URL(pageUrlRaw);
+          const selfReferenced = tags.some((t) => {
+            try { const h = new URL(t.href); return h.href.replace(/\/$/, "") === pageUrl.href.replace(/\/$/, ""); } catch { return false; }
+          });
+          checks.push({ label: "Self-referencing tag is present", pass: selfReferenced, detail: selfReferenced ? "This page's own URL is included in its hreflang set, as required." : "This page's own URL isn't listed among its hreflang tags. Google requires a page to reference itself in its own hreflang set." });
+        } catch {
+          checks.push({ label: "Page URL is valid", pass: false, detail: "The Page URL field isn't a valid, absolute URL, so self-reference couldn't be checked." });
+        }
+      } else {
+        checks.push({ label: "Page URL provided", pass: false, detail: "Enter this page's URL above to check for a self-referencing tag and to check return tags on alternates.", severity: "info" });
+      }
+
+      renderReport(checks);
+      lastExtractedHreflangs = tags;
+      checkReturnsBtn!.disabled = !pageUrlRaw || tags.length === 0;
+    }
+
+    htmlInput.addEventListener("input", runPageValidation);
+    pageUrlInput.addEventListener("input", runPageValidation);
+
+    fetchBtn.addEventListener("click", async () => {
+      let target = fetchUrlInput!.value.trim();
+      if (!target) return;
+      if (!/^https?:\/\//i.test(target)) target = "https://" + target;
+      let parsedUrl: URL;
+      try { parsedUrl = new URL(target); } catch {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = "That doesn't look like a valid URL.";
+        return;
+      }
+
+      fetchBtn!.disabled = true;
+      fetchBtn!.textContent = "Fetching…";
+      fetchStatus!.classList.add("hidden");
+
+      let result: Awaited<ReturnType<typeof fetchWithRedirects>>;
+      try { result = await fetchWithRedirects(parsedUrl.toString()); }
+      catch (err) {
+        fetchBtn!.disabled = false; fetchBtn!.textContent = "Fetch";
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
+        return;
+      }
+      fetchBtn!.disabled = false; fetchBtn!.textContent = "Fetch";
+
+      if ("error" in result) {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = `Could not fetch: ${result.error}`;
+        return;
+      }
+      if (result.status >= 400) {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-amber-600";
+        fetchStatus!.textContent = `${result.finalUrl} returned status ${result.status}.`;
+        return;
+      }
+
+      pageUrlInput!.value = result.finalUrl;
+      htmlInput!.value = result.body;
+      fetchStatus!.classList.remove("hidden");
+      fetchStatus!.className = "mb-3 text-xs text-green-600";
+      fetchStatus!.textContent = `Fetched from ${result.finalUrl}`;
+      runPageValidation();
+    });
+
+    checkReturnsBtn.addEventListener("click", async () => {
+      if (lastExtractedHreflangs.length === 0 || !lastPageUrl) return;
+      const alternates = lastExtractedHreflangs.filter((t) => {
+        try { return new URL(t.href).href.replace(/\/$/, "") !== new URL(lastPageUrl).href.replace(/\/$/, ""); } catch { return true; }
+      });
+      const toCheck = alternates.slice(0, MAX_RETURN_CHECKS);
+
+      checkReturnsBtn!.disabled = true;
+      returnStatus!.classList.remove("hidden");
+      returnReport!.classList.remove("hidden");
+      returnReport!.innerHTML = "";
+      const results: CheckResult[] = [];
+
+      for (let i = 0; i < toCheck.length; i++) {
+        const alt = toCheck[i];
+        returnStatus!.className = "mt-2 text-xs text-gray-500";
+        returnStatus!.textContent = `Checking ${i + 1} of ${toCheck.length}: ${alt.href}`;
+
+        try {
+          const res = await fetchWithRedirects(alt.href);
+          if ("error" in res || res.status >= 400) {
+            results.push({ label: alt.href, pass: false, detail: "error" in res ? `Could not fetch: ${res.error}` : `Returned status ${res.status}.`, severity: "info" });
+          } else {
+            const altDoc = new DOMParser().parseFromString(res.body, "text/html");
+            const altTags = extractHreflangs(altDoc);
+            const pointsBack = altTags.some((t) => {
+              try { return new URL(t.href).href.replace(/\/$/, "") === new URL(lastPageUrl).href.replace(/\/$/, ""); } catch { return false; }
+            });
+            results.push({
+              label: alt.href,
+              pass: pointsBack,
+              detail: pointsBack ? "Correctly links back to the original page." : "Does not link back to the original page — this breaks the reciprocal hreflang requirement.",
+            });
+          }
+        } catch (err) {
+          results.push({ label: alt.href, pass: false, detail: `Request failed: ${err instanceof Error ? err.message : "unknown error"}`, severity: "info" });
+        }
+
+        returnReport!.innerHTML = results.map((r) => `<li class="flex items-start gap-2">${iconFor(r.pass, r.severity)}<div><span class="font-medium text-gray-800 break-all">${escapeHtml(r.label)}</span><p class="text-gray-500">${escapeHtml(r.detail)}</p></div></li>`).join("");
+      }
+
+      const truncatedNote = alternates.length > MAX_RETURN_CHECKS ? ` Only the first ${MAX_RETURN_CHECKS} of ${alternates.length} alternates were checked.` : "";
+      returnStatus!.className = "mt-2 text-xs text-gray-500";
+      returnStatus!.textContent = `Checked ${toCheck.length} alternate page${toCheck.length === 1 ? "" : "s"}.${truncatedNote}`;
+      checkReturnsBtn!.disabled = false;
+    });
+
+    addRow();
+    addRow();
+    renderRows();
+    setOutputFormatButtons();
+    generate();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-hreflang-tool-widget]").forEach(initHreflangTool);
+</script>

@@ -1,0 +1,172 @@
+<div class="robots-meta-tag" data-robots-meta-tag>
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <div class="mb-4">
+      <span class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Target</span>
+      <select data-target-select class="w-full max-w-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+        <option value="robots">All crawlers (robots)</option>
+        <option value="googlebot">Googlebot only</option>
+        <option value="bingbot">Bingbot only</option>
+      </select>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div>
+        <span class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Indexing</span>
+        <label class="flex items-center gap-2 py-1 text-sm text-slate-700"><input type="radio" name="index" data-directive="index" value="index" checked class="text-indigo-600"> index (default, allow indexing)</label>
+        <label class="flex items-center gap-2 py-1 text-sm text-slate-700"><input type="radio" name="index" data-directive="index" value="noindex" class="text-indigo-600"> noindex (exclude from search results)</label>
+      </div>
+      <div>
+        <span class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Link following</span>
+        <label class="flex items-center gap-2 py-1 text-sm text-slate-700"><input type="radio" name="follow" data-directive="follow" value="follow" checked class="text-indigo-600"> follow (default, pass link equity)</label>
+        <label class="flex items-center gap-2 py-1 text-sm text-slate-700"><input type="radio" name="follow" data-directive="follow" value="nofollow" class="text-indigo-600"> nofollow (don't pass link equity)</label>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <span class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Additional directives</span>
+      <div class="grid gap-2 sm:grid-cols-2">
+        <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" data-extra="noarchive" class="rounded border-slate-300 text-indigo-600"> noarchive (no cached copy)</label>
+        <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" data-extra="nosnippet" class="rounded border-slate-300 text-indigo-600"> nosnippet (no text/video snippet)</label>
+        <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" data-extra="noimageindex" class="rounded border-slate-300 text-indigo-600"> noimageindex (don't index images on this page)</label>
+        <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" data-extra="notranslate" class="rounded border-slate-300 text-indigo-600"> notranslate (no offered translation)</label>
+      </div>
+    </div>
+
+    <div class="mt-4 grid gap-4 sm:grid-cols-3">
+      <label class="block">
+        <span class="mb-1 block text-xs text-slate-600">max-snippet (chars, -1 = no limit)</span>
+        <input type="number" data-max-snippet value="" placeholder="unset" class="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm" />
+      </label>
+      <label class="block">
+        <span class="mb-1 block text-xs text-slate-600">max-image-preview</span>
+        <select data-max-image-preview class="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm">
+          <option value="">unset</option>
+          <option value="none">none</option>
+          <option value="standard">standard</option>
+          <option value="large">large</option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="mb-1 block text-xs text-slate-600">max-video-preview (seconds, -1 = no limit)</span>
+        <input type="number" data-max-video-preview value="" placeholder="unset" class="w-full rounded-lg border border-slate-300 px-3 py-1.5 text-sm" />
+      </label>
+    </div>
+
+    <label class="mt-4 flex items-center gap-2 text-sm text-slate-700">
+      <input type="checkbox" data-unavailable-after-toggle class="rounded border-slate-300 text-indigo-600" />
+      unavailable_after (auto-noindex after a date)
+    </label>
+    <input type="datetime-local" data-unavailable-after-input disabled class="mt-2 w-full max-w-xs rounded-lg border border-slate-300 px-3 py-1.5 text-sm disabled:bg-slate-50 disabled:text-slate-400" />
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-4">
+      <div class="mb-1 flex items-center justify-between">
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">HTML meta tag</h3>
+        <button type="button" data-copy-btn="meta" class="copy-btn inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600 hover:border-indigo-300 hover:bg-indigo-100">
+          <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          <span data-copy-label>Copy</span>
+        </button>
+      </div>
+      <pre data-meta-output class="overflow-auto rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-800"></pre>
+    </div>
+
+    <div>
+      <div class="mb-1 flex items-center justify-between">
+        <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Equivalent X-Robots-Tag HTTP header</h3>
+        <button type="button" data-copy-btn="header" class="copy-btn inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600 hover:border-indigo-300 hover:bg-indigo-100">
+          <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          <span data-copy-label>Copy</span>
+        </button>
+      </div>
+      <pre data-header-output class="overflow-auto rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-800"></pre>
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you configure here is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  function initRobotsMetaTag(root: HTMLElement) {
+    const targetSelect = root.querySelector<HTMLSelectElement>("[data-target-select]")!;
+    const maxSnippet = root.querySelector<HTMLInputElement>("[data-max-snippet]")!;
+    const maxImagePreview = root.querySelector<HTMLSelectElement>("[data-max-image-preview]")!;
+    const maxVideoPreview = root.querySelector<HTMLInputElement>("[data-max-video-preview]")!;
+    const unavailableToggle = root.querySelector<HTMLInputElement>("[data-unavailable-after-toggle]")!;
+    const unavailableInput = root.querySelector<HTMLInputElement>("[data-unavailable-after-input]")!;
+    const metaOutput = root.querySelector<HTMLPreElement>("[data-meta-output]")!;
+    const headerOutput = root.querySelector<HTMLPreElement>("[data-header-output]")!;
+    const copyBtns = root.querySelectorAll<HTMLButtonElement>("[data-copy-btn]");
+
+    function buildDirectives(): string[] {
+      const directives: string[] = [];
+
+      const indexVal = root.querySelector<HTMLInputElement>('[data-directive="index"]:checked')!.value;
+      if (indexVal === "noindex") directives.push("noindex");
+
+      const followVal = root.querySelector<HTMLInputElement>('[data-directive="follow"]:checked')!.value;
+      if (followVal === "nofollow") directives.push("nofollow");
+
+      root.querySelectorAll<HTMLInputElement>("[data-extra]:checked").forEach((el) => {
+        directives.push(el.dataset.extra!);
+      });
+
+      if (maxSnippet.value !== "") directives.push(`max-snippet:${maxSnippet.value}`);
+      if (maxImagePreview.value) directives.push(`max-image-preview:${maxImagePreview.value}`);
+      if (maxVideoPreview.value !== "") directives.push(`max-video-preview:${maxVideoPreview.value}`);
+
+      if (unavailableToggle.checked && unavailableInput.value) {
+        const date = new Date(unavailableInput.value);
+        const rfc850 = date.toUTCString().replace("GMT", "GMT");
+        directives.push(`unavailable_after:${rfc850}`);
+      }
+
+      if (directives.length === 0) directives.push("index", "follow");
+
+      return directives;
+    }
+
+    function render() {
+      const directives = buildDirectives();
+      const content = directives.join(", ");
+      const target = targetSelect.value;
+
+      metaOutput.textContent = `<meta name="${target}" content="${content}" />`;
+      headerOutput.textContent = `X-Robots-Tag: ${target === "robots" ? "" : target + ": "}${content}`;
+    }
+
+    root.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+      "[data-directive], [data-extra], [data-max-snippet], [data-max-image-preview], [data-max-video-preview]"
+    ).forEach((el) => el.addEventListener("input", render));
+    targetSelect.addEventListener("change", render);
+
+    unavailableToggle.addEventListener("change", () => {
+      unavailableInput.disabled = !unavailableToggle.checked;
+      render();
+    });
+    unavailableInput.addEventListener("input", render);
+
+    copyBtns.forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const which = btn.dataset.copyBtn;
+        const text = (which === "meta" ? metaOutput.textContent : headerOutput.textContent) ?? "";
+        if (!text) return;
+        await navigator.clipboard.writeText(text);
+        const icon = btn.querySelector("[data-copy-icon]")!;
+        const label = btn.querySelector("[data-copy-label]")!;
+        icon.innerHTML = `<path d="M20 6L9 17l-5-5"/>`;
+        label.textContent = "Copied";
+        setTimeout(() => {
+          icon.innerHTML = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+          label.textContent = "Copy";
+        }, 1500);
+      });
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-robots-meta-tag]").forEach(initRobotsMetaTag);
+</script>

@@ -1,0 +1,228 @@
+<div class="htaccess-redirect" data-htaccess-redirect>
+  <div class="flex flex-wrap items-center gap-1 rounded-t-2xl border border-b-0 border-slate-200 bg-slate-50 p-3">
+    <button type="button" data-type-btn data-type="single" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium bg-teal-600 text-white">Single URL</button>
+    <button type="button" data-type-btn data-type="wildcard" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">Wildcard folder</button>
+    <button type="button" data-type-btn data-type="https" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">Force HTTPS</button>
+    <button type="button" data-type-btn data-type="www" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">WWW ↔ non-WWW</button>
+    <button type="button" data-type-btn data-type="domain" class="type-btn rounded-md px-3 py-1.5 text-sm font-medium text-slate-500">Domain change</button>
+  </div>
+
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <div data-form="single" class="grid gap-3 sm:grid-cols-2">
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Old path</span><input type="text" data-field="oldPath" value="/old-page" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">New path or full URL</span><input type="text" data-field="newPath" value="/new-page" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+    </div>
+
+    <div data-form="wildcard" class="hidden grid gap-3 sm:grid-cols-2">
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Old folder (without trailing slash)</span><input type="text" data-field="oldFolder" value="/old-blog" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">New folder (without trailing slash)</span><input type="text" data-field="newFolder" value="/blog" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+    </div>
+
+    <div data-form="https" class="hidden">
+      <p class="text-sm text-slate-500">Redirects any HTTP request to the same URL on HTTPS. No fields needed, applies site-wide.</p>
+    </div>
+
+    <div data-form="www" class="hidden grid gap-3 sm:grid-cols-2">
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Domain (without www)</span><input type="text" data-field="domain" value="example.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Direction</span>
+        <select data-field="direction" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <option value="toNonWww">www → non-www</option>
+          <option value="toWww">non-www → www</option>
+        </select>
+      </label>
+    </div>
+
+    <div data-form="domain" class="hidden grid gap-3 sm:grid-cols-2">
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">Old domain</span><input type="text" data-field="oldDomain" value="oldsite.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+      <label class="block"><span class="mb-1 block text-xs text-slate-600">New domain</span><input type="text" data-field="newDomain" value="newsite.com" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /></label>
+    </div>
+
+    <div class="mt-4 flex items-center gap-4">
+      <label class="flex items-center gap-1.5 text-sm text-slate-700"><input type="radio" name="statuscode" data-status value="301" checked class="text-teal-600" /> 301 Permanent</label>
+      <label class="flex items-center gap-1.5 text-sm text-slate-700"><input type="radio" name="statuscode" data-status value="302" class="text-teal-600" /> 302 Temporary</label>
+      <button type="button" data-add-rule-btn class="ml-auto rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700">
+        + Add Rule
+      </button>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-3 flex items-center justify-between">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">.htaccess output</h3>
+      <div class="flex gap-2">
+        <button type="button" data-clear-all-btn class="text-xs font-medium text-red-500 hover:underline">Clear all</button>
+        <button type="button" data-copy-btn
+          class="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-600 hover:border-teal-300 hover:bg-teal-100">
+          <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          <span data-copy-label>Copy</span>
+        </button>
+      </div>
+    </div>
+    <div data-rules-list class="mb-3 space-y-1"></div>
+    <pre data-output class="overflow-auto rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-800">—</pre>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you configure here is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  interface Rule { id: number; label: string; code: string; needsRewrite: boolean }
+
+  let nextId = 1;
+
+  function buildRule(type: string, fields: Record<string, string>, status: string): { label: string; code: string; needsRewrite: boolean } {
+    if (type === "single") {
+      return {
+        label: `Redirect ${fields.oldPath} → ${fields.newPath}`,
+        code: `Redirect ${status} ${fields.oldPath} ${fields.newPath}`,
+        needsRewrite: false,
+      };
+    }
+
+    if (type === "wildcard") {
+      const flag = status === "301" ? "R=301" : "R=302";
+      return {
+        label: `Wildcard ${fields.oldFolder}/* → ${fields.newFolder}/*`,
+        code: `RewriteRule ^${fields.oldFolder.replace(/^\//, "")}/(.*)$ ${fields.newFolder}/$1 [${flag},L]`,
+        needsRewrite: true,
+      };
+    }
+
+    if (type === "https") {
+      const flag = status === "301" ? "R=301" : "R=302";
+      return {
+        label: "Force HTTPS site-wide",
+        code: `RewriteCond %{HTTPS} off\nRewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [${flag},L]`,
+        needsRewrite: true,
+      };
+    }
+
+    if (type === "www") {
+      const flag = status === "301" ? "R=301" : "R=302";
+      const domain = fields.domain;
+      if (fields.direction === "toNonWww") {
+        return {
+          label: `www.${domain} → ${domain}`,
+          code: `RewriteCond %{HTTP_HOST} ^www\\.${domain.replace(/\./g, "\\.")}$ [NC]\nRewriteRule ^(.*)$ https://${domain}/$1 [${flag},L]`,
+          needsRewrite: true,
+        };
+      }
+      return {
+        label: `${domain} → www.${domain}`,
+        code: `RewriteCond %{HTTP_HOST} ^${domain.replace(/\./g, "\\.")}$ [NC]\nRewriteRule ^(.*)$ https://www.${domain}/$1 [${flag},L]`,
+        needsRewrite: true,
+      };
+    }
+
+    // domain
+    const flag = status === "301" ? "R=301" : "R=302";
+    return {
+      label: `${fields.oldDomain} → ${fields.newDomain}`,
+      code: `RewriteCond %{HTTP_HOST} ^(www\\.)?${fields.oldDomain.replace(/\./g, "\\.")}$ [NC]\nRewriteRule ^(.*)$ https://${fields.newDomain}/$1 [${flag},L]`,
+      needsRewrite: true,
+    };
+  }
+
+  function initHtaccessRedirect(root: HTMLElement) {
+    const typeBtns = root.querySelectorAll<HTMLButtonElement>("[data-type-btn]");
+    const forms = root.querySelectorAll<HTMLDivElement>("[data-form]");
+    const addRuleBtn = root.querySelector<HTMLButtonElement>("[data-add-rule-btn]")!;
+    const clearAllBtn = root.querySelector<HTMLButtonElement>("[data-clear-all-btn]")!;
+    const rulesList = root.querySelector<HTMLDivElement>("[data-rules-list]")!;
+    const output = root.querySelector<HTMLPreElement>("[data-output]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+
+    let activeType = "single";
+    let rules: Rule[] = [];
+
+    function getFields(formEl: HTMLElement): Record<string, string> {
+      const fields: Record<string, string> = {};
+      formEl.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-field]").forEach((el) => {
+        fields[el.dataset.field!] = el.value;
+      });
+      return fields;
+    }
+
+    function renderRules() {
+      rulesList.innerHTML = rules
+        .map(
+          (r) => `
+        <div class="flex items-center justify-between rounded-lg border border-slate-100 px-3 py-1.5">
+          <span class="font-mono text-xs text-slate-600">${r.label}</span>
+          <button type="button" data-remove-rule="${r.id}" class="text-xs font-medium text-red-500 hover:underline">Remove</button>
+        </div>`
+        )
+        .join("");
+
+      rulesList.querySelectorAll<HTMLButtonElement>("[data-remove-rule]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          rules = rules.filter((r) => r.id !== Number(btn.dataset.removeRule));
+          renderRules();
+          renderOutput();
+        });
+      });
+    }
+
+    function renderOutput() {
+      if (rules.length === 0) {
+        output.textContent = "—";
+        return;
+      }
+      const needsRewriteEngine = rules.some((r) => r.needsRewrite);
+      const parts: string[] = [];
+      if (needsRewriteEngine) parts.push("RewriteEngine On");
+      rules.forEach((r) => parts.push(r.code));
+      output.textContent = parts.join("\n\n");
+    }
+
+    typeBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeType = btn.dataset.type!;
+        typeBtns.forEach((b) => {
+          const active = b.dataset.type === activeType;
+          b.classList.toggle("bg-teal-600", active);
+          b.classList.toggle("text-white", active);
+          b.classList.toggle("text-slate-500", !active);
+        });
+        forms.forEach((f) => f.classList.toggle("hidden", f.dataset.form !== activeType));
+      });
+    });
+
+    addRuleBtn.addEventListener("click", () => {
+      const formEl = root.querySelector<HTMLElement>(`[data-form="${activeType}"]`)!;
+      const fields = getFields(formEl);
+      const status = root.querySelector<HTMLInputElement>("[data-status]:checked")!.value;
+      const built = buildRule(activeType, fields, status);
+      rules.push({ id: nextId++, ...built });
+      renderRules();
+      renderOutput();
+    });
+
+    clearAllBtn.addEventListener("click", () => {
+      rules = [];
+      renderRules();
+      renderOutput();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+      const text = output.textContent ?? "";
+      if (!text || text === "—") return;
+      await navigator.clipboard.writeText(text);
+      const icon = copyBtn.querySelector("[data-copy-icon]")!;
+      const label = copyBtn.querySelector("[data-copy-label]")!;
+      icon.innerHTML = `<path d="M20 6L9 17l-5-5"/>`;
+      label.textContent = "Copied";
+      setTimeout(() => {
+        icon.innerHTML = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+        label.textContent = "Copy";
+      }, 1500);
+    });
+
+    renderRules();
+    renderOutput();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-htaccess-redirect]").forEach(initHtaccessRedirect);
+</script>

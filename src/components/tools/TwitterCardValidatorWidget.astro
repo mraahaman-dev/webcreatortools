@@ -1,0 +1,434 @@
+---
+---
+
+<div data-twitter-card-validator-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div class="flex flex-wrap items-center gap-2 mb-2">
+    <input
+      type="text"
+      data-fetch-url-input
+      placeholder="Fetch from URL https://…"
+      spellcheck="false"
+      class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    />
+    <button type="button" data-fetch-btn class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
+      Fetch
+    </button>
+  </div>
+  <p data-fetch-status class="hidden mb-3 text-xs"></p>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">HTML or meta tags</label>
+      <textarea
+        data-html-input
+        rows="14"
+        spellcheck="false"
+        placeholder='Paste a page&#39;s <head> HTML, or just its meta tags, e.g.
+&lt;meta name="twitter:card" content="summary_large_image" /&gt;
+&lt;meta name="twitter:title" content="…" /&gt;'
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      ></textarea>
+    </div>
+
+    <div>
+      <p class="text-xs font-medium text-gray-600 mb-1">Card preview</p>
+      <div data-preview-card class="rounded-lg border border-gray-200 overflow-hidden mb-1"></div>
+      <p class="text-xs text-gray-400 mb-4">Approximation only — X's actual rendering can vary and changes over time.</p>
+
+      <div class="flex items-center justify-between mb-1">
+        <p class="text-xs font-medium text-gray-600">Validation report</p>
+        <span data-report-summary class="text-xs text-gray-400"></span>
+      </div>
+      <ul data-report class="space-y-2 text-sm rounded-lg border border-gray-200 bg-gray-50 p-3 max-h-72 overflow-y-auto">
+        <li class="text-gray-400">Paste tags or fetch a URL to see the validation report.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  interface CheckResult { label: string; pass: boolean; detail: string; severity?: "warn" | "info" }
+
+  const IMAGE_MIN: Record<string, { w: number; h: number; label: string }> = {
+    summary: { w: 144, h: 144, label: "at least 144×144, roughly square" },
+    summary_large_image: { w: 300, h: 157, label: "at least 300×157, roughly 2:1" },
+  };
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function iconFor(pass: boolean, severity?: "warn" | "info"): string {
+    if (pass) {
+      return '<svg class="h-4 w-4 shrink-0 text-green-600" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+    if (severity === "info") {
+      return '<svg class="h-4 w-4 shrink-0 text-blue-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 4.5v.01" stroke-linecap="round"/></svg>';
+    }
+    return '<svg class="h-4 w-4 shrink-0 text-amber-500" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5v4M8 11.5v.01" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5"/></svg>';
+  }
+
+  function domainFromUrl(url: string): string {
+    try {
+      return new URL(url).hostname.replace(/^www\./, "");
+    } catch {
+      return "";
+    }
+  }
+
+  function loadImageDimensions(url: string): Promise<{ width: number; height: number } | null> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const timer = window.setTimeout(() => resolve(null), 8000);
+      img.onload = () => {
+        window.clearTimeout(timer);
+        resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      };
+      img.onerror = () => {
+        window.clearTimeout(timer);
+        resolve(null);
+      };
+      img.src = url;
+    });
+  }
+
+  async function fetchWithRedirects(url: string, maxHops = 5): Promise<{ body: string; status: number; finalUrl: string } | { error: string }> {
+    let current = url;
+    for (let i = 0; i < maxHops; i++) {
+      const res = await fetch(`/api/fetch-proxy/?url=${encodeURIComponent(current)}`);
+      if (!res.ok && res.status !== 400 && res.status !== 502) {
+        return { error: `/api/fetch-proxy responded with HTTP ${res.status}` };
+      }
+      let data: any;
+      try {
+        data = await res.json();
+      } catch {
+        return { error: "The proxy endpoint didn't return valid JSON." };
+      }
+      if (data.error) return { error: data.error };
+      if (data.status >= 300 && data.status < 400 && data.headers?.location) {
+        current = new URL(data.headers.location, current).toString();
+        continue;
+      }
+      return { body: data.body, status: data.status, finalUrl: data.finalUrl || current };
+    }
+    return { error: "Too many redirects" };
+  }
+
+  function extractTags(doc: Document): Record<string, string> {
+    const tags: Record<string, string> = {};
+    doc.querySelectorAll('meta[name^="twitter:"]').forEach((el) => {
+      const name = el.getAttribute("name");
+      const content = el.getAttribute("content")?.trim();
+      if (name && content) tags[name] = content;
+    });
+    doc.querySelectorAll('meta[property^="og:"]').forEach((el) => {
+      const name = el.getAttribute("property");
+      const content = el.getAttribute("content")?.trim();
+      if (name && content) tags[name] = content;
+    });
+    return tags;
+  }
+
+  function resolve(tags: Record<string, string>) {
+    return {
+      card: tags["twitter:card"] || "",
+      title: tags["twitter:title"] || tags["og:title"] || "",
+      description: tags["twitter:description"] || tags["og:description"] || "",
+      image: tags["twitter:image"] || tags["og:image"] || "",
+      site: tags["twitter:site"] || "",
+      creator: tags["twitter:creator"] || "",
+      player: tags["twitter:player"] || "",
+      playerWidth: tags["twitter:player:width"] || "",
+      playerHeight: tags["twitter:player:height"] || "",
+      appId: tags["twitter:app:id:iphone"] || tags["twitter:app:id:ipad"] || tags["twitter:app:id:googleplay"] || "",
+    };
+  }
+
+  function initTwitterCardValidator(root: HTMLElement) {
+    const fetchUrlInput = root.querySelector<HTMLInputElement>("[data-fetch-url-input]");
+    const fetchBtn = root.querySelector<HTMLButtonElement>("[data-fetch-btn]");
+    const fetchStatus = root.querySelector<HTMLElement>("[data-fetch-status]");
+    const htmlInput = root.querySelector<HTMLTextAreaElement>("[data-html-input]");
+    const previewCard = root.querySelector<HTMLElement>("[data-preview-card]");
+    const report = root.querySelector<HTMLUListElement>("[data-report]");
+    const reportSummary = root.querySelector<HTMLElement>("[data-report-summary]");
+
+    if (!fetchUrlInput || !fetchBtn || !fetchStatus || !htmlInput || !previewCard || !report || !reportSummary) return;
+
+    let runToken = 0;
+    let currentDomain = "";
+
+    function renderPreview(data: ReturnType<typeof resolve>) {
+      const title = data.title || "Title will appear here";
+      const description = data.description || "Description will appear here.";
+      const image = data.image;
+      const domain = currentDomain || "example.com";
+
+      const imageBlock = image
+        ? `<img src="${image.replace(/"/g, "&quot;")}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'" />`
+        : `<div class="flex h-full w-full items-center justify-center bg-gray-100 text-gray-300 text-xs">No image set</div>`;
+
+      if (data.card === "player") {
+        previewCard!.innerHTML = `
+          <div class="border border-gray-200 rounded-lg overflow-hidden">
+            <div class="w-full aspect-video bg-gray-900 flex items-center justify-center text-white text-xs">
+              ▶ Player card (embedded player shown on X, not previewable here)
+            </div>
+            <div class="p-3 bg-gray-50">
+              <div class="text-xs uppercase tracking-wide text-gray-400 mb-0.5">${escapeHtml(domain)}</div>
+              <div class="text-sm font-semibold text-gray-900 truncate">${escapeHtml(title)}</div>
+            </div>
+          </div>`;
+        return;
+      }
+
+      if (data.card === "app") {
+        previewCard!.innerHTML = `
+          <div class="border border-gray-200 rounded-lg overflow-hidden p-3 bg-gray-50">
+            <div class="text-sm font-semibold text-gray-900">${escapeHtml(title || "App name")}</div>
+            <div class="text-xs text-gray-500">${escapeHtml(description || "App description")}</div>
+            <div class="mt-2 inline-block rounded bg-gray-200 px-2 py-1 text-xs text-gray-600">VIEW</div>
+          </div>`;
+        return;
+      }
+
+      if (data.card === "summary") {
+        previewCard!.innerHTML = `
+          <div class="flex items-stretch border border-gray-200 rounded-lg overflow-hidden">
+            <div class="w-20 h-20 flex-shrink-0 bg-gray-100">${imageBlock}</div>
+            <div class="flex-1 min-w-0 p-2.5 flex flex-col justify-center">
+              <div class="text-sm font-semibold text-gray-900 truncate">${escapeHtml(title)}</div>
+              <div class="text-xs text-gray-500 line-clamp-2">${escapeHtml(description)}</div>
+              <div class="text-xs text-gray-400 mt-0.5">${escapeHtml(domain)}</div>
+            </div>
+          </div>`;
+        return;
+      }
+
+      // summary_large_image (default/fallback layout for anything unrecognized)
+      previewCard!.innerHTML = `
+        <div class="border border-gray-200 rounded-lg overflow-hidden">
+          <div class="w-full aspect-[1200/630] bg-gray-100">${imageBlock}</div>
+          <div class="p-3 bg-gray-50">
+            <div class="text-xs uppercase tracking-wide text-gray-400 mb-0.5">${escapeHtml(domain)}</div>
+            <div class="text-sm font-semibold text-gray-900 truncate">${escapeHtml(title)}</div>
+            <div class="text-xs text-gray-500 line-clamp-2 mt-0.5">${escapeHtml(description)}</div>
+          </div>
+        </div>`;
+    }
+
+    function renderReport(checks: CheckResult[]) {
+      report!.innerHTML = checks
+        .map(
+          (check) => `
+          <li class="flex items-start gap-2">
+            ${iconFor(check.pass, check.severity)}
+            <div>
+              <span class="font-medium text-gray-800">${escapeHtml(check.label)}</span>
+              <p class="text-gray-500">${escapeHtml(check.detail)}</p>
+            </div>
+          </li>`
+        )
+        .join("");
+
+      const failCount = checks.filter((c) => !c.pass && c.severity !== "info").length;
+      reportSummary!.textContent = failCount === 0 ? "All checks passed" : `${failCount} issue${failCount === 1 ? "" : "s"} found`;
+      reportSummary!.className = failCount === 0 ? "text-xs text-green-600" : "text-xs text-amber-600";
+    }
+
+    async function run() {
+      const html = htmlInput!.value.trim();
+      const token = ++runToken;
+
+      if (!html) {
+        report!.innerHTML = '<li class="text-gray-400">Paste tags or fetch a URL to see the validation report.</li>';
+        reportSummary!.textContent = "";
+        previewCard!.innerHTML = "";
+        return;
+      }
+
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const tags = extractTags(doc);
+      const data = resolve(tags);
+
+      renderPreview(data);
+
+      const checks: CheckResult[] = [];
+      const validCards = new Set(["summary", "summary_large_image", "app", "player"]);
+
+      checks.push({
+        label: "twitter:card is present and valid",
+        pass: validCards.has(data.card),
+        detail: validCards.has(data.card)
+          ? `Card type: ${data.card}.`
+          : data.card
+            ? `"${data.card}" isn't a recognized card type. Use summary, summary_large_image, app, or player.`
+            : "No twitter:card tag found. Without it, X shows a plain link preview instead of a rich card.",
+      });
+
+      checks.push({
+        label: "Title is resolved",
+        pass: !!data.title,
+        detail: data.title
+          ? tags["twitter:title"] ? "Found via twitter:title." : "Found via og:title fallback."
+          : "No twitter:title or og:title found.",
+      });
+
+      checks.push({
+        label: "Description is resolved",
+        pass: !!data.description,
+        detail: data.description
+          ? tags["twitter:description"] ? "Found via twitter:description." : "Found via og:description fallback."
+          : "No twitter:description or og:description found. Optional, but recommended.",
+        severity: data.description ? undefined : "info",
+      });
+
+      if (data.card === "summary" || data.card === "summary_large_image") {
+        checks.push({
+          label: "Image is resolved",
+          pass: !!data.image,
+          detail: data.image
+            ? tags["twitter:image"] ? "Found via twitter:image." : "Found via og:image fallback."
+            : "No twitter:image or og:image found. Required for a summary or summary_large_image card.",
+        });
+
+        if (data.image) {
+          const dims = await loadImageDimensions(data.image);
+          if (token !== runToken) return;
+
+          if (!dims) {
+            checks.push({
+              label: "Image loads and meets size requirements",
+              pass: false,
+              detail: "Could not load this image to check its dimensions. It may be blocking hotlinking, or the URL may be broken.",
+              severity: "info",
+            });
+          } else {
+            const min = IMAGE_MIN[data.card];
+            const meetsMin = dims.width >= min.w && dims.height >= min.h;
+            checks.push({
+              label: "Image meets minimum size for this card type",
+              pass: meetsMin,
+              detail: meetsMin
+                ? `${dims.width}×${dims.height} — meets the recommended minimum (${min.label}).`
+                : `${dims.width}×${dims.height} — below the recommended minimum (${min.label}).`,
+            });
+          }
+        }
+      }
+
+      if (data.card === "player") {
+        const hasPlayer = !!data.player && data.player.startsWith("https:");
+        checks.push({
+          label: "twitter:player is a valid https URL",
+          pass: hasPlayer,
+          detail: hasPlayer ? "Present and uses https." : "Missing or not an https URL. Player cards require an https player URL.",
+        });
+        checks.push({
+          label: "Player width and height are set",
+          pass: !!data.playerWidth && !!data.playerHeight,
+          detail: data.playerWidth && data.playerHeight
+            ? `${data.playerWidth}×${data.playerHeight}.`
+            : "twitter:player:width and twitter:player:height are both required for player cards.",
+        });
+      }
+
+      if (data.card === "app") {
+        checks.push({
+          label: "At least one app ID is set",
+          pass: !!data.appId,
+          detail: data.appId
+            ? "Found an app ID for at least one platform."
+            : "None of twitter:app:id:iphone, :ipad, or :googleplay were found. At least one is required for an app card.",
+        });
+      }
+
+      if (data.site) {
+        checks.push({
+          label: "twitter:site format",
+          pass: data.site.startsWith("@"),
+          detail: data.site.startsWith("@") ? `${data.site}` : `"${data.site}" should start with @.`,
+          severity: data.site.startsWith("@") ? undefined : "info",
+        });
+      }
+
+      if (data.creator) {
+        checks.push({
+          label: "twitter:creator format",
+          pass: data.creator.startsWith("@"),
+          detail: data.creator.startsWith("@") ? `${data.creator}` : `"${data.creator}" should start with @.`,
+          severity: data.creator.startsWith("@") ? undefined : "info",
+        });
+      }
+
+      if (token === runToken) renderReport(checks);
+    }
+
+    htmlInput.addEventListener("input", () => { void run(); });
+
+    fetchBtn.addEventListener("click", async () => {
+      let target = fetchUrlInput!.value.trim();
+      if (!target) return;
+      if (!/^https?:\/\//i.test(target)) target = "https://" + target;
+
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(target);
+      } catch {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = "That doesn't look like a valid URL.";
+        return;
+      }
+
+      fetchBtn!.disabled = true;
+      fetchBtn!.textContent = "Fetching…";
+      fetchStatus!.classList.add("hidden");
+
+      let result: Awaited<ReturnType<typeof fetchWithRedirects>>;
+      try {
+        result = await fetchWithRedirects(parsedUrl.toString());
+      } catch (err) {
+        fetchBtn!.disabled = false;
+        fetchBtn!.textContent = "Fetch";
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = `Request failed: ${err instanceof Error ? err.message : "unknown error"}`;
+        return;
+      }
+
+      fetchBtn!.disabled = false;
+      fetchBtn!.textContent = "Fetch";
+
+      if ("error" in result) {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-red-600";
+        fetchStatus!.textContent = `Could not fetch: ${result.error}`;
+        return;
+      }
+
+      if (result.status >= 400) {
+        fetchStatus!.classList.remove("hidden");
+        fetchStatus!.className = "mb-3 text-xs text-amber-600";
+        fetchStatus!.textContent = `${result.finalUrl} returned status ${result.status}.`;
+        return;
+      }
+
+      currentDomain = domainFromUrl(result.finalUrl);
+      htmlInput!.value = result.body;
+      fetchStatus!.classList.remove("hidden");
+      fetchStatus!.className = "mb-3 text-xs text-green-600";
+      fetchStatus!.textContent = `Fetched from ${result.finalUrl}`;
+      void run();
+    });
+
+    run();
+  }
+
+  document
+    .querySelectorAll<HTMLElement>("[data-twitter-card-validator-widget]")
+    .forEach(initTwitterCardValidator);
+</script>

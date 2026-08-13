@@ -1,0 +1,366 @@
+---
+---
+
+<div data-svg-sprite-generator-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div
+    data-drop-zone
+    class="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-8 text-center cursor-pointer hover:border-teal-400 hover:bg-teal-50/40 transition-colors"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M4 6h16v12H4V6z"></path>
+    </svg>
+    <p class="text-sm text-gray-600">
+      <span class="font-semibold text-teal-600">Click to upload</span> or drag and drop multiple SVG icons
+    </p>
+    <p class="text-xs text-gray-400">.svg files only</p>
+    <input type="file" data-file-input accept=".svg,image/svg+xml" multiple class="hidden" />
+  </div>
+
+  <div data-workspace class="hidden mt-5">
+    <div data-file-list class="divide-y divide-gray-100 rounded-lg border border-gray-200 mb-4 max-h-64 overflow-y-auto"></div>
+
+    <div class="flex flex-col sm:flex-row gap-2 mb-4">
+      <button
+        type="button"
+        data-generate-btn
+        class="flex-1 inline-flex items-center justify-center rounded-lg bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-700 transition-colors"
+      >
+        Generate Sprite
+      </button>
+      <button
+        type="button"
+        data-add-more-btn
+        class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        Add More
+      </button>
+      <button
+        type="button"
+        data-clear-btn
+        class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        Clear
+      </button>
+    </div>
+
+    <p data-status-message class="text-xs text-gray-500 mb-4"></p>
+
+    <div data-result class="hidden">
+      <p class="text-xs font-medium text-gray-600 mb-2">Preview</p>
+      <div data-preview-grid class="flex flex-wrap gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4 mb-4"></div>
+
+      <div class="relative mb-4">
+        <label class="block text-xs font-medium text-gray-600 mb-1">Sprite sheet markup</label>
+        <textarea
+          data-sprite-output
+          readonly
+          rows="10"
+          spellcheck="false"
+          class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-teal-500 resize-y"
+        ></textarea>
+        <button
+          type="button"
+          data-copy-sprite-btn
+          class="absolute top-8 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors"
+        >
+          <svg data-copy-icon xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <svg data-copy-check xmlns="http://www.w3.org/2000/svg" class="hidden h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span data-copy-label>Copy</span>
+        </button>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-xs font-medium text-gray-600 mb-1">Usage example</label>
+        <textarea
+          data-usage-output
+          readonly
+          rows="3"
+          spellcheck="false"
+          class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-teal-500 resize-y"
+        ></textarea>
+      </div>
+
+      <button
+        type="button"
+        data-download-btn
+        class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        Download sprite.svg
+      </button>
+    </div>
+  </div>
+
+  <div data-sprite-container style="display:none"></div>
+</div>
+
+<script>
+  interface SpriteItem {
+    file: File;
+    idInput: HTMLInputElement;
+    status: "pending" | "done" | "error";
+    errorMessage: string;
+  }
+
+  function sanitizeId(raw: string): string {
+    const cleaned = raw
+      .toLowerCase()
+      .replace(/\.svg$/i, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    return cleaned || "icon";
+  }
+
+  function uniqueId(base: string, existing: Set<string>): string {
+    let id = base;
+    let n = 2;
+    while (existing.has(id)) {
+      id = `${base}-${n}`;
+      n += 1;
+    }
+    existing.add(id);
+    return id;
+  }
+
+  function extractSymbolParts(svgText: string): { viewBox: string; inner: string } {
+    const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
+    if (doc.querySelector("parsererror")) throw new Error("Invalid SVG markup.");
+    const svgEl = doc.documentElement;
+
+    let viewBox = svgEl.getAttribute("viewBox");
+    if (!viewBox) {
+      const w = parseFloat(svgEl.getAttribute("width") || "");
+      const h = parseFloat(svgEl.getAttribute("height") || "");
+      viewBox = !isNaN(w) && !isNaN(h) && w > 0 && h > 0 ? `0 0 ${w} ${h}` : "0 0 24 24";
+    }
+
+    return { viewBox, inner: svgEl.innerHTML.trim() };
+  }
+
+  function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function initSvgSpriteGenerator(root: HTMLElement) {
+    const dropZone = root.querySelector<HTMLElement>("[data-drop-zone]");
+    const fileInput = root.querySelector<HTMLInputElement>("[data-file-input]");
+    const workspace = root.querySelector<HTMLElement>("[data-workspace]");
+    const fileListEl = root.querySelector<HTMLElement>("[data-file-list]");
+    const generateBtn = root.querySelector<HTMLButtonElement>("[data-generate-btn]");
+    const addMoreBtn = root.querySelector<HTMLButtonElement>("[data-add-more-btn]");
+    const clearBtn = root.querySelector<HTMLButtonElement>("[data-clear-btn]");
+    const statusMessage = root.querySelector<HTMLElement>("[data-status-message]");
+    const resultEl = root.querySelector<HTMLElement>("[data-result]");
+    const previewGrid = root.querySelector<HTMLElement>("[data-preview-grid]");
+    const spriteOutput = root.querySelector<HTMLTextAreaElement>("[data-sprite-output]");
+    const usageOutput = root.querySelector<HTMLTextAreaElement>("[data-usage-output]");
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-sprite-btn]");
+    const copyIcon = root.querySelector<HTMLElement>("[data-copy-icon]");
+    const copyCheck = root.querySelector<HTMLElement>("[data-copy-check]");
+    const copyLabel = root.querySelector<HTMLElement>("[data-copy-label]");
+    const downloadBtn = root.querySelector<HTMLButtonElement>("[data-download-btn]");
+    const spriteContainer = root.querySelector<HTMLElement>("[data-sprite-container]");
+
+    if (
+      !dropZone || !fileInput || !workspace || !fileListEl || !generateBtn || !addMoreBtn || !clearBtn ||
+      !statusMessage || !resultEl || !previewGrid || !spriteOutput || !usageOutput || !copyBtn ||
+      !copyIcon || !copyCheck || !copyLabel || !downloadBtn || !spriteContainer
+    ) {
+      return;
+    }
+
+    let items: SpriteItem[] = [];
+    let lastSpriteMarkup = "";
+
+    function setStatus(message: string, isError = false) {
+      statusMessage!.textContent = message;
+      statusMessage!.classList.toggle("text-red-600", isError);
+      statusMessage!.classList.toggle("text-gray-500", !isError);
+    }
+
+    function renderList() {
+      fileListEl!.innerHTML = "";
+      for (const item of items) {
+        const row = document.createElement("div");
+        row.className = "flex items-center gap-3 px-3 py-2 text-sm";
+
+        const nameEl = document.createElement("span");
+        nameEl.className = "truncate text-gray-700 w-1/2";
+        nameEl.textContent = item.file.name;
+        nameEl.title = item.file.name;
+
+        row.appendChild(nameEl);
+        row.appendChild(item.idInput);
+
+        if (item.status === "error") {
+          const errEl = document.createElement("span");
+          errEl.className = "text-xs text-red-600 flex-shrink-0";
+          errEl.textContent = item.errorMessage || "Error";
+          row.appendChild(errEl);
+        }
+
+        fileListEl!.appendChild(row);
+      }
+    }
+
+    function addFiles(fileList: FileList | File[]) {
+      const svgFiles = Array.from(fileList).filter(
+        (f) => f.type === "image/svg+xml" || f.name.toLowerCase().endsWith(".svg")
+      );
+      if (svgFiles.length === 0) {
+        setStatus("Please choose .svg files.", true);
+        return;
+      }
+
+      const existingIds = new Set(items.map((i) => i.idInput.value));
+
+      for (const file of svgFiles) {
+        const idInput = document.createElement("input");
+        idInput.type = "text";
+        idInput.value = uniqueId(sanitizeId(file.name), existingIds);
+        idInput.className =
+          "flex-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-mono text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500";
+        items.push({ file, idInput, status: "pending", errorMessage: "" });
+      }
+
+      workspace!.classList.remove("hidden");
+      renderList();
+      setStatus(`${items.length} icon${items.length === 1 ? "" : "s"} ready. Edit IDs if needed, then generate.`);
+    }
+
+    async function generate() {
+      if (items.length === 0) return;
+      generateBtn!.disabled = true;
+      setStatus("Building sprite…");
+
+      const existingIds = new Set<string>();
+      const symbols: string[] = [];
+      const previewIcons: { id: string; filename: string }[] = [];
+      let errorCount = 0;
+
+      for (const item of items) {
+        try {
+          const svgText = await item.file.text();
+          const { viewBox, inner } = extractSymbolParts(svgText);
+          const id = uniqueId(sanitizeId(item.idInput.value || item.file.name), existingIds);
+          item.idInput.value = id;
+          symbols.push(`  <symbol id="${id}" viewBox="${viewBox}">${inner}</symbol>`);
+          previewIcons.push({ id, filename: item.file.name });
+          item.status = "done";
+          item.errorMessage = "";
+        } catch (err) {
+          item.status = "error";
+          item.errorMessage = err instanceof Error ? err.message : "Could not parse this file.";
+          errorCount += 1;
+        }
+      }
+
+      renderList();
+
+      if (symbols.length === 0) {
+        setStatus("No valid SVG files could be added to the sprite.", true);
+        resultEl!.classList.add("hidden");
+        generateBtn!.disabled = false;
+        return;
+      }
+
+      const spriteMarkup = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none">\n${symbols.join("\n")}\n</svg>`;
+      lastSpriteMarkup = spriteMarkup;
+
+      spriteContainer!.innerHTML = spriteMarkup;
+
+      previewGrid!.innerHTML = "";
+      for (const icon of previewIcons) {
+        const wrap = document.createElement("div");
+        wrap.className = "flex flex-col items-center gap-1 w-16";
+
+        wrap.innerHTML = `<svg width="32" height="32" class="text-slate-700"><use href="#${icon.id}"></use></svg>`;
+
+        const label = document.createElement("span");
+        label.className = "text-[10px] text-gray-500 truncate max-w-[64px]";
+        label.textContent = icon.id;
+        label.title = icon.filename;
+
+        wrap.appendChild(label);
+        previewGrid!.appendChild(wrap);
+      }
+
+      spriteOutput!.value = spriteMarkup;
+      usageOutput!.value = `<svg width="24" height="24">\n  <use href="sprite.svg#${previewIcons[0].id}"></use>\n</svg>`;
+
+      resultEl!.classList.remove("hidden");
+      generateBtn!.disabled = false;
+      setStatus(
+        errorCount === 0
+          ? `Sprite built with ${symbols.length} icon${symbols.length === 1 ? "" : "s"}.`
+          : `Sprite built with ${symbols.length} icon${symbols.length === 1 ? "" : "s"}, ${errorCount} failed.`,
+        errorCount > 0
+      );
+    }
+
+    function resetAll() {
+      items = [];
+      lastSpriteMarkup = "";
+      fileInput!.value = "";
+      workspace!.classList.add("hidden");
+      resultEl!.classList.add("hidden");
+      spriteContainer!.innerHTML = "";
+      renderList();
+      setStatus("");
+    }
+
+    dropZone.addEventListener("click", () => fileInput!.click());
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone!.classList.add("border-teal-400", "bg-teal-50/40");
+    });
+    dropZone.addEventListener("dragleave", () => {
+      dropZone!.classList.remove("border-teal-400", "bg-teal-50/40");
+    });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone!.classList.remove("border-teal-400", "bg-teal-50/40");
+      if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener("change", () => {
+      if (fileInput!.files?.length) addFiles(fileInput!.files);
+    });
+
+    addMoreBtn.addEventListener("click", () => fileInput!.click());
+    generateBtn.addEventListener("click", generate);
+    clearBtn.addEventListener("click", resetAll);
+
+    copyBtn.addEventListener("click", async () => {
+      if (!lastSpriteMarkup) return;
+      try {
+        await navigator.clipboard.writeText(lastSpriteMarkup);
+        copyIcon!.classList.add("hidden");
+        copyCheck!.classList.remove("hidden");
+        copyLabel!.textContent = "Copied!";
+        setTimeout(() => {
+          copyIcon!.classList.remove("hidden");
+          copyCheck!.classList.add("hidden");
+          copyLabel!.textContent = "Copy";
+        }, 1500);
+      } catch {
+        // clipboard write failed silently; user can still select the text manually
+      }
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      if (!lastSpriteMarkup) return;
+      downloadBlob(new Blob([lastSpriteMarkup], { type: "image/svg+xml" }), "sprite.svg");
+    });
+  }
+
+  document
+    .querySelectorAll<HTMLElement>("[data-svg-sprite-generator-widget]")
+    .forEach(initSvgSpriteGenerator);
+</script>

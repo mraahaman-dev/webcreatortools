@@ -1,0 +1,182 @@
+---
+---
+
+<div data-slug-generator-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Separator</label>
+      <select data-separator-select class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+        <option value="-" selected>Hyphen (recommended)</option>
+        <option value="_">Underscore</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Max length</label>
+      <input type="number" data-maxlength-input min="10" max="200" value="60" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+    </div>
+    <div class="flex items-end">
+      <label class="flex items-center gap-2 text-xs text-gray-600 mb-2 select-none">
+        <input type="checkbox" data-stopwords-checkbox checked class="rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+        Remove stop words (a, the, and, of…)
+      </label>
+    </div>
+  </div>
+
+  <p data-separator-note class="hidden mb-3 text-xs text-amber-700 bg-amber-50 rounded-lg p-2"></p>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Titles (one per line)</label>
+      <textarea
+        data-title-input
+        rows="12"
+        spellcheck="false"
+        placeholder="10 Best SEO Tools for 2026
+How to Bake Sourdough Bread at Home
+Café Naïve: A Résumé Case Study"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-y"
+      ></textarea>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <label class="text-xs font-medium text-gray-600">Slugs</label>
+        <button type="button" data-copy-all-btn class="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors">
+          <svg data-copy-icon xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          <svg data-copy-check xmlns="http://www.w3.org/2000/svg" class="hidden h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span data-copy-label>Copy all</span>
+        </button>
+      </div>
+      <ul data-results-list class="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-gray-50 min-h-[16rem] max-h-[28rem] overflow-y-auto">
+        <li class="p-3 text-sm text-gray-400">Enter one or more titles to generate slugs.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STOP_WORDS = new Set([
+    "a", "an", "the", "and", "or", "but", "of", "in", "on", "at", "to", "for",
+    "with", "by", "from", "as", "is", "are", "was", "were", "be", "been",
+    "being", "this", "that", "these", "those", "it", "its",
+  ]);
+
+  function slugifyTitle(
+    title: string,
+    separator: string,
+    removeStopWords: boolean,
+    maxLength: number
+  ): { slug: string; truncated: boolean } {
+    const normalized = title.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const cleaned = normalized.toLowerCase().replace(/[^a-z0-9\s-]/g, " ");
+    let words = cleaned.split(/[\s-]+/).filter(Boolean);
+
+    if (removeStopWords) {
+      const withoutStopWords = words.filter((w) => !STOP_WORDS.has(w));
+      if (withoutStopWords.length > 0) words = withoutStopWords;
+    }
+
+    let slug = words.join(separator);
+    slug = slug.replace(new RegExp(`\\${separator}{2,}`, "g"), separator).replace(new RegExp(`^\\${separator}+|\\${separator}+$`, "g"), "");
+
+    let truncated = false;
+    if (slug.length > maxLength) {
+      const cut = slug.slice(0, maxLength);
+      const lastSep = cut.lastIndexOf(separator);
+      slug = lastSep > 0 ? cut.slice(0, lastSep) : cut;
+      truncated = true;
+    }
+
+    return { slug, truncated };
+  }
+
+  function initSlugGenerator(root: HTMLElement) {
+    const separatorSelect = root.querySelector<HTMLSelectElement>("[data-separator-select]");
+    const separatorNote = root.querySelector<HTMLElement>("[data-separator-note]");
+    const maxLengthInput = root.querySelector<HTMLInputElement>("[data-maxlength-input]");
+    const stopwordsCheckbox = root.querySelector<HTMLInputElement>("[data-stopwords-checkbox]");
+    const titleInput = root.querySelector<HTMLTextAreaElement>("[data-title-input]");
+    const resultsList = root.querySelector<HTMLElement>("[data-results-list]");
+    const copyAllBtn = root.querySelector<HTMLButtonElement>("[data-copy-all-btn]");
+    const copyIcon = root.querySelector<HTMLElement>("[data-copy-icon]");
+    const copyCheck = root.querySelector<HTMLElement>("[data-copy-check]");
+    const copyLabel = root.querySelector<HTMLElement>("[data-copy-label]");
+
+    if (
+      !separatorSelect || !separatorNote || !maxLengthInput || !stopwordsCheckbox || !titleInput ||
+      !resultsList || !copyAllBtn || !copyIcon || !copyCheck || !copyLabel
+    ) {
+      return;
+    }
+
+    let lastSlugs: string[] = [];
+
+    function render() {
+      const separator = separatorSelect!.value;
+      const maxLength = Math.max(10, Math.min(200, parseInt(maxLengthInput!.value, 10) || 60));
+      const removeStopWords = stopwordsCheckbox!.checked;
+
+      separatorNote!.classList.toggle("hidden", separator !== "_");
+      if (separator === "_") {
+        separatorNote!.textContent = "Google has said underscores aren't treated as word separators the way hyphens are — words on either side of an underscore can be read as one merged word. Hyphens are the safer default.";
+      }
+
+      const titles = titleInput!.value.split("\n").map((t) => t.trim()).filter(Boolean);
+
+      if (titles.length === 0) {
+        resultsList!.innerHTML = '<li class="p-3 text-sm text-gray-400">Enter one or more titles to generate slugs.</li>';
+        lastSlugs = [];
+        return;
+      }
+
+      const results = titles.map((title) => ({ title, ...slugifyTitle(title, separator, removeStopWords, maxLength) }));
+
+      const slugCounts = new Map<string, number>();
+      results.forEach((r) => slugCounts.set(r.slug, (slugCounts.get(r.slug) || 0) + 1));
+
+      resultsList!.innerHTML = results
+        .map((r) => {
+          const isDuplicate = r.slug && (slugCounts.get(r.slug) || 0) > 1;
+          return `
+          <li class="p-3">
+            <p class="text-xs text-gray-400 truncate mb-0.5">${r.title.replace(/</g, "&lt;")}</p>
+            <div class="flex items-center justify-between gap-2">
+              <code class="text-sm ${isDuplicate ? "text-amber-700" : "text-gray-800"} break-all">${r.slug || "(empty)"}</code>
+              <span class="flex-shrink-0 text-xs ${r.slug.length > maxLength ? "text-amber-600" : "text-gray-400"}">${r.slug.length}/${maxLength}</span>
+            </div>
+            ${r.truncated ? '<p class="mt-0.5 text-xs text-amber-600">Truncated to fit the max length</p>' : ""}
+            ${isDuplicate ? '<p class="mt-0.5 text-xs text-amber-600">Same slug as another title above — these would collide as URLs</p>' : ""}
+          </li>`;
+        })
+        .join("");
+
+      lastSlugs = results.map((r) => r.slug);
+    }
+
+    titleInput.addEventListener("input", render);
+    separatorSelect.addEventListener("change", render);
+    maxLengthInput.addEventListener("input", render);
+    stopwordsCheckbox.addEventListener("change", render);
+
+    copyAllBtn.addEventListener("click", async () => {
+      if (lastSlugs.length === 0) return;
+      try {
+        await navigator.clipboard.writeText(lastSlugs.join("\n"));
+        copyIcon!.classList.add("hidden");
+        copyCheck!.classList.remove("hidden");
+        copyLabel!.textContent = "Copied!";
+        setTimeout(() => {
+          copyIcon!.classList.remove("hidden");
+          copyCheck!.classList.add("hidden");
+          copyLabel!.textContent = "Copy all";
+        }, 1500);
+      } catch {
+        // clipboard write failed silently; user can still select the text manually
+      }
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-slug-generator-widget]").forEach(initSlugGenerator);
+</script>

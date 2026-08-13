@@ -75,9 +75,7 @@
         spellcheck="false"
         class="h-96 w-full resize-none border-0 bg-white p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-200"
         placeholder="Paste your SVG code here, or upload a file above"
-      ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M6 38 L18 14 L28 30 L34 20 L42 38 Z" />
-</svg></textarea>
+      ></textarea>
     </div>
 
     <div>
@@ -117,6 +115,31 @@
 
 <script>
   import iconLibrary from "../../data/icon-library.json";
+
+  // Set as a JS string and assigned to the textarea on init, deliberately —
+  // NOT written as literal markup between <textarea> tags. This component has
+  // a scoped <style> block, which makes Astro stamp a bare data-astro-cid-*
+  // attribute onto every element in the template, including any markup it
+  // finds sitting inertly inside a textarea. That bare attribute is valid
+  // HTML but invalid strict XML, so the preview's image/svg+xml parser would
+  // reject it as "Invalid SVG" before the user ever touches the editor.
+  const DEFAULT_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <rect x="4" y="4" width="40" height="40" rx="9" fill="#4F46E5" />
+  <path
+    d="M16 36
+       V13
+       H25
+       C33 13 33 24 25 24
+       H20
+       V17
+       C26 17 26 20 21 20
+       V33
+       C24 31 27 33 32 36
+       Z"
+    fill="#EEF2FF"
+  />
+  <rect x="30" y="30" width="5" height="5" rx="1.2" fill="#EEF2FF" />
+</svg>`;
 
   interface IconElement {
     tag: string;
@@ -165,8 +188,6 @@
     const libraryHint = root.querySelector<HTMLParagraphElement>("[data-library-hint]")!;
     const libraryCategory = root.querySelector<HTMLSelectElement>("[data-library-category]")!;
 
-    // Populate the category dropdown from whatever categories actually exist
-    // in the current icon data, sorted alphabetically by their display label.
     const categoryMap = new Map<string, string>();
     (iconLibrary as IconDefinition[]).forEach((icon) => categoryMap.set(icon.category, icon.categoryLabel));
     Array.from(categoryMap.entries())
@@ -263,6 +284,8 @@
     }
 
     codeInput.addEventListener("input", renderPreview);
+
+    codeInput.value = DEFAULT_SVG;
     renderPreview();
 
     libraryBtn.addEventListener("click", () => {

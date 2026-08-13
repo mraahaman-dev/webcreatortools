@@ -1,0 +1,266 @@
+---
+---
+
+<div data-xml-sitemap-generator-widget class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+    <div>
+      <label class="flex items-center gap-2 text-xs font-medium text-gray-600 mb-1">
+        <input type="checkbox" data-lastmod-checkbox checked class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+        Include lastmod
+      </label>
+      <input
+        type="date"
+        data-lastmod-date
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Change frequency</label>
+      <select
+        data-changefreq-select
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      >
+        <option value="">None</option>
+        <option value="always">Always</option>
+        <option value="hourly">Hourly</option>
+        <option value="daily">Daily</option>
+        <option value="weekly" selected>Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
+        <option value="never">Never</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">Priority</label>
+      <select
+        data-priority-select
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      >
+        <option value="">None</option>
+        <option value="1.0">1.0</option>
+        <option value="0.9">0.9</option>
+        <option value="0.8" selected>0.8</option>
+        <option value="0.7">0.7</option>
+        <option value="0.6">0.6</option>
+        <option value="0.5">0.5</option>
+        <option value="0.4">0.4</option>
+        <option value="0.3">0.3</option>
+        <option value="0.2">0.2</option>
+        <option value="0.1">0.1</option>
+        <option value="0.0">0.0</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-xs font-medium text-gray-600 mb-1">URLs (one per line)</label>
+      <textarea
+        data-url-input
+        rows="14"
+        spellcheck="false"
+        placeholder="https://example.com/
+https://example.com/about
+https://example.com/blog/first-post"
+        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+      ></textarea>
+    </div>
+
+    <div class="relative">
+      <label class="block text-xs font-medium text-gray-600 mb-1">sitemap.xml</label>
+      <textarea
+        data-output
+        readonly
+        rows="14"
+        spellcheck="false"
+        class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm font-mono text-gray-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+      ></textarea>
+
+      <button
+        type="button"
+        data-copy-btn
+        class="absolute top-8 right-2.5 inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors"
+      >
+        <svg data-copy-icon xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        <svg data-copy-check xmlns="http://www.w3.org/2000/svg" class="hidden h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span data-copy-label>Copy</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="flex flex-col sm:flex-row sm:items-center gap-3 mt-4">
+    <button
+      type="button"
+      data-download-btn
+      disabled
+      class="w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+    >
+      Download sitemap.xml
+    </button>
+    <p data-status-message class="text-xs text-gray-500"></p>
+  </div>
+</div>
+
+<script>
+  const DEBOUNCE_MS = 250;
+  const MAX_URLS = 50000; // sitemaps.org protocol limit per file
+
+  function escapeXml(text: string): string {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
+
+  function isValidSitemapUrl(candidate: string): boolean {
+    try {
+      const parsed = new URL(candidate);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+      return false;
+    }
+  }
+
+  function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function initXmlSitemapGenerator(root: HTMLElement) {
+    const urlInput = root.querySelector<HTMLTextAreaElement>("[data-url-input]");
+    const lastmodCheckbox = root.querySelector<HTMLInputElement>("[data-lastmod-checkbox]");
+    const lastmodDate = root.querySelector<HTMLInputElement>("[data-lastmod-date]");
+    const changefreqSelect = root.querySelector<HTMLSelectElement>("[data-changefreq-select]");
+    const prioritySelect = root.querySelector<HTMLSelectElement>("[data-priority-select]");
+    const output = root.querySelector<HTMLTextAreaElement>("[data-output]");
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]");
+    const copyIcon = root.querySelector<HTMLElement>("[data-copy-icon]");
+    const copyCheck = root.querySelector<HTMLElement>("[data-copy-check]");
+    const copyLabel = root.querySelector<HTMLElement>("[data-copy-label]");
+    const downloadBtn = root.querySelector<HTMLButtonElement>("[data-download-btn]");
+    const statusMessage = root.querySelector<HTMLElement>("[data-status-message]");
+
+    if (
+      !urlInput || !lastmodCheckbox || !lastmodDate || !changefreqSelect || !prioritySelect ||
+      !output || !copyBtn || !copyIcon || !copyCheck || !copyLabel || !downloadBtn || !statusMessage
+    ) {
+      return;
+    }
+
+    let lastXml = "";
+    let debounceTimer: number | undefined;
+
+    function generate() {
+      const rawLines = urlInput!.value.split("\n").map((line) => line.trim()).filter(Boolean);
+
+      const seen = new Set<string>();
+      const validUrls: string[] = [];
+      let invalidCount = 0;
+      let duplicateCount = 0;
+
+      for (const line of rawLines) {
+        if (!isValidSitemapUrl(line)) {
+          invalidCount += 1;
+          continue;
+        }
+        if (seen.has(line)) {
+          duplicateCount += 1;
+          continue;
+        }
+        seen.add(line);
+        validUrls.push(line);
+      }
+
+      if (validUrls.length === 0) {
+        output!.value = "";
+        downloadBtn!.disabled = true;
+        lastXml = "";
+        statusMessage!.textContent = rawLines.length === 0
+          ? ""
+          : `No valid URLs found. ${invalidCount} line${invalidCount === 1 ? "" : "s"} could not be parsed as an absolute http/https URL.`;
+        return;
+      }
+
+      const truncated = validUrls.length > MAX_URLS;
+      const urlsToUse = truncated ? validUrls.slice(0, MAX_URLS) : validUrls;
+
+      const includeLastmod = lastmodCheckbox!.checked;
+      const lastmodValue = lastmodDate!.value;
+      const changefreqValue = changefreqSelect!.value;
+      const priorityValue = prioritySelect!.value;
+
+      const entries = urlsToUse
+        .map((url) => {
+          const parts = [`    <loc>${escapeXml(url)}</loc>`];
+          if (includeLastmod && lastmodValue) parts.push(`    <lastmod>${lastmodValue}</lastmod>`);
+          if (changefreqValue) parts.push(`    <changefreq>${changefreqValue}</changefreq>`);
+          if (priorityValue) parts.push(`    <priority>${priorityValue}</priority>`);
+          return `  <url>\n${parts.join("\n")}\n  </url>`;
+        })
+        .join("\n");
+
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries}\n</urlset>\n`;
+
+      output!.value = xml;
+      lastXml = xml;
+      downloadBtn!.disabled = false;
+
+      const parts: string[] = [`${urlsToUse.length} URL${urlsToUse.length === 1 ? "" : "s"} included`];
+      if (duplicateCount > 0) parts.push(`${duplicateCount} duplicate${duplicateCount === 1 ? "" : "s"} removed`);
+      if (invalidCount > 0) parts.push(`${invalidCount} invalid line${invalidCount === 1 ? "" : "s"} skipped`);
+      if (truncated) parts.push(`only the first ${MAX_URLS.toLocaleString()} URLs were included, the sitemap protocol limit per file`);
+      statusMessage!.textContent = parts.join(" · ");
+    }
+
+    function scheduleGenerate() {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(generate, DEBOUNCE_MS);
+    }
+
+    urlInput.addEventListener("input", scheduleGenerate);
+    lastmodCheckbox.addEventListener("change", generate);
+    lastmodDate.addEventListener("input", generate);
+    changefreqSelect.addEventListener("change", generate);
+    prioritySelect.addEventListener("change", generate);
+
+    copyBtn.addEventListener("click", async () => {
+      if (!lastXml) return;
+      try {
+        await navigator.clipboard.writeText(lastXml);
+        copyIcon!.classList.add("hidden");
+        copyCheck!.classList.remove("hidden");
+        copyLabel!.textContent = "Copied!";
+        setTimeout(() => {
+          copyIcon!.classList.remove("hidden");
+          copyCheck!.classList.add("hidden");
+          copyLabel!.textContent = "Copy";
+        }, 1500);
+      } catch {
+        // clipboard write failed silently; user can still select the text manually
+      }
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      if (!lastXml) return;
+      downloadBlob(new Blob([lastXml], { type: "application/xml" }), "sitemap.xml");
+    });
+
+    // Default lastmod to today, set via JS rather than a hardcoded template
+    // value so it never goes stale.
+    lastmodDate.value = new Date().toISOString().slice(0, 10);
+  }
+
+  document
+    .querySelectorAll<HTMLElement>("[data-xml-sitemap-generator-widget]")
+    .forEach(initXmlSitemapGenerator);
+</script>

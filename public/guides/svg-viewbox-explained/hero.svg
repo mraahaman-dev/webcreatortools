@@ -1,0 +1,28 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#F5F3FF"/>
+
+  <!-- Left: broken frame, star cropped/offset -->
+  <g>
+    <rect x="90" y="90" width="220" height="220" fill="none" stroke="#F87171" stroke-width="2.5" stroke-dasharray="6 5" rx="6"/>
+    <g transform="translate(260,260)">
+      <path d="M0 -70 L18 -22 L68 -22 L28 8 L44 58 L0 26 L-44 58 L-28 8 L-68 -22 L-18 -22 Z"
+            fill="#818CF8" transform="scale(1.05)"/>
+    </g>
+    <text x="200" y="345" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#B91C1C" font-weight="600">Cropped, wrong viewBox</text>
+  </g>
+
+  <!-- Arrow -->
+  <g>
+    <path d="M400 200h90" stroke="#A78BFA" stroke-width="4" stroke-linecap="round"/>
+    <path d="M478 185l20 15-20 15" fill="none" stroke="#A78BFA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Right: fixed frame, star centered -->
+  <g>
+    <rect x="490" y="90" width="220" height="220" fill="none" stroke="#4ADE80" stroke-width="2.5" rx="6"/>
+    <g transform="translate(600,200)">
+      <path d="M0 -60 L15 -19 L58 -19 L24 7 L37 50 L0 22 L-37 50 L-24 7 L-58 -19 L-15 -19 Z" fill="#4F46E5"/>
+    </g>
+    <text x="600" y="345" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#15803D" font-weight="600">Centered, correct viewBox</text>
+  </g>
+</svg>

@@ -1,37 +1,50 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import { getCollection } from 'astro:content';
+
+const guides = (await getCollection('guides')).sort(
+  (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()
+);
 ---
 
 <MainLayout
   title="Guides"
-  description="Practical guides on SVG, frontend development, and technical SEO from Pixelquil."
+  description="In-depth, practical guides on SVG workflows, frontend development, and technical SEO."
 >
-  <section class="mx-auto max-w-6xl px-4 py-20 text-center">
-    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
-      Coming soon
+  <div class="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8 text-center">
+    <span class="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 mb-4">
+      {guides.length > 0 ? `${guides.length} guide${guides.length === 1 ? '' : 's'}` : 'Coming soon'}
     </span>
-
-    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">
-      Guides
-    </h1>
-
-    <p class="mx-auto mt-4 max-w-xl text-slate-600">
-      In-depth, practical guides on SVG workflows, frontend development, and technical SEO are
-      on the way. In the meantime, every tool page includes its own how-it-works walkthrough
-      and FAQ section to help you get the most out of it.
+    <h1 class="text-4xl font-bold text-slate-900 mb-4">Guides</h1>
+    <p class="text-slate-600 max-w-2xl mx-auto mb-10">
+      In-depth, practical guides on SVG workflows, frontend development, and technical SEO. Every
+      tool page also includes its own how-it-works walkthrough and FAQ section.
     </p>
 
-    <div class="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
-      <a href="/svg-tools/"
-        class="rounded-lg bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-700"
-      >
-        Browse SVG Tools
-      </a>
-      <a href="/developer-tools/"
-        class="rounded-lg border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-500 hover:text-brand-600"
-      >
-        Browse Developer Tools
-      </a>
-    </div>
-  </section>
+    {guides.length === 0 ? (
+      <div class="flex flex-wrap justify-center gap-3">
+        <a href="/svg-tools/" class="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700">
+          Browse SVG Tools
+        </a>
+        <a href="/developer-tools/" class="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          Browse Developer Tools
+        </a>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
+        {guides.map((guide) => (
+          <a
+            href={`/guides/${guide.id}/`}
+            class="block rounded-2xl border border-slate-200 overflow-hidden hover:border-brand-400 hover:shadow-sm transition-all"
+          >
+            <img src={guide.data.image} alt="" class="w-full h-40 object-cover" />
+            <div class="p-5">
+              <h2 class="font-semibold text-slate-900 mb-1.5">{guide.data.title}</h2>
+              <p class="text-sm text-slate-500">{guide.data.description}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
 </MainLayout>

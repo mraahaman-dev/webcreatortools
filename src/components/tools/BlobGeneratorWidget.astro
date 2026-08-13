@@ -1,0 +1,173 @@
+<div class="blob-generator" data-blob-generator>
+  <div class="border border-b-0 border-slate-200 bg-white p-5">
+    <div class="mb-4 flex items-center justify-center">
+      <div data-preview-wrap class="flex h-64 w-64 items-center justify-center rounded-xl border border-slate-200 bg-slate-50"></div>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="block">
+        <div class="mb-1 flex items-center justify-between text-sm text-slate-600">
+          <span>Complexity (points)</span>
+          <span data-points-value class="font-mono font-medium text-slate-800">8</span>
+        </div>
+        <input type="range" data-points-input min="4" max="16" value="8" class="w-full accent-green-600" />
+      </label>
+      <label class="block">
+        <div class="mb-1 flex items-center justify-between text-sm text-slate-600">
+          <span>Irregularity</span>
+          <span data-irregularity-value class="font-mono font-medium text-slate-800">40%</span>
+        </div>
+        <input type="range" data-irregularity-input min="0" max="100" value="40" class="w-full accent-green-600" />
+      </label>
+      <label class="flex items-center gap-2 text-sm text-slate-600">
+        <span>Fill color</span>
+        <input type="color" data-fill-color value="#4F46E5" class="h-9 w-12 cursor-pointer rounded border border-slate-300 bg-white p-0.5" />
+      </label>
+      <button type="button" data-regenerate-btn
+        class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+        Regenerate Shape
+      </button>
+    </div>
+  </div>
+
+  <div class="rounded-b-2xl border border-slate-200 bg-white p-5">
+    <div class="mb-2 flex items-center justify-between">
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">SVG Markup</h3>
+      <div class="flex gap-2">
+        <button type="button" data-copy-btn
+          class="inline-flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-xs font-medium text-green-600 hover:border-green-300 hover:bg-green-100">
+          <svg data-copy-icon class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          <span data-copy-label>Copy</span>
+        </button>
+        <button type="button" data-download-btn
+          class="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
+          Download
+        </button>
+      </div>
+    </div>
+    <pre data-markup-output class="overflow-auto rounded-lg bg-slate-50 p-4 font-mono text-xs text-slate-800"></pre>
+  </div>
+
+  <p class="mt-3 text-xs text-slate-400">
+    Everything runs in your browser. Nothing you build here is uploaded or stored.
+  </p>
+</div>
+
+<script>
+  // Generates a smooth closed blob path by placing N points around a circle,
+  // perturbing each point's radius randomly, then interpolating a smooth curve
+  // through them using Catmull-Rom splines converted to cubic Bezier segments.
+  function generateBlobPoints(numPoints: number, irregularity: number, radius: number, cx: number, cy: number): { x: number; y: number }[] {
+    const points: { x: number; y: number }[] = [];
+    const angleStep = (Math.PI * 2) / numPoints;
+    for (let i = 0; i < numPoints; i++) {
+      const angle = i * angleStep;
+      const variance = 1 + (Math.random() * 2 - 1) * irregularity;
+      const r = radius * variance;
+      points.push({
+        x: cx + Math.cos(angle) * r,
+        y: cy + Math.sin(angle) * r,
+      });
+    }
+    return points;
+  }
+
+  function catmullRomToBezierPath(points: { x: number; y: number }[]): string {
+    const n = points.length;
+    if (n < 3) return "";
+
+    const get = (i: number) => points[(i + n) % n];
+
+    let d = `M ${points[0].x.toFixed(2)},${points[0].y.toFixed(2)} `;
+
+    for (let i = 0; i < n; i++) {
+      const p0 = get(i - 1);
+      const p1 = get(i);
+      const p2 = get(i + 1);
+      const p3 = get(i + 2);
+
+      // Standard Catmull-Rom to cubic Bezier control point conversion.
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+      d += `C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)} `;
+    }
+
+    return d + "Z";
+  }
+
+  function initBlobGenerator(root: HTMLElement) {
+    const previewWrap = root.querySelector<HTMLDivElement>("[data-preview-wrap]")!;
+    const pointsInput = root.querySelector<HTMLInputElement>("[data-points-input]")!;
+    const pointsValue = root.querySelector<HTMLSpanElement>("[data-points-value]")!;
+    const irregularityInput = root.querySelector<HTMLInputElement>("[data-irregularity-input]")!;
+    const irregularityValue = root.querySelector<HTMLSpanElement>("[data-irregularity-value]")!;
+    const fillColor = root.querySelector<HTMLInputElement>("[data-fill-color]")!;
+    const regenerateBtn = root.querySelector<HTMLButtonElement>("[data-regenerate-btn]")!;
+    const markupOutput = root.querySelector<HTMLPreElement>("[data-markup-output]")!;
+    const copyBtn = root.querySelector<HTMLButtonElement>("[data-copy-btn]")!;
+    const downloadBtn = root.querySelector<HTMLButtonElement>("[data-download-btn]")!;
+
+    let currentPoints = generateBlobPoints(8, 0.4, 100, 150, 150);
+
+    function render() {
+      const fill = fillColor.value;
+      const pathData = catmullRomToBezierPath(currentPoints);
+
+      const markup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <path d="${pathData}" fill="${fill}" />
+</svg>`;
+
+      markupOutput.textContent = markup;
+      previewWrap.innerHTML = `<svg viewBox="0 0 300 300" class="h-full w-full"><path d="${pathData}" fill="${fill}" /></svg>`;
+    }
+
+    function regenerate() {
+      const numPoints = parseInt(pointsInput.value, 10);
+      const irregularity = parseInt(irregularityInput.value, 10) / 100;
+      currentPoints = generateBlobPoints(numPoints, irregularity, 100, 150, 150);
+      render();
+    }
+
+    pointsInput.addEventListener("input", () => {
+      pointsValue.textContent = pointsInput.value;
+      regenerate();
+    });
+    irregularityInput.addEventListener("input", () => {
+      irregularityValue.textContent = `${irregularityInput.value}%`;
+      regenerate();
+    });
+    fillColor.addEventListener("input", render);
+    regenerateBtn.addEventListener("click", regenerate);
+
+    copyBtn.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(markupOutput.textContent ?? "");
+      const icon = copyBtn.querySelector("[data-copy-icon]")!;
+      const label = copyBtn.querySelector("[data-copy-label]")!;
+      icon.innerHTML = `<path d="M20 6L9 17l-5-5"/>`;
+      label.textContent = "Copied";
+      setTimeout(() => {
+        icon.innerHTML = `<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>`;
+        label.textContent = "Copy";
+      }, 1500);
+    });
+
+    downloadBtn.addEventListener("click", () => {
+      const blob = new Blob([markupOutput.textContent ?? ""], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "blob.svg";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-blob-generator]").forEach(initBlobGenerator);
+</script>
