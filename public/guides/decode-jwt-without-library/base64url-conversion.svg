@@ -1,0 +1,28 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FFFFFF"/>
+
+  <text x="400" y="38" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#3730A3">base64url → base64</text>
+
+  <rect x="80" y="80" width="640" height="60" rx="8" fill="#FEF2F2" stroke="#DC2626" stroke-width="2"/>
+  <text x="105" y="118" font-family="monospace" font-size="16" fill="#991B1B">eyJzdWIiOiJ1c2Vy<tspan fill="#DC2626" font-weight="bold">-</tspan>MTIzIn0<tspan fill="#DC2626" font-weight="bold">_</tspan></text>
+  <text x="560" y="118" font-family="sans-serif" font-size="13" fill="#991B1B">base64url (as received)</text>
+
+  <g stroke="#818CF8" stroke-width="2" fill="none">
+    <line x1="400" y1="140" x2="400" y2="180"/>
+    <path d="M388 168 L400 180 L412 168"/>
+  </g>
+
+  <rect x="80" y="190" width="640" height="60" rx="8" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+  <text x="105" y="228" font-family="monospace" font-size="16" fill="#166534">eyJzdWIiOiJ1c2Vy<tspan fill="#16A34A" font-weight="bold">+</tspan>MTIzIn0<tspan fill="#16A34A" font-weight="bold">/</tspan><tspan fill="#16A34A" font-weight="bold">==</tspan></text>
+  <text x="560" y="228" font-family="sans-serif" font-size="13" fill="#166534">standard base64 (padded)</text>
+
+  <g stroke="#818CF8" stroke-width="2" fill="none">
+    <line x1="400" y1="250" x2="400" y2="290"/>
+    <path d="M388 278 L400 290 L412 278"/>
+  </g>
+
+  <rect x="250" y="300" width="300" height="50" rx="8" fill="#EEF2FF" stroke="#818CF8" stroke-width="2"/>
+  <text x="400" y="332" text-anchor="middle" font-family="monospace" font-size="16" fill="#3730A3">atob(...) ready</text>
+
+  <text x="400" y="390" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#4B5563">Swap - → + and _ → /, then pad with = until length is a multiple of 4.</text>
+</svg>

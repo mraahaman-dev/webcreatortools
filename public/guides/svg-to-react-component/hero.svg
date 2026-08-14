@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="heroTitle4">
+  <title id="heroTitle4">An SVG angle-bracket tag transforming into a React component tag, with a checkmark icon shape between them</title>
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#EEF2FF"/>
+      <stop offset="100%" stop-color="#E0E7FF"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg4)"/>
+
+  <!-- left: raw svg tag -->
+  <text x="120" y="290" font-family="ui-monospace, monospace" font-size="34" font-weight="600" fill="#64748B">&lt;svg&gt;</text>
+  <text x="120" y="335" font-family="ui-monospace, monospace" font-size="20" fill="#94A3B8">class="icon"</text>
+
+  <!-- icon in the middle -->
+  <g transform="translate(560,220)">
+    <rect width="120" height="120" rx="24" fill="#4F46E5"/>
+    <path d="M32 62 L52 82 L90 40" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- arrow -->
+  <path d="M420 280 L540 280" stroke="#818CF8" stroke-width="4" marker-end="url(#arrowHead)"/>
+  <path d="M740 280 L860 280" stroke="#818CF8" stroke-width="4" marker-end="url(#arrowHead)"/>
+  <defs>
+    <marker id="arrowHead" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto">
+      <path d="M0 0 L9 4 L0 8 Z" fill="#818CF8"/>
+    </marker>
+  </defs>
+
+  <!-- right: jsx component tag -->
+  <text x="900" y="290" font-family="ui-monospace, monospace" font-size="34" font-weight="600" fill="#3730A3">&lt;Icon /&gt;</text>
+  <text x="900" y="335" font-family="ui-monospace, monospace" font-size="20" fill="#4F46E5">className="icon"</text>
+</svg>

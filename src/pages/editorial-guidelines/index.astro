@@ -5,54 +5,60 @@ const lastUpdated = "August 2026";
 
 <MainLayout
   title="Editorial Guidelines"
-  description="How Pixelquil researches, writes, and maintains accurate content across every tool page."
+  description="Our detailed process for testing tools, verifying technical documentation, and maintaining independent editorial standards at Pixelquil."
 >
   <section class="mx-auto max-w-3xl px-4 py-20">
     <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
       Editorial Guidelines
     </span>
-    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">How we write and maintain content</h1>
+    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">Our Editorial Standards and Technical Process</h1>
     <p class="mt-3 text-sm text-slate-500">Last updated: {lastUpdated}</p>
 
-    <div class="mt-10 space-y-8 text-slate-600 leading-relaxed">
+    <div class="mt-10 space-y-10 text-slate-600 leading-relaxed">
       <div>
-        <h2 class="text-xl font-bold text-slate-900">Written from real usage</h2>
+        <h2 class="text-2xl font-bold text-slate-900">Purpose and Mission</h2>
         <p class="mt-3">
-          Every tool page's written content is grounded in actual production experience, not
-          written speculatively. Technical explanations, like why a missing SVG viewBox breaks
-          scaling, or how the SVG specification permits embedded scripts, are checked against
-          primary sources such as the official SVG and schema.org specifications rather than
-          repeated secondhand from other sites.
+          Pixelquil provides privacy focused web tools and technical guides for developers, designers, and site owners. Every tool operates client side in the user browser without transmitting personal data. Our written guides exist to explain the underlying web specifications, security considerations, and optimization techniques behind these utilities.
         </p>
       </div>
 
       <div>
-        <h2 class="text-xl font-bold text-slate-900">Accuracy standards</h2>
+        <h2 class="text-2xl font-bold text-slate-900">Testing and Research Standards</h2>
         <p class="mt-3">
-          Where content references a technical standard, security mechanism, or specification, we
-          aim to cite the actual behavior correctly rather than a simplified or exaggerated
-          version of it. Where a tool has a genuine limitation, that limitation is stated directly
-          rather than glossed over, for example, noting that automatically generated color scales
-          are a practical approximation, not a perceptually precise model.
+          All technical explanations are developed through direct hands on testing using actual production markup and scripts. We test vector files, code minifiers, and SEO analyzers against current specifications established by official bodies including the World Wide Web Consortium and schema standards organizations.
+        </p>
+        <p class="mt-3">
+          When explaining complex topics such as SVG attribute scaling, script sanitization, or metadata validation, our documentation references actual browser rendering behavior across modern engines rather than repeating summary claims from secondary blogs.
         </p>
       </div>
 
       <div>
-        <h2 class="text-xl font-bold text-slate-900">Updates and corrections</h2>
+        <h2 class="text-2xl font-bold text-slate-900">Technical Accuracy and Limitations</h2>
         <p class="mt-3">
-          Tool pages are revisited and updated as tools themselves evolve or as errors are found.
-          If you spot something inaccurate or outdated, we welcome corrections through the
-          <a href="/contact/" class="text-brand-600 hover:underline">contact page</a>, and take
-          them seriously.
+          We prioritize technical precision over simplified marketing language. If an algorithm relies on an approximation, such as calculating perceived color contrast or vector path conversion, that limitation is explicitly documented on the tool page.
+        </p>
+        <p class="mt-3">
+          Our team monitors changes to browser APIs, security models, and web standard recommendations to ensure code snippets and instructions remain current.
         </p>
       </div>
 
       <div>
-        <h2 class="text-xl font-bold text-slate-900">No paid placement</h2>
+        <h2 class="text-2xl font-bold text-slate-900">Peer Review and Community Corrections</h2>
         <p class="mt-3">
-          Tool recommendations, comparisons, and technical explanations on this site are not
-          influenced by paid placement. Where advertising appears on the site, it is served
-          through Google AdSense and clearly separated from editorial content.
+          Technical accuracy requires continuous review. Before publishing, content is verified against specification documentation. After publishing, pages are revisited periodically to update code examples or adjust recommendations as browser support evolves.
+        </p>
+        <p class="mt-3">
+          We actively encourage feedback from developers and designers. If you discover a technical error, broken reference, or outdated code snippet, you can submit a correction notice through our <a href="/contact/" class="text-brand-600 hover:underline font-medium">contact page</a>. Reported issues are reviewed and addressed within five business days.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">Advertising and Independence</h2>
+        <p class="mt-3">
+          Pixelquil maintains complete financial and editorial independence. We do not accept paid tool placement, sponsored content, or paid reviews. Tool comparisons and recommendations are determined solely by technical evaluation.
+        </p>
+        <p class="mt-3">
+          Monetization is limited to automated display advertisements served through Google AdSense. Advertising units are styled to remain visually distinct from site utilities, source code examples, and educational text to prevent accidental clicks and preserve user experience.
         </p>
       </div>
     </div>

@@ -4,62 +4,79 @@ import MainLayout from '../../layouts/MainLayout.astro';
 
 <MainLayout
   title="Help Center"
-  description="Get help using Pixelquil's tools, find answers, troubleshooting tips, and how to reach us directly."
+  description="Troubleshooting guides, common technical questions, local execution explanations, and direct support options for Pixelquil."
 >
   <section class="mx-auto max-w-4xl px-4 py-20">
     <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-600">
       Help Center
     </span>
-    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">How can we help?</h1>
-    <p class="mt-4 max-w-xl text-slate-600">
-      Most answers live in one of three places below. If you can't find what you need, reach out
-      directly, every message gets read.
+    <h1 class="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">How can we support your workflow?</h1>
+    <p class="mt-4 max-w-2xl text-slate-600 leading-relaxed">
+      Find quick resolutions for browser execution issues, learn about local privacy mechanisms, or connect with our support team directly. Every message submitted through our support portal receives a human response.
     </p>
 
     <div class="mt-12 grid gap-6 sm:grid-cols-3">
-      <a href="/faqs/" class="rounded-2xl border border-slate-200 bg-white p-6 hover:border-brand-300">
-        <svg class="h-8 w-8 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <a href="/faqs/" class="group rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-brand-300 hover:shadow-sm">
+        <svg class="h-8 w-8 text-brand-600 transition-transform group-hover:scale-105" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10" />
           <path d="M9.5 9a2.5 2.5 0 015 0c0 1.5-2 1.8-2 3.2M12 17v.01" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        <h2 class="mt-4 text-base font-semibold text-slate-900">General FAQs</h2>
-        <p class="mt-1.5 text-sm text-slate-500">Common questions about Pixelquil itself, privacy, pricing, and how tools work.</p>
+        <h2 class="mt-4 text-lg font-bold text-slate-900">General FAQs</h2>
+        <p class="mt-2 text-sm text-slate-500 leading-relaxed">Comprehensive answers regarding site usage, browser data safety, pricing commitments, and open utilities.</p>
       </a>
 
-      <a href="/svg-tools/" class="rounded-2xl border border-slate-200 bg-white p-6 hover:border-brand-300">
-        <svg class="h-8 w-8 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <a href="/svg-tools/" class="group rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-brand-300 hover:shadow-sm">
+        <svg class="h-8 w-8 text-brand-600 transition-transform group-hover:scale-105" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        <h2 class="mt-4 text-base font-semibold text-slate-900">Tool-specific help</h2>
-        <p class="mt-1.5 text-sm text-slate-500">Every tool page has its own FAQ and step-by-step "How it works" section built in.</p>
+        <h2 class="mt-4 text-lg font-bold text-slate-900">Tool Help Pages</h2>
+        <p class="mt-2 text-sm text-slate-500 leading-relaxed">Individual utilities feature step by step usage instructions, input requirements, and optimization tips.</p>
       </a>
 
-      <a href="/contact/" class="rounded-2xl border border-slate-200 bg-white p-6 hover:border-brand-300">
-        <svg class="h-8 w-8 text-brand-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <a href="/contact/" class="group rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-brand-300 hover:shadow-sm">
+        <svg class="h-8 w-8 text-brand-600 transition-transform group-hover:scale-105" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="5" width="18" height="14" rx="2" />
           <path d="M3 7l9 6 9-6" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        <h2 class="mt-4 text-base font-semibold text-slate-900">Contact us directly</h2>
-        <p class="mt-1.5 text-sm text-slate-500">Bug reports, tool suggestions, or anything not covered above.</p>
+        <h2 class="mt-4 text-lg font-bold text-slate-900">Direct Support</h2>
+        <p class="mt-2 text-sm text-slate-500 leading-relaxed">Report conversion edge cases, request additional features, or submit feedback directly to the developer.</p>
       </a>
     </div>
 
-    <div class="mt-12 rounded-2xl border border-slate-200 bg-white p-6">
-      <h2 class="text-base font-semibold text-slate-900">Quick troubleshooting</h2>
-      <ul class="mt-3 space-y-2 text-sm text-slate-600">
-        <li class="flex gap-2">
-          <span class="text-brand-600">•</span>
-          <span><strong class="text-slate-900">A tool isn't loading correctly:</strong> try refreshing the page, or clearing the specific tool with its Clear button before pasting new content.</span>
-        </li>
-        <li class="flex gap-2">
-          <span class="text-brand-600">•</span>
-          <span><strong class="text-slate-900">Copy or download isn't working:</strong> some browser privacy settings block clipboard access, check for a permission prompt or try a different browser.</span>
-        </li>
-        <li class="flex gap-2">
-          <span class="text-brand-600">•</span>
-          <span><strong class="text-slate-900">A tool gives an unexpected result:</strong> double check your input is valid, most tools include a validator or status panel that explains what's wrong.</span>
-        </li>
-      </ul>
+    <div class="mt-12 rounded-2xl border border-slate-200 bg-white p-8">
+      <h2 class="text-xl font-bold text-slate-900">Browser Troubleshooting Procedures</h2>
+      <div class="mt-6 space-y-6 text-sm text-slate-600">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Client script execution issues</h3>
+          <p class="mt-1 leading-relaxed">
+            Because tools run entirely within your local web browser session, ad blockers or aggressive script restriction extensions may block core script files. Try disabling strict content blockers for Pixelquil or clearing your active web browser cache.
+          </p>
+        </div>
+
+        <div class="border-t border-slate-100 pt-6">
+          <h3 class="font-bold text-slate-900 text-base">Clipboard access and download restrictions</h3>
+          <p class="mt-1 leading-relaxed">
+            If the copy to clipboard button fails to capture text output, review browser security permissions for the site. Secure clipboard APIs require active permission grants in browser security preference panels.
+          </p>
+        </div>
+
+        <div class="border-t border-slate-100 pt-6">
+          <h3 class="font-bold text-slate-900 text-base">Parsing and validation errors</h3>
+          <p class="mt-1 leading-relaxed">
+            Vector files or code snippets containing unclosed markup tags, invalid character encodings, or broken attributes will trigger validation warnings. Utilize the built in clear function to reset tool inputs before pasting revised source code.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 rounded-2xl bg-brand-50 p-6 border border-brand-100 text-center sm:text-left sm:flex sm:items-center sm:justify-between">
+      <div>
+        <h3 class="font-bold text-slate-900">Still seeking technical assistance?</h3>
+        <p class="mt-1 text-sm text-slate-600">Our support desk responds to technical questions and bug reports within 24 hours.</p>
+      </div>
+      <a href="/contact/" class="mt-4 inline-flex shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-500 sm:mt-0">
+        Contact Support
+      </a>
     </div>
   </section>
 </MainLayout>

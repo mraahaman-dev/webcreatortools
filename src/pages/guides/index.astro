@@ -2,26 +2,44 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import { getCollection } from 'astro:content';
 
-const guides = (await getCollection('guides')).sort(
+const allGuides = (await getCollection('guides')).sort(
   (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()
 );
+
+const categoryLabels: Record<string, string> = {
+  'svg-tools': 'SVG Tools Guides',
+  'developer-tools': 'Developer Tools Guides',
+  'seo-tools': 'SEO Tools Guides',
+};
+
+const categoryOrder = ['svg-tools', 'developer-tools', 'seo-tools'];
+
+const groupedGuides = categoryOrder
+  .map((category) => ({
+    category,
+    label: categoryLabels[category] ?? category,
+    guides: allGuides.filter((g) => g.data.category === category),
+  }))
+  .filter((group) => group.guides.length > 0);
 ---
 
 <MainLayout
   title="Guides"
   description="In-depth, practical guides on SVG workflows, frontend development, and technical SEO."
 >
-  <div class="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8 text-center">
-    <span class="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 mb-4">
-      {guides.length > 0 ? `${guides.length} guide${guides.length === 1 ? '' : 's'}` : 'Coming soon'}
-    </span>
-    <h1 class="text-4xl font-bold text-slate-900 mb-4">Guides</h1>
-    <p class="text-slate-600 max-w-2xl mx-auto mb-10">
-      In-depth, practical guides on SVG workflows, frontend development, and technical SEO. Every
-      tool page also includes its own how-it-works walkthrough and FAQ section.
-    </p>
+  <div class="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
+    <div class="text-center mb-14">
+      <span class="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 mb-4">
+        {allGuides.length > 0 ? `${allGuides.length} guide${allGuides.length === 1 ? '' : 's'}` : 'Coming soon'}
+      </span>
+      <h1 class="text-4xl font-bold text-slate-900 mb-4">Guides</h1>
+      <p class="text-slate-600 max-w-2xl mx-auto">
+        In-depth, practical guides on SVG workflows, frontend development, and technical SEO. Every
+        tool page also includes its own how-it-works walkthrough and FAQ section.
+      </p>
+    </div>
 
-    {guides.length === 0 ? (
+    {allGuides.length === 0 ? (
       <div class="flex flex-wrap justify-center gap-3">
         <a href="/svg-tools/" class="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700">
           Browse SVG Tools
@@ -31,18 +49,35 @@ const guides = (await getCollection('guides')).sort(
         </a>
       </div>
     ) : (
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
-        {guides.map((guide) => (
-          <a
-            href={`/guides/${guide.id}/`}
-            class="block rounded-2xl border border-slate-200 overflow-hidden hover:border-brand-400 hover:shadow-sm transition-all"
-          >
-            <img src={guide.data.image} alt="" class="w-full h-40 object-cover" />
-            <div class="p-5">
-              <h2 class="font-semibold text-slate-900 mb-1.5">{guide.data.title}</h2>
-              <p class="text-sm text-slate-500">{guide.data.description}</p>
+      <div class="space-y-12">
+        {groupedGuides.map((group) => (
+          <section>
+            <h2 class="text-xl font-bold text-slate-900 mb-4">
+              {group.label}
+              <span class="ml-2 text-sm font-normal text-slate-400">({group.guides.length})</span>
+            </h2>
+
+            <div class="rounded-2xl border border-slate-200 bg-white overflow-y-auto max-h-[520px] p-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {group.guides.map((guide) => (
+                  <a
+                    href={`/guides/${guide.id}/`}
+                    class="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors"
+                  >
+                    <img
+                      src={guide.data.image}
+                      alt=""
+                      class="w-20 h-20 shrink-0 rounded-lg object-cover"
+                    />
+                    <div class="min-w-0">
+                      <h3 class="font-semibold text-slate-900 mb-1 leading-snug line-clamp-2">{guide.data.title}</h3>
+                      <p class="text-sm text-slate-500 line-clamp-2">{guide.data.description}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
             </div>
-          </a>
+          </section>
         ))}
       </div>
     )}

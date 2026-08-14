@@ -1,0 +1,31 @@
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EEF2FF"/>
+      <stop offset="1" stop-color="#C7D2FE"/>
+    </linearGradient>
+    <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <pattern id="heroPattern" width="26" height="26" patternUnits="userSpaceOnUse">
+      <rect width="26" height="26" fill="#EEF2FF"/>
+      <circle cx="13" cy="13" r="5" fill="#4F46E5"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg4)"/>
+
+  <!-- gradient shape -->
+  <rect x="180" y="215" width="260" height="200" rx="20" fill="url(#heroGrad)"/>
+  <text x="310" y="450" text-anchor="middle" font-family="monospace" font-size="16" fill="#3730A3">linearGradient</text>
+
+  <!-- pattern shape -->
+  <rect x="560" y="215" width="260" height="200" rx="20" fill="url(#heroPattern)" stroke="#818CF8" stroke-width="2"/>
+  <text x="690" y="450" text-anchor="middle" font-family="monospace" font-size="16" fill="#3730A3">pattern</text>
+
+  <!-- plus sign -->
+  <text x="500" y="330" text-anchor="middle" font-family="sans-serif" font-size="40" fill="#818CF8">+</text>
+
+  <text x="600" y="530" text-anchor="middle" font-family="sans-serif" font-size="30" font-weight="bold" fill="#3730A3">SVG Gradients and Patterns</text>
+  <text x="600" y="568" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#4338CA">A practical guide</text>
+</svg>

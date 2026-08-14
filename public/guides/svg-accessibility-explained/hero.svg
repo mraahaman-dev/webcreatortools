@@ -1,0 +1,27 @@
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EEF2FF"/>
+      <stop offset="1" stop-color="#C7D2FE"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg3)"/>
+
+  <!-- icon -->
+  <rect x="150" y="225" width="180" height="180" rx="24" fill="#4F46E5"/>
+  <circle cx="240" cy="300" r="35" fill="none" stroke="#FFFFFF" stroke-width="10"/>
+  <line x1="265" y1="325" x2="295" y2="355" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- speech bubble -->
+  <path d="M420 210 h380 a20 20 0 0 1 20 20 v140 a20 20 0 0 1 -20 20 h-260 l-50 50 v-50 h-70 a20 20 0 0 1 -20 -20 v-140 a20 20 0 0 1 20 -20 z" fill="#FFFFFF" stroke="#818CF8" stroke-width="3"/>
+
+  <text x="460" y="265" font-family="monospace" font-size="18" fill="#4338CA">&lt;title&gt;</text>
+  <text x="590" y="265" font-family="sans-serif" font-size="18" fill="#3730A3">Search</text>
+  <text x="460" y="300" font-family="monospace" font-size="18" fill="#4338CA">&lt;/title&gt;</text>
+
+  <text x="460" y="345" font-family="sans-serif" font-size="16" fill="#6366F1">role="img"</text>
+  <text x="460" y="375" font-family="sans-serif" font-size="16" fill="#6366F1">aria-labelledby</text>
+
+  <text x="600" y="500" text-anchor="middle" font-family="sans-serif" font-size="30" font-weight="bold" fill="#3730A3">SVG Accessibility Explained</text>
+  <text x="600" y="540" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#4338CA">title, desc, and ARIA roles</text>
+</svg>

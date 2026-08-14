@@ -9,8 +9,8 @@
     </a>
 
     <!-- Search bar (center, desktop) -->
-    <form action="/search/" method="get" class="hidden md:flex flex-1 justify-center">
-      <div class="relative w-full max-w-sm">
+    <div class="hidden md:flex flex-1 justify-center">
+      <div class="relative w-full max-w-sm" data-search-widget>
         <label for="site-search" class="sr-only">Search tools and guides</label>
         <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="7" />
@@ -18,13 +18,18 @@
         </svg>
         <input
           id="site-search"
-          name="q"
+          data-search-input
           type="search"
           placeholder="Search tools..."
+          autocomplete="off"
           class="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
         />
+        <div
+          data-search-results
+          class="absolute left-0 right-0 top-full mt-2 hidden max-h-96 overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg"
+        ></div>
       </div>
-    </form>
+    </div>
 
     <!-- Nav + menu (right) -->
     <div class="flex items-center gap-6 shrink-0">
@@ -54,7 +59,7 @@
       class="absolute right-4 top-full mt-2 w-64 origin-top-right scale-95 opacity-0 pointer-events-none rounded-xl border border-gray-200 bg-white p-2 shadow-lg transition-all duration-150 ease-out md:hidden"
     >
       <!-- Search bar (mobile) -->
-      <form action="/search/" method="get" class="mb-2 px-1 pt-1">
+      <div class="mb-2 px-1 pt-1" data-search-widget>
         <label for="site-search-mobile" class="sr-only">Search tools and guides</label>
         <div class="relative w-full">
           <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -63,13 +68,18 @@
           </svg>
           <input
             id="site-search-mobile"
-            name="q"
+            data-search-input
             type="search"
             placeholder="Search tools..."
+            autocomplete="off"
             class="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-9 pr-3 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
           />
         </div>
-      </form>
+        <div
+          data-search-results
+          class="mt-2 hidden max-h-72 overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-sm"
+        ></div>
+      </div>
 
       <a href="/svg-tools/" class="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600">SVG Tools</a>
       <a href="/developer-tools/" class="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-brand-50 hover:text-brand-600">Developer Tools</a>
@@ -81,6 +91,154 @@
 </header>
 
 <script>
+  interface SearchEntry {
+    title: string;
+    description: string;
+    href: string;
+    type: "tool" | "guide";
+    badgeColor: string;
+    iconPath: string;
+  }
+
+  const BADGE_COLOR_CLASSES: Record<string, string> = {
+    indigo: "bg-indigo-50 text-indigo-600",
+    blue: "bg-blue-50 text-blue-600",
+    purple: "bg-purple-50 text-purple-600",
+    amber: "bg-amber-50 text-amber-600",
+    teal: "bg-teal-50 text-teal-600",
+    green: "bg-green-50 text-green-600",
+    pink: "bg-pink-50 text-pink-600",
+  };
+
+  let searchIndex: SearchEntry[] | null = null;
+  let searchIndexPromise: Promise<SearchEntry[]> | null = null;
+
+  function loadSearchIndex(): Promise<SearchEntry[]> {
+    if (searchIndex) return Promise.resolve(searchIndex);
+    if (!searchIndexPromise) {
+      searchIndexPromise = fetch("/search-index.json")
+        .then((res) => res.json())
+        .then((data: SearchEntry[]) => {
+          searchIndex = data;
+          return data;
+        })
+        .catch(() => []);
+    }
+    return searchIndexPromise;
+  }
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function initSearchWidget(widget: HTMLElement) {
+    const input = widget.querySelector<HTMLInputElement>("[data-search-input]")!;
+    const resultsPanel = widget.querySelector<HTMLDivElement>("[data-search-results]")!;
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    let activeIndex = -1;
+    let currentResults: SearchEntry[] = [];
+
+    function renderResults(entries: SearchEntry[]) {
+      currentResults = entries;
+      activeIndex = -1;
+
+      if (entries.length === 0) {
+        resultsPanel.innerHTML = '<p class="px-3 py-4 text-center text-sm text-gray-400">No matches found.</p>';
+        resultsPanel.classList.remove("hidden");
+        return;
+      }
+
+      resultsPanel.innerHTML = entries
+        .map((entry, i) => {
+          const colorClass = BADGE_COLOR_CLASSES[entry.badgeColor] || BADGE_COLOR_CLASSES.indigo;
+          return `
+          <a href="${entry.href}" data-result-index="${i}"
+             class="flex items-start gap-2.5 rounded-lg px-2.5 py-2 hover:bg-brand-50">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${colorClass}">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="${entry.iconPath}" />
+              </svg>
+            </span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-sm font-medium text-gray-800">${escapeHtml(entry.title)}</span>
+                <span class="rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-gray-500">${entry.type}</span>
+              </div>
+              <p class="truncate text-xs text-gray-500">${escapeHtml(entry.description)}</p>
+            </div>
+          </a>`;
+        })
+        .join("");
+
+      resultsPanel.classList.remove("hidden");
+    }
+
+    function hideResults() {
+      resultsPanel.classList.add("hidden");
+      activeIndex = -1;
+    }
+
+    function updateActiveHighlight() {
+      resultsPanel.querySelectorAll<HTMLAnchorElement>("[data-result-index]").forEach((el, i) => {
+        el.classList.toggle("bg-brand-50", i === activeIndex);
+      });
+    }
+
+    input.addEventListener("input", () => {
+      const query = input.value.trim();
+      clearTimeout(debounceTimer);
+
+      if (!query) {
+        hideResults();
+        return;
+      }
+
+      debounceTimer = setTimeout(async () => {
+        const index = await loadSearchIndex();
+        const q = query.toLowerCase();
+        const matches = index
+          .filter((e) => e.title.toLowerCase().includes(q) || e.description.toLowerCase().includes(q))
+          .slice(0, 8);
+        renderResults(matches);
+      }, 120);
+    });
+
+    input.addEventListener("focus", () => {
+      if (input.value.trim() && currentResults.length > 0) {
+        resultsPanel.classList.remove("hidden");
+      }
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (resultsPanel.classList.contains("hidden") || currentResults.length === 0) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, currentResults.length - 1);
+        updateActiveHighlight();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, 0);
+        updateActiveHighlight();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        const target = activeIndex >= 0 ? currentResults[activeIndex] : currentResults[0];
+        if (target) window.location.href = target.href;
+      } else if (e.key === "Escape") {
+        hideResults();
+        input.blur();
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!widget.contains(e.target as Node)) hideResults();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-search-widget]").forEach(initSearchWidget);
+
   const toggleBtn = document.querySelector<HTMLButtonElement>("[data-menu-toggle]");
   const panel = document.querySelector<HTMLElement>("[data-menu-panel]");
 

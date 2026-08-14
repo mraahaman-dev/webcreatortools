@@ -1,0 +1,25 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FFFFFF"/>
+
+  <text x="400" y="40" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#3730A3">Same SVG, Two Encodings</text>
+
+  <!-- Original SVG box -->
+  <rect x="40" y="75" width="200" height="60" rx="10" fill="#EEF2FF" stroke="#818CF8" stroke-width="2"/>
+  <text x="140" y="110" text-anchor="middle" font-family="monospace" font-size="14" fill="#3730A3">original.svg</text>
+  <text x="140" y="128" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#6366F1">312 bytes</text>
+
+  <!-- URL-encoded row -->
+  <text x="40" y="185" font-family="sans-serif" font-size="15" font-weight="bold" fill="#166534">URL-encoded (recommended)</text>
+  <rect x="40" y="200" width="430" height="34" rx="6" fill="#BBF7D0"/>
+  <text x="55" y="222" font-family="monospace" font-size="12" fill="#166534">%3Csvg xmlns='...' viewBox='0 0 24 24'%3E%3Cpath.../%3E</text>
+  <text x="480" y="222" font-family="sans-serif" font-size="13" fill="#16A34A">~338 bytes</text>
+
+  <!-- Base64 row -->
+  <text x="40" y="270" font-family="sans-serif" font-size="15" font-weight="bold" fill="#B45309">Base64</text>
+  <rect x="40" y="285" width="620" height="34" rx="6" fill="#FDE68A"/>
+  <text x="55" y="307" font-family="monospace" font-size="12" fill="#92400E">PHN2ZyB4bWxucz0iLi4uIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxwYXRoLi4uLz48L3N2Zz4=</text>
+  <text x="670" y="307" font-family="sans-serif" font-size="13" fill="#D97706">~416 bytes</text>
+
+  <text x="400" y="370" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#4B5563">Base64 adds roughly 33% overhead regardless of content.</text>
+  <text x="400" y="392" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#4B5563">URL-encoding only escapes the characters that actually need it.</text>
+</svg>

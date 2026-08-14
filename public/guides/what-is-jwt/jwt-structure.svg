@@ -1,0 +1,36 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FFFFFF"/>
+
+  <text x="400" y="38" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#3730A3">One String, Three Segments</text>
+
+  <rect x="60" y="65" width="680" height="46" rx="8" fill="#1E1B4B"/>
+  <text x="80" y="94" font-family="monospace" font-size="13" fill="#818CF8">eyJhbGciOiJIUzI1NiJ9</text>
+  <text x="270" y="94" font-family="monospace" font-size="13" fill="#F59E0B">.</text>
+  <text x="285" y="94" font-family="monospace" font-size="13" fill="#4ADE80">eyJzdWIiOiJ1c2VyXzEyMyJ9</text>
+  <text x="530" y="94" font-family="monospace" font-size="13" fill="#F59E0B">.</text>
+  <text x="545" y="94" font-family="monospace" font-size="13" fill="#FCA5A5">4f3a9c8b1e2d</text>
+
+  <g stroke="#818CF8" stroke-width="2" fill="none">
+    <line x1="180" y1="111" x2="140" y2="150"/>
+    <line x1="400" y1="111" x2="400" y2="150"/>
+    <line x1="620" y1="111" x2="660" y2="150"/>
+  </g>
+
+  <rect x="40" y="160" width="200" height="110" rx="10" fill="#EEF2FF" stroke="#818CF8" stroke-width="2"/>
+  <text x="140" y="188" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#3730A3">Header</text>
+  <text x="55" y="212" font-family="monospace" font-size="11" fill="#4338CA">{ "alg": "HS256",</text>
+  <text x="70" y="230" font-family="monospace" font-size="11" fill="#4338CA">"typ": "JWT" }</text>
+
+  <rect x="300" y="160" width="200" height="110" rx="10" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+  <text x="400" y="188" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#166534">Payload</text>
+  <text x="315" y="212" font-family="monospace" font-size="11" fill="#166534">{ "sub": "user_123",</text>
+  <text x="330" y="230" font-family="monospace" font-size="11" fill="#166534">"exp": 1755043200 }</text>
+
+  <rect x="560" y="160" width="200" height="110" rx="10" fill="#FEF2F2" stroke="#DC2626" stroke-width="2"/>
+  <text x="660" y="188" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#991B1B">Signature</text>
+  <text x="575" y="212" font-family="monospace" font-size="11" fill="#991B1B">not decodable —</text>
+  <text x="575" y="230" font-family="monospace" font-size="11" fill="#991B1B">it's a hash output</text>
+
+  <text x="400" y="320" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#4B5563">Header and payload are base64url-decoded JSON;</text>
+  <text x="400" y="342" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#4B5563">the signature is a cryptographic output, not encoded text.</text>
+</svg>

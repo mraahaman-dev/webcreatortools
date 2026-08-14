@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="heroTitle3">
+  <title id="heroTitle3">Three side-by-side representations of SVG, PNG, and WebP image formats</title>
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#EEF2FF"/>
+      <stop offset="100%" stop-color="#E0E7FF"/>
+    </linearGradient>
+    <pattern id="checker" width="20" height="20" patternUnits="userSpaceOnUse">
+      <rect width="20" height="20" fill="#F1F5F9"/>
+      <rect width="10" height="10" fill="#E2E8F0"/>
+      <rect x="10" y="10" width="10" height="10" fill="#E2E8F0"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg3)"/>
+
+  <!-- SVG card -->
+  <g transform="translate(90,140)">
+    <rect width="300" height="340" rx="16" fill="#ffffff" stroke="#C7D2FE" stroke-width="2"/>
+    <path d="M150 70 L210 190 L90 190 Z" fill="none" stroke="#4F46E5" stroke-width="6" stroke-linejoin="round"/>
+    <circle cx="150" cy="70" r="7" fill="#4F46E5"/>
+    <circle cx="210" cy="190" r="7" fill="#4F46E5"/>
+    <circle cx="90" cy="190" r="7" fill="#4F46E5"/>
+    <text x="150" y="270" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#3730A3">SVG</text>
+    <text x="150" y="300" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#6366F1">Vector</text>
+  </g>
+
+  <!-- PNG card -->
+  <g transform="translate(450,140)">
+    <rect width="300" height="340" rx="16" fill="#ffffff" stroke="#C7D2FE" stroke-width="2"/>
+    <rect x="90" y="70" width="120" height="120" fill="url(#checker)"/>
+    <circle cx="150" cy="130" r="45" fill="#F97316"/>
+    <text x="150" y="270" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#9A3412">PNG</text>
+    <text x="150" y="300" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#EA580C">Raster + transparency</text>
+  </g>
+
+  <!-- WebP card -->
+  <g transform="translate(810,140)">
+    <rect width="300" height="340" rx="16" fill="#ffffff" stroke="#C7D2FE" stroke-width="2"/>
+    <rect x="90" y="70" width="120" height="120" rx="8" fill="#0EA5E9"/>
+    <circle cx="130" cy="105" r="14" fill="#BAE6FD"/>
+    <path d="M90 165 L130 130 L160 155 L210 105 V190 H90 Z" fill="#0284C7"/>
+    <text x="150" y="270" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#075985">WebP</text>
+    <text x="150" y="300" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" fill="#0284C7">Modern raster</text>
+  </g>
+</svg>

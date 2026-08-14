@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620" role="img" aria-labelledby="decisionTitle">
+  <title id="decisionTitle">A decision tree for choosing between SVG, PNG, and WebP based on whether the image is a photo, needs to scale or be styled with code, or needs sharp-edged transparency</title>
+
+  <rect width="800" height="620" fill="#FAFAFA" rx="12"/>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0 0 L8 3 L0 6 Z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <!-- Start -->
+  <rect x="290" y="20" width="220" height="56" rx="10" fill="#4F46E5"/>
+  <text x="400" y="54" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#ffffff">Is it a photograph?</text>
+
+  <line x1="400" y1="76" x2="400" y2="120" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="420" y="102" font-family="system-ui, sans-serif" font-size="13" fill="#64748B">Yes</text>
+
+  <!-- WebP box -->
+  <rect x="290" y="120" width="220" height="70" rx="10" fill="#0EA5E9"/>
+  <text x="400" y="150" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#ffffff">Use WebP</text>
+  <text x="400" y="172" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#E0F2FE">Smallest for photographic detail</text>
+
+  <line x1="290" y1="48" x2="120" y2="48" stroke="#94A3B8" stroke-width="2"/>
+  <line x1="120" y1="48" x2="120" y2="230" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="130" y="60" font-family="system-ui, sans-serif" font-size="13" fill="#64748B">No</text>
+
+  <!-- Second question -->
+  <rect x="10" y="230" width="220" height="70" rx="10" fill="#4F46E5"/>
+  <text x="120" y="258" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#ffffff">Does it need to scale</text>
+  <text x="120" y="277" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#ffffff">or be styled with CSS?</text>
+
+  <line x1="120" y1="300" x2="120" y2="340" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="140" y="326" font-family="system-ui, sans-serif" font-size="13" fill="#64748B">Yes</text>
+
+  <!-- SVG box -->
+  <rect x="10" y="340" width="220" height="70" rx="10" fill="#4F46E5"/>
+  <text x="120" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#ffffff">Use SVG</text>
+  <text x="120" y="392" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#E0E7FF">Icons, logos, UI graphics</text>
+
+  <line x1="10" y1="265" x2="-60" y2="265" stroke="#94A3B8" stroke-width="0" opacity="0"/>
+  <!-- branch to third question -->
+  <line x1="120" y1="300" x2="330" y2="300" stroke="#94A3B8" stroke-width="0" opacity="0"/>
+
+  <line x1="230" y1="265" x2="330" y2="265" stroke="#94A3B8" stroke-width="2"/>
+  <line x1="330" y1="265" x2="330" y2="440" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="340" y="280" font-family="system-ui, sans-serif" font-size="13" fill="#64748B">No</text>
+
+  <!-- Third question -->
+  <rect x="220" y="440" width="220" height="70" rx="10" fill="#4F46E5"/>
+  <text x="330" y="468" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#ffffff">Needs sharp-edged</text>
+  <text x="330" y="487" text-anchor="middle" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#ffffff">transparency?</text>
+
+  <line x1="330" y1="510" x2="330" y2="550" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="350" y="536" font-family="system-ui, sans-serif" font-size="13" fill="#64748B">Yes</text>
+
+  <!-- PNG box -->
+  <rect x="220" y="550" width="220" height="60" rx="10" fill="#F97316"/>
+  <text x="330" y="577" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#ffffff">Use PNG</text>
+  <text x="330" y="597" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#FFEDD5">Screenshots, flat-color graphics</text>
+
+  <line x1="440" y1="475" x2="560" y2="475" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="470" y="465" font-family="system-ui, sans-serif" font-size="13" fill="#64748B">No</text>
+
+  <!-- WebP lossless box -->
+  <rect x="560" y="440" width="220" height="70" rx="10" fill="#0EA5E9"/>
+  <text x="670" y="468" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#ffffff">Use WebP</text>
+  <text x="670" y="488" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" fill="#E0F2FE">Usually the smallest general choice</text>
+</svg>
