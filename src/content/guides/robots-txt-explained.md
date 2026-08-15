@@ -9,7 +9,7 @@ publishDate: 2026-08-14
 category: "seo-tools"
 relatedTools:
   - "robots-txt-tester"
-  - "ai-crawler-checker"
+  - "ai-crawler-access-checker"
 faqs:
   - question: "Does robots.txt actually prevent a page from appearing in search results?"
     answer: "Not reliably. Disallowing a URL in robots.txt tells well-behaved crawlers not to fetch that page's content, but if the URL is linked from elsewhere, a search engine can still index the URL itself, sometimes showing it in results with no description, since it was never allowed to crawl the page to generate one. Reliably keeping a page out of search results requires a noindex meta tag or header instead, which requires the page to be crawlable in the first place."

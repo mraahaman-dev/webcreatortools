@@ -8,7 +8,7 @@ imageAlt: "A robots.txt file with separate User-agent blocks for GPTBot, ClaudeB
 publishDate: 2026-08-14
 category: "seo-tools"
 relatedTools:
-  - "ai-crawler-checker"
+  - "ai-crawler-access-checker"
   - "robots-txt-tester"
 faqs:
   - question: "Does blocking GPTBot also block ChatGPT from browsing a page live for a user?"
@@ -70,7 +70,7 @@ It's also worth weighing the trade-off directly rather than defaulting to blocki
 
 ## Checking a Site's Current Configuration
 
-Because named AI crawlers can be added, renamed, or documented differently over time, and because a rule aimed at one crawler has zero effect on any other, manually auditing a robots.txt file against a current list is easy to get subtly wrong. The [AI Crawler Checker](/seo-tools/ai-crawler-checker/) checks a live domain's robots.txt against a current list of named AI crawlers and reports exactly which ones are allowed or blocked. For checking a specific rule's effect on a specific URL and crawler in more general terms, the [Robots.txt Tester](/seo-tools/robots-txt-tester/) covers that broader case.
+Because named AI crawlers can be added, renamed, or documented differently over time, and because a rule aimed at one crawler has zero effect on any other, manually auditing a robots.txt file against a current list is easy to get subtly wrong. The [AI Crawler Access Checker](/seo-tools/ai-crawler-access-checker/) checks a live domain's robots.txt against a current list of named AI crawlers and reports exactly which ones are allowed or blocked. For checking a specific rule's effect on a specific URL and crawler in more general terms, the [Robots.txt Tester](/seo-tools/robots-txt-tester/) covers that broader case.
 
 ## The short version
 
