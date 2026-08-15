@@ -1,0 +1,21 @@
+<!-- blocking-tradeoffs.svg -->
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#F8FAFC"/>
+  <text x="400" y="45" font-family="sans-serif" font-size="20" font-weight="700" fill="#0F172A" text-anchor="middle">Blocking a Named Crawler</text>
+
+  <rect x="60" y="80" width="320" height="280" rx="12" fill="#BBF7D0" stroke="#16A34A" stroke-width="2"/>
+  <text x="220" y="115" font-family="sans-serif" font-size="16" font-weight="700" fill="#166534" text-anchor="middle">What it does</text>
+  <text x="90" y="160" font-family="sans-serif" font-size="14" fill="#166534">• Reputable crawlers honor it</text>
+  <text x="90" y="190" font-family="sans-serif" font-size="14" fill="#166534">• Prevents that crawler's</text>
+  <text x="90" y="212" font-family="sans-serif" font-size="14" fill="#166534">  use of your content</text>
+  <text x="90" y="245" font-family="sans-serif" font-size="14" fill="#166534">• Same trusted convention</text>
+  <text x="90" y="267" font-family="sans-serif" font-size="14" fill="#166534">  search crawlers follow</text>
+
+  <rect x="420" y="80" width="320" height="280" rx="12" fill="#FECACA" stroke="#DC2626" stroke-width="2"/>
+  <text x="580" y="115" font-family="sans-serif" font-size="16" font-weight="700" fill="#991B1B" text-anchor="middle">What it doesn't do</text>
+  <text x="450" y="160" font-family="sans-serif" font-size="14" fill="#991B1B">• No technical enforcement</text>
+  <text x="450" y="190" font-family="sans-serif" font-size="14" fill="#991B1B">• Unnamed/malicious scrapers</text>
+  <text x="450" y="212" font-family="sans-serif" font-size="14" fill="#991B1B">  can ignore it freely</text>
+  <text x="450" y="245" font-family="sans-serif" font-size="14" fill="#991B1B">• Doesn't affect other</text>
+  <text x="450" y="267" font-family="sans-serif" font-size="14" fill="#991B1B">  named crawlers' rules</text>
+</svg>

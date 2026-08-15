@@ -1,0 +1,24 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FFFFFF"/>
+
+  <text x="400" y="34" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="#3730A3">Vague vs. Specific Description</text>
+
+  <!-- vague -->
+  <text x="200" y="70" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#991B1B">Vague</text>
+  <rect x="60" y="85" width="300" height="120" rx="10" fill="#FEF2F2" stroke="#DC2626" stroke-width="2"/>
+  <text x="80" y="115" font-family="sans-serif" font-size="15" fill="#4F46E5">example.com/seo-guide</text>
+  <text x="80" y="140" font-family="sans-serif" font-size="12" fill="#991B1B">Learn about SEO and how it</text>
+  <text x="80" y="158" font-family="sans-serif" font-size="12" fill="#991B1B">can help your website rank</text>
+  <text x="80" y="176" font-family="sans-serif" font-size="12" fill="#991B1B">better in search results.</text>
+
+  <!-- specific -->
+  <text x="600" y="70" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#166534">Specific</text>
+  <rect x="460" y="85" width="300" height="120" rx="10" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+  <text x="480" y="115" font-family="sans-serif" font-size="15" fill="#4F46E5">example.com/fix-404-errors</text>
+  <text x="480" y="140" font-family="sans-serif" font-size="12" fill="#166534">Step-by-step guide to finding</text>
+  <text x="480" y="158" font-family="sans-serif" font-size="12" fill="#166534">and fixing 404 errors before</text>
+  <text x="480" y="176" font-family="sans-serif" font-size="12" fill="#166534">they hurt your rankings.</text>
+
+  <text x="400" y="260" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#4B5563">Same length, same topic area — the specific version tells a searcher</text>
+  <text x="400" y="282" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#4B5563">exactly what they'll get, which is what actually earns the click.</text>
+</svg>

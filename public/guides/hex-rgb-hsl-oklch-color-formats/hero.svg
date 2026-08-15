@@ -1,0 +1,13 @@
+<!-- hero.svg -->
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#EEF2FF"/>
+  <rect x="80" y="220" width="220" height="220" rx="20" fill="#F26B5E"/>
+  <text x="190" y="480" font-family="monospace" font-size="22" fill="#3730A3" text-anchor="middle">#F26B5E</text>
+  <rect x="340" y="220" width="220" height="220" rx="20" fill="#F26B5E"/>
+  <text x="450" y="480" font-family="monospace" font-size="18" fill="#3730A3" text-anchor="middle">rgb(242 107 94)</text>
+  <rect x="600" y="220" width="220" height="220" rx="20" fill="#F26B5E"/>
+  <text x="710" y="480" font-family="monospace" font-size="18" fill="#3730A3" text-anchor="middle">hsl(6 84% 66%)</text>
+  <rect x="860" y="220" width="220" height="220" rx="20" fill="#F26B5E"/>
+  <text x="970" y="480" font-family="monospace" font-size="16" fill="#3730A3" text-anchor="middle">oklch(0.71 0.16 25)</text>
+  <text x="600" y="120" font-family="sans-serif" font-size="42" font-weight="700" fill="#3730A3" text-anchor="middle">One Color, Four Formats</text>
+</svg>

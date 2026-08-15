@@ -1,0 +1,28 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FFFFFF"/>
+
+  <text x="400" y="34" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="#3730A3">Passing Seconds Where Milliseconds Are Expected</text>
+
+  <rect x="60" y="60" width="300" height="46" rx="8" fill="#EEF2FF" stroke="#818CF8" stroke-width="2"/>
+  <text x="80" y="88" font-family="monospace" font-size="13" fill="#3730A3">timestamp = 1755043200</text>
+
+  <!-- wrong path -->
+  <g stroke="#DC2626" stroke-width="2" fill="none">
+    <line x1="210" y1="106" x2="150" y2="150"/>
+    <path d="M138 138 L150 150 L162 138"/>
+  </g>
+  <rect x="70" y="160" width="220" height="42" rx="8" fill="#FEF2F2" stroke="#DC2626" stroke-width="2"/>
+  <text x="85" y="186" font-family="monospace" font-size="12" fill="#991B1B">new Date(timestamp)</text>
+  <text x="180" y="230" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#991B1B">→ Jan 21, 1970 (wrong)</text>
+
+  <!-- correct path -->
+  <g stroke="#16A34A" stroke-width="2" fill="none">
+    <line x1="280" y1="106" x2="470" y2="150"/>
+    <path d="M455 142 L470 150 L458 160"/>
+  </g>
+  <rect x="450" y="160" width="280" height="42" rx="8" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+  <text x="465" y="186" font-family="monospace" font-size="12" fill="#166534">new Date(timestamp * 1000)</text>
+  <text x="590" y="230" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#166534">→ Aug 12, 2026 (correct)</text>
+
+  <text x="400" y="300" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#4B5563">JavaScript's Date always expects milliseconds; standard Unix timestamps are in seconds.</text>
+</svg>

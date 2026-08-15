@@ -1,0 +1,12 @@
+<!-- hero.svg -->
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#EEF2FF"/>
+  <rect x="260" y="120" width="680" height="390" rx="16" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="2"/>
+  <text x="300" y="170" font-family="monospace" font-size="22" fill="#4F46E5">User-agent: *</text>
+  <text x="300" y="215" font-family="monospace" font-size="22" fill="#DC2626">Disallow: /admin/</text>
+  <text x="300" y="260" font-family="monospace" font-size="22" fill="#16A34A">Allow: /admin/public.html</text>
+  <text x="300" y="330" font-family="monospace" font-size="22" fill="#4F46E5">User-agent: Googlebot</text>
+  <text x="300" y="375" font-family="monospace" font-size="22" fill="#DC2626">Disallow: /search-results/</text>
+  <text x="300" y="445" font-family="monospace" font-size="22" fill="#D97706">Sitemap: /sitemap.xml</text>
+  <text x="600" y="80" font-family="sans-serif" font-size="36" font-weight="700" fill="#3730A3" text-anchor="middle">robots.txt</text>
+</svg>

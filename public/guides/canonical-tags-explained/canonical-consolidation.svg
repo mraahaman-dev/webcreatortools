@@ -1,0 +1,22 @@
+<!-- canonical-consolidation.svg -->
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#F8FAFC"/>
+  <text x="400" y="45" font-family="sans-serif" font-size="20" font-weight="700" fill="#0F172A" text-anchor="middle">Same Content, Multiple URLs, One Canonical</text>
+
+  <rect x="60" y="90" width="200" height="70" rx="10" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="2"/>
+  <text x="160" y="130" font-family="monospace" font-size="13" fill="#3730A3" text-anchor="middle">?utm_source=x</text>
+
+  <rect x="300" y="90" width="200" height="70" rx="10" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="2"/>
+  <text x="400" y="130" font-family="monospace" font-size="13" fill="#3730A3" text-anchor="middle">/page/</text>
+
+  <rect x="540" y="90" width="200" height="70" rx="10" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="2"/>
+  <text x="640" y="130" font-family="monospace" font-size="13" fill="#3730A3" text-anchor="middle">/Page</text>
+
+  <path d="M160 165 L390 280" stroke="#4F46E5" stroke-width="2"/>
+  <path d="M400 165 L400 280" stroke="#4F46E5" stroke-width="2"/>
+  <path d="M640 165 L410 280" stroke="#4F46E5" stroke-width="2"/>
+
+  <rect x="300" y="290" width="200" height="80" rx="10" fill="#BBF7D0" stroke="#16A34A" stroke-width="2"/>
+  <text x="400" y="325" font-family="monospace" font-size="13" fill="#166534" text-anchor="middle">/page</text>
+  <text x="400" y="350" font-family="sans-serif" font-size="12" fill="#166534" text-anchor="middle">canonical URL</text>
+</svg>

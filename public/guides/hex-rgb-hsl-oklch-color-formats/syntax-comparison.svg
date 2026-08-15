@@ -1,0 +1,25 @@
+<!-- syntax-comparison.svg -->
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#EEF2FF"/>
+  <g>
+    <rect x="60" y="60" width="150" height="150" rx="16" fill="#F26B5E"/>
+    <text x="135" y="240" font-family="monospace" font-size="16" fill="#3730A3" text-anchor="middle">#F26B5E</text>
+    <text x="135" y="30" font-family="sans-serif" font-size="16" font-weight="600" fill="#3730A3" text-anchor="middle">HEX</text>
+  </g>
+  <g>
+    <rect x="245" y="60" width="150" height="150" rx="16" fill="#F26B5E"/>
+    <text x="320" y="240" font-family="monospace" font-size="13" fill="#3730A3" text-anchor="middle">rgb(242 107 94)</text>
+    <text x="320" y="30" font-family="sans-serif" font-size="16" font-weight="600" fill="#3730A3" text-anchor="middle">RGB</text>
+  </g>
+  <g>
+    <rect x="430" y="60" width="150" height="150" rx="16" fill="#F26B5E"/>
+    <text x="505" y="240" font-family="monospace" font-size="13" fill="#3730A3" text-anchor="middle">hsl(6 84% 66%)</text>
+    <text x="505" y="30" font-family="sans-serif" font-size="16" font-weight="600" fill="#3730A3" text-anchor="middle">HSL</text>
+  </g>
+  <g>
+    <rect x="615" y="60" width="150" height="150" rx="16" fill="#F26B5E"/>
+    <text x="690" y="240" font-family="monospace" font-size="12" fill="#3730A3" text-anchor="middle">oklch(0.71 0.16 25)</text>
+    <text x="690" y="30" font-family="sans-serif" font-size="16" font-weight="600" fill="#3730A3" text-anchor="middle">OKLCH</text>
+  </g>
+  <text x="400" y="300" font-family="sans-serif" font-size="16" fill="#64748B" text-anchor="middle">All four describe the exact same visible color</text>
+</svg>

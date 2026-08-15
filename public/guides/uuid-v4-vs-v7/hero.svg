@@ -1,0 +1,41 @@
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg7" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EEF2FF"/>
+      <stop offset="1" stop-color="#C7D2FE"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg7)"/>
+
+  <!-- v4 scattered dots -->
+  <text x="270" y="180" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#3730A3">UUID v4</text>
+  <g fill="#818CF8">
+    <circle cx="150" cy="240" r="10"/>
+    <circle cx="330" cy="220" r="10"/>
+    <circle cx="220" cy="300" r="10"/>
+    <circle cx="380" cy="330" r="10"/>
+    <circle cx="120" cy="350" r="10"/>
+    <circle cx="290" cy="400" r="10"/>
+    <circle cx="180" cy="420" r="10"/>
+    <circle cx="360" cy="270" r="10"/>
+  </g>
+  <text x="270" y="470" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#4338CA">fully random</text>
+
+  <!-- divider -->
+  <line x1="600" y1="150" x2="600" y2="480" stroke="#A5B4FC" stroke-width="2" stroke-dasharray="6 6"/>
+
+  <!-- v7 ordered timeline -->
+  <text x="930" y="180" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#3730A3">UUID v7</text>
+  <line x1="770" y1="330" x2="1090" y2="330" stroke="#4F46E5" stroke-width="3"/>
+  <g fill="#4F46E5">
+    <circle cx="800" cy="330" r="10"/>
+    <circle cx="860" cy="330" r="10"/>
+    <circle cx="920" cy="330" r="10"/>
+    <circle cx="980" cy="330" r="10"/>
+    <circle cx="1040" cy="330" r="10"/>
+  </g>
+  <text x="930" y="380" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#4338CA">timestamp-ordered</text>
+  <text x="930" y="470" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#4338CA">roughly sequential</text>
+
+  <text x="600" y="565" text-anchor="middle" font-family="sans-serif" font-size="26" font-weight="bold" fill="#3730A3">Random vs. Time-Ordered Identifiers</text>
+</svg>

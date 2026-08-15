@@ -1,0 +1,36 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FFFFFF"/>
+
+  <text x="400" y="34" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="#3730A3">Four Common JSON Mistakes</text>
+
+  <!-- header row -->
+  <text x="230" y="65" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#991B1B">Invalid</text>
+  <text x="590" y="65" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#166534">Valid</text>
+
+  <!-- row 1: trailing comma -->
+  <rect x="70" y="75" width="320" height="36" rx="6" fill="#FEF2F2"/>
+  <text x="85" y="98" font-family="monospace" font-size="12" fill="#991B1B">{"a": 1, "b": 2,}</text>
+  <rect x="430" y="75" width="320" height="36" rx="6" fill="#F0FDF4"/>
+  <text x="445" y="98" font-family="monospace" font-size="12" fill="#166534">{"a": 1, "b": 2}</text>
+
+  <!-- row 2: single quotes -->
+  <rect x="70" y="120" width="320" height="36" rx="6" fill="#FEF2F2"/>
+  <text x="85" y="143" font-family="monospace" font-size="12" fill="#991B1B">{'name': 'value'}</text>
+  <rect x="430" y="120" width="320" height="36" rx="6" fill="#F0FDF4"/>
+  <text x="445" y="143" font-family="monospace" font-size="12" fill="#166534">{"name": "value"}</text>
+
+  <!-- row 3: unquoted keys -->
+  <rect x="70" y="165" width="320" height="36" rx="6" fill="#FEF2F2"/>
+  <text x="85" y="188" font-family="monospace" font-size="12" fill="#991B1B">{name: "value"}</text>
+  <rect x="430" y="165" width="320" height="36" rx="6" fill="#F0FDF4"/>
+  <text x="445" y="188" font-family="monospace" font-size="12" fill="#166534">{"name": "value"}</text>
+
+  <!-- row 4: comments -->
+  <rect x="70" y="210" width="320" height="36" rx="6" fill="#FEF2F2"/>
+  <text x="85" y="233" font-family="monospace" font-size="12" fill="#991B1B">{"a": 1 // note}</text>
+  <rect x="430" y="210" width="320" height="36" rx="6" fill="#F0FDF4"/>
+  <text x="445" y="233" font-family="monospace" font-size="12" fill="#166534">{"a": 1}</text>
+
+  <text x="400" y="290" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#4B5563">trailing comma · single quotes · unquoted keys · comments</text>
+  <text x="400" y="312" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#4B5563">all valid in JS object literals, none valid in strict JSON</text>
+</svg>

@@ -1,0 +1,21 @@
+<!-- density-vs-topic-coverage.svg -->
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#F8FAFC"/>
+  <text x="400" y="40" font-family="sans-serif" font-size="20" font-weight="700" fill="#0F172A" text-anchor="middle">Repetition vs Genuine Coverage</text>
+
+  <rect x="60" y="70" width="300" height="300" rx="12" fill="#FECACA" stroke="#DC2626" stroke-width="2"/>
+  <text x="210" y="105" font-family="sans-serif" font-size="14" font-weight="700" fill="#991B1B" text-anchor="middle">Density-chasing page</text>
+  <text x="90" y="150" font-family="monospace" font-size="12" fill="#991B1B">"best coffee maker" appears</text>
+  <text x="90" y="175" font-family="monospace" font-size="12" fill="#991B1B">"best coffee maker" again</text>
+  <text x="90" y="200" font-family="monospace" font-size="12" fill="#991B1B">"best coffee maker" again</text>
+  <text x="90" y="225" font-family="monospace" font-size="12" fill="#991B1B">"best coffee maker" again</text>
+  <text x="90" y="280" font-family="sans-serif" font-size="12" fill="#991B1B">Reads unnatural, narrow scope</text>
+
+  <rect x="440" y="70" width="300" height="300" rx="12" fill="#BBF7D0" stroke="#16A34A" stroke-width="2"/>
+  <text x="590" y="105" font-family="sans-serif" font-size="14" font-weight="700" fill="#166534" text-anchor="middle">Topic-covering page</text>
+  <text x="470" y="150" font-family="monospace" font-size="12" fill="#166534">grind size, extraction time</text>
+  <text x="470" y="175" font-family="monospace" font-size="12" fill="#166534">portafilter, water temperature</text>
+  <text x="470" y="200" font-family="monospace" font-size="12" fill="#166534">bean freshness, tamping</text>
+  <text x="470" y="225" font-family="monospace" font-size="12" fill="#166534">common brewing mistakes</text>
+  <text x="470" y="280" font-family="sans-serif" font-size="12" fill="#166534">Reads natural, broad coverage</text>
+</svg>

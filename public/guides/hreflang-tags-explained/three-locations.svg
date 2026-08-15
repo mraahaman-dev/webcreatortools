@@ -1,0 +1,26 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FFFFFF"/>
+
+  <text x="400" y="38" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#3730A3">Three Valid Locations</text>
+
+  <rect x="50" y="80" width="210" height="150" rx="10" fill="#EEF2FF" stroke="#818CF8" stroke-width="2"/>
+  <text x="155" y="112" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#3730A3">HTML &lt;head&gt;</text>
+  <text x="70" y="140" font-family="monospace" font-size="10" fill="#4338CA">&lt;link rel="alternate"</text>
+  <text x="90" y="155" font-family="monospace" font-size="10" fill="#4338CA">hreflang="fr" ... /&gt;</text>
+  <text x="155" y="205" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4338CA">good for a few variants</text>
+
+  <rect x="295" y="80" width="210" height="150" rx="10" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+  <text x="400" y="112" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#166534">XML Sitemap</text>
+  <text x="315" y="140" font-family="monospace" font-size="10" fill="#166534">&lt;xhtml:link</text>
+  <text x="330" y="155" font-family="monospace" font-size="10" fill="#166534">rel="alternate" .../&gt;</text>
+  <text x="400" y="205" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#166534">good for many variants</text>
+
+  <rect x="540" y="80" width="210" height="150" rx="10" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/>
+  <text x="645" y="112" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#92400E">HTTP Headers</text>
+  <text x="560" y="140" font-family="monospace" font-size="10" fill="#92400E">Link: &lt;url&gt;;</text>
+  <text x="560" y="155" font-family="monospace" font-size="10" fill="#92400E">rel="alternate"...</text>
+  <text x="645" y="205" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#92400E">for non-HTML files (PDFs)</text>
+
+  <text x="400" y="280" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#4B5563">All three follow the same reciprocity and format rules;</text>
+  <text x="400" y="302" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#4B5563">the choice is about scale and content type.</text>
+</svg>

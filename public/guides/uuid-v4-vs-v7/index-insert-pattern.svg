@@ -1,0 +1,31 @@
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#FFFFFF"/>
+
+  <text x="400" y="38" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#3730A3">Where New Rows Land in the Index</text>
+
+  <!-- v4 index -->
+  <text x="200" y="75" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#991B1B">UUID v4 primary key</text>
+  <rect x="70" y="90" width="260" height="50" rx="6" fill="#FEF2F2" stroke="#DC2626" stroke-width="2"/>
+  <circle cx="110" cy="115" r="7" fill="#DC2626"/>
+  <circle cx="290" cy="115" r="7" fill="#DC2626"/>
+  <circle cx="180" cy="115" r="7" fill="#DC2626"/>
+  <circle cx="240" cy="115" r="7" fill="#DC2626"/>
+  <circle cx="140" cy="115" r="7" fill="#DC2626"/>
+  <text x="200" y="165" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#991B1B">new rows insert anywhere</text>
+  <text x="200" y="185" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#991B1B">→ page splits, fragmentation</text>
+
+  <!-- v7 index -->
+  <text x="600" y="75" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#166534">UUID v7 primary key</text>
+  <rect x="470" y="90" width="260" height="50" rx="6" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+  <circle cx="500" cy="115" r="7" fill="#16A34A"/>
+  <circle cx="540" cy="115" r="7" fill="#16A34A"/>
+  <circle cx="580" cy="115" r="7" fill="#16A34A"/>
+  <circle cx="620" cy="115" r="7" fill="#16A34A"/>
+  <rect x="655" y="105" width="45" height="20" rx="4" fill="none" stroke="#16A34A" stroke-width="2" stroke-dasharray="3 3"/>
+  <text x="678" y="119" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#16A34A">new</text>
+  <text x="600" y="165" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#166534">new rows mostly append at end</text>
+  <text x="600" y="185" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#166534">→ index stays efficient</text>
+
+  <text x="400" y="280" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#4B5563">B-tree indexes perform best with mostly-sequential inserts.</text>
+  <text x="400" y="302" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#4B5563">v7's timestamp prefix keeps values roughly increasing; v4 offers no such pattern.</text>
+</svg>

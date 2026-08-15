@@ -1,0 +1,20 @@
+<!-- canonical-mistakes.svg -->
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="420" fill="#F8FAFC"/>
+  <text x="400" y="40" font-family="sans-serif" font-size="20" font-weight="700" fill="#0F172A" text-anchor="middle">Common Canonical Mistakes</text>
+
+  <rect x="40" y="70" width="220" height="300" rx="12" fill="#FECACA" stroke="#DC2626" stroke-width="2"/>
+  <text x="150" y="105" font-family="sans-serif" font-size="14" font-weight="700" fill="#991B1B" text-anchor="middle">Points to 404</text>
+  <text x="150" y="200" font-family="monospace" font-size="13" fill="#991B1B" text-anchor="middle">canonical →</text>
+  <text x="150" y="225" font-family="monospace" font-size="13" fill="#991B1B" text-anchor="middle">deleted page</text>
+
+  <rect x="290" y="70" width="220" height="300" rx="12" fill="#FECACA" stroke="#DC2626" stroke-width="2"/>
+  <text x="400" y="105" font-family="sans-serif" font-size="14" font-weight="700" fill="#991B1B" text-anchor="middle">Two Canonicals</text>
+  <text x="400" y="190" font-family="monospace" font-size="12" fill="#991B1B" text-anchor="middle">canonical → A</text>
+  <text x="400" y="215" font-family="monospace" font-size="12" fill="#991B1B" text-anchor="middle">canonical → B</text>
+
+  <rect x="540" y="70" width="220" height="300" rx="12" fill="#FECACA" stroke="#DC2626" stroke-width="2"/>
+  <text x="650" y="105" font-family="sans-serif" font-size="14" font-weight="700" fill="#991B1B" text-anchor="middle">Wrong Page</text>
+  <text x="650" y="200" font-family="monospace" font-size="13" fill="#991B1B" text-anchor="middle">canonical →</text>
+  <text x="650" y="225" font-family="monospace" font-size="13" fill="#991B1B" text-anchor="middle">unrelated URL</text>
+</svg>
