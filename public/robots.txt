@@ -1,9 +1,6 @@
 User-agent: *
 Allow: /
 
-User-agent: Googlebot
-Disallow: /
-
 User-agent: GPTBot
 Allow: /
 
@@ -12,5 +9,7 @@ Allow: /
 
 User-agent: PerplexityBot
 Allow: /
+
+Disallow: /api/
 
 Sitemap: https://pixelquil.com/sitemap-index.xml
