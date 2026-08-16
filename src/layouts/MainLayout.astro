@@ -39,7 +39,16 @@ const resolvedCanonical = canonicalUrl ?? `https://pixelquil.com${Astro.url.path
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
-    <slot name="head" />
+   <slot name="head" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-30T36VM3XN"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-30T36VM3XN');
+    </script>
   </head>
 
   <body class="flex min-h-screen flex-col bg-white text-slate-900">
