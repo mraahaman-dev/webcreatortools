@@ -105,7 +105,7 @@ The multiplication by 1000 matters because JavaScript's `Date` constructor expec
 
 ## When You Just Want the Answer Without Typing Code
 
-The console approach is genuinely useful for understanding what's happening, but typing it out every time you need to check a token gets old fast. The [JWT Decoder](/dev-tools/jwt-decoder/) runs this exact base64url-to-JSON logic behind a paste box, formats both the header and payload as readable JSON, converts `exp` and `iat` into actual dates automatically, and flags an already-expired token, all without the token ever leaving your browser.
+The console approach is genuinely useful for understanding what's happening, but typing it out every time you need to check a token gets old fast. The [JWT Decoder](/developer-tools/jwt-decoder/) runs this exact base64url-to-JSON logic behind a paste box, formats both the header and payload as readable JSON, converts `exp` and `iat` into actual dates automatically, and flags an already-expired token, all without the token ever leaving your browser.
 
 ## The short version
 

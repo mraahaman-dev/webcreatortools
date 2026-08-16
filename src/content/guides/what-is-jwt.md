@@ -92,7 +92,7 @@ None of these are enforced automatically. A server that never checks `exp` will 
 
 ## Decoding a JWT Yourself
 
-Manually base64url-decoding two segments and formatting the JSON by hand works, but it's tedious and easy to mess up, especially with padding differences between standard base64 and base64url. Pasting a token into the [JWT Decoder](/dev-tools/jwt-decoder/) splits it into header and payload instantly, formats both as readable JSON, and flags common issues like an already-expired `exp` claim, without ever sending the token anywhere since decoding happens entirely in the browser.
+Manually base64url-decoding two segments and formatting the JSON by hand works, but it's tedious and easy to mess up, especially with padding differences between standard base64 and base64url. Pasting a token into the [JWT Decoder](/developer-tools/jwt-decoder/) splits it into header and payload instantly, formats both as readable JSON, and flags common issues like an already-expired `exp` claim, without ever sending the token anywhere since decoding happens entirely in the browser.
 
 ## The short version
 

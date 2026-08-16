@@ -56,7 +56,7 @@ Skipping any one of these doesn't break the site, but it does mean some visitors
 ## Step-by-Step: Generating the Set
 
 1. **Start with a square, simplified SVG.** If your logo includes a wordmark, isolate just the icon mark or monogram, since a full logo compressed into a 16px square usually turns to mush. Set the `viewBox` to equal width and height (for example `0 0 512 512`) with the artwork centered.
-2. **Validate it first.** Run the source through the [SVG Viewer & Validator](/svg-tools/svg-viewer-validator/) to confirm it has a clean, single `viewBox` and no leftover editor artifacts that could render oddly at tiny sizes.
+2. **Validate it first.** Run the source through the [SVG Viewer & Validator](/svg-tools/svg-viewer/) to confirm it has a clean, single `viewBox` and no leftover editor artifacts that could render oddly at tiny sizes.
 3. **Optimize it.** Pass it through the [SVG Optimizer](/svg-tools/svg-optimizer/) to strip unnecessary precision and metadata, since favicon files get requested on every single page load.
 4. **Generate the full set.** Upload the cleaned SVG to the [Favicon Generator](/svg-tools/favicon-generator/), which outputs `favicon.svg`, a real multi-size `favicon.ico`, and the PNG sizes needed for touch icons and web manifests, all from that one source file.
 5. **Add the HTML tags.** Copy the generated `<link>` tags into your site's `<head>`, covering each format so every browser and device requests the right file rather than falling back to a default.

@@ -79,7 +79,7 @@ If an attacker obtains a database of password hashes, they try to guess the orig
 
 ## Generating Either Hash
 
-Computing an MD5 or SHA-256 hash by hand isn't practical, both rely on well-defined but intricate bit manipulation that's meant to be run by an algorithm, not worked out manually. The [Hash Generator](/dev-tools/hash-generator/) computes both MD5 and SHA-family hashes from pasted text or an uploaded file entirely in the browser, useful for verifying a download against a publisher's published checksum or generating one for your own files.
+Computing an MD5 or SHA-256 hash by hand isn't practical, both rely on well-defined but intricate bit manipulation that's meant to be run by an algorithm, not worked out manually. The [Hash Generator](/developer-tools/hash-generator/) computes both MD5 and SHA-family hashes from pasted text or an uploaded file entirely in the browser, useful for verifying a download against a publisher's published checksum or generating one for your own files.
 
 ## The short version
 

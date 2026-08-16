@@ -85,7 +85,7 @@ JSON.stringify(data);
 
 ## Validating and Formatting Without Guessing by Eye
 
-Manually scanning a large JSON blob for a single missing comma or stray quote is slow and error-prone, especially once nesting gets a few levels deep. The [JSON Formatter & Validator](/dev-tools/json-formatter-validator/) parses pasted JSON, points out exactly what's invalid and why in plain language rather than just a character offset, and can instantly toggle the same valid data between pretty-printed and minified output.
+Manually scanning a large JSON blob for a single missing comma or stray quote is slow and error-prone, especially once nesting gets a few levels deep. The [JSON Formatter & Validator](/developer-tools/json-formatter-validator/) parses pasted JSON, points out exactly what's invalid and why in plain language rather than just a character offset, and can instantly toggle the same valid data between pretty-printed and minified output.
 
 ## The short version
 

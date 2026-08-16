@@ -81,7 +81,7 @@ v4 is also the simpler default when the value in question isn't a high-volume da
 
 ## Generating Either Version
 
-Both versions follow specific bit-layout rules that are easy to get subtly wrong by hand, particularly the version and variant bits that mark a UUID as v4 or v7 in the first place. The [UUID Generator](/dev-tools/uuid-generator/) produces correctly formatted values for either version on demand, so there's no need to hand-roll the bit manipulation or accidentally generate a malformed identifier.
+Both versions follow specific bit-layout rules that are easy to get subtly wrong by hand, particularly the version and variant bits that mark a UUID as v4 or v7 in the first place. The [UUID Generator](/developer-tools/uuid-generator/) produces correctly formatted values for either version on demand, so there's no need to hand-roll the bit manipulation or accidentally generate a malformed identifier.
 
 ## The short version
 

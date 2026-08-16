@@ -43,7 +43,7 @@ An SVG icon that looks perfectly clear on screen can be completely silent, or wo
 
 When a browser encounters `<img src="icon.svg" alt="Search">`, the rule is simple: the `alt` attribute is what gets announced, full stop. Whatever accessibility markup exists inside `icon.svg` itself is irrelevant in that context, because the browser treats the whole file as a single opaque image, the same as it would a PNG or JPEG.
 
-The moment that same SVG is inlined directly into the HTML as an `<svg>...</svg>` element, the rules change completely. Now the browser exposes the SVG's actual internal structure to the accessibility tree, and it's the SVG's own markup, specifically `<title>`, `<desc>`, and any `role` or `aria-*` attributes, that determines what gets announced. Running a source file through the [SVG Viewer & Validator](/svg-tools/svg-viewer-validator/) first is a good habit here too, since malformed markup can behave unpredictably once it's parsed as live DOM rather than treated as an opaque file.
+The moment that same SVG is inlined directly into the HTML as an `<svg>...</svg>` element, the rules change completely. Now the browser exposes the SVG's actual internal structure to the accessibility tree, and it's the SVG's own markup, specifically `<title>`, `<desc>`, and any `role` or `aria-*` attributes, that determines what gets announced. Running a source file through the [SVG Viewer & Validator](/svg-tools/svg-viewer/) first is a good habit here too, since malformed markup can behave unpredictably once it's parsed as live DOM rather than treated as an opaque file.
 
 ## `<title>`: The Accessible Name
 

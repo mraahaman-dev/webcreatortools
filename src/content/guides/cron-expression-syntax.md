@@ -102,7 +102,7 @@ These are a readability convenience layered on top of the standard fields, not a
 
 ## Building and Checking an Expression Without Guessing
 
-Reading an unfamiliar cron expression correctly, or writing a new one without accidentally scheduling it for the wrong day, is easy to get subtly wrong by hand, especially once ranges and steps combine. The [Cron Expression Parser](/dev-tools/cron-expression-parser/) translates a pasted expression into a plain-English description of exactly when it runs, and includes a visual builder mode for constructing one field by field without memorizing the syntax.
+Reading an unfamiliar cron expression correctly, or writing a new one without accidentally scheduling it for the wrong day, is easy to get subtly wrong by hand, especially once ranges and steps combine. The [Cron Expression Parser](/developer-tools/cron-expression-parser/) translates a pasted expression into a plain-English description of exactly when it runs, and includes a visual builder mode for constructing one field by field without memorizing the syntax.
 
 ## The short version
 

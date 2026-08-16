@@ -82,7 +82,7 @@ Without stored color data to read, extracting from a PNG or JPG logo works diffe
   <figcaption>Clustering turns hundreds of technically-distinct pixel values into the handful of colors a human would actually name.</figcaption>
 </figure>
 
-If you're working from a raster logo and eventually want to use the result as a design system palette (for example, generating Tailwind color tokens), an [Image to Tailwind Palette](/svg-tools/image-to-tailwind/) tool handles the sampling and outputs ready-to-use palette tokens directly, rather than leaving you to convert swatches manually afterward.
+If you're working from a raster logo and eventually want to use the result as a design system palette (for example, generating Tailwind color tokens), an [Image to Tailwind Palette](/developer-tools/image-to-tailwind-palette/) tool handles the sampling and outputs ready-to-use palette tokens directly, rather than leaving you to convert swatches manually afterward.
 
 ## Common mistakes that produce a messier palette than expected
 
@@ -95,7 +95,7 @@ If you're working from a raster logo and eventually want to use the result as a 
 
 Once you have a clean, deduplicated palette, the practical next steps usually involve converting formats and applying the colors consistently:
 
-- **Format conversion.** Design tools, CSS, and Tailwind configs don't always want the same format. A [Color Format Converter](/svg-tools/color-converter/) converts a HEX value to RGB, HSL, or OKLCH as needed, useful when your extracted palette is in one format but your codebase's design tokens are set up in another.
+- **Format conversion.** Design tools, CSS, and Tailwind configs don't always want the same format. A [Color Format Converter](/developer-tools/color-format-converter/) converts a HEX value to RGB, HSL, or OKLCH as needed, useful when your extracted palette is in one format but your codebase's design tokens are set up in another.
 - **Enforcing the palette across existing assets.** If you've extracted a definitive brand palette and want to make sure every SVG icon in a set actually uses those exact values (rather than slightly-off approximations from various sources), a [Batch Color Replacer](/svg-tools/batch-color-replacer/) can swap near-matching colors across many files at once to the correct canonical value.
 
 ## The short version

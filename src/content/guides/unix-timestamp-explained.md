@@ -86,7 +86,7 @@ Older and embedded systems sometimes store a Unix timestamp as a signed 32-bit i
 
 ## Converting and Debugging Without Doing the Math by Hand
 
-Manually converting between a raw timestamp, a readable date, and the right timezone, especially while also tracking whether a given value is in seconds or milliseconds, is easy to get wrong under time pressure while debugging. The [Unix Timestamp Converter](/dev-tools/unix-timestamp-converter/) converts in both directions instantly, detects whether a pasted value looks like seconds or milliseconds, and displays the result across multiple timezones at once so there's no guessing which conversion step went wrong.
+Manually converting between a raw timestamp, a readable date, and the right timezone, especially while also tracking whether a given value is in seconds or milliseconds, is easy to get wrong under time pressure while debugging. The [Unix Timestamp Converter](/developer-tools/unix-timestamp-converter/) converts in both directions instantly, detects whether a pasted value looks like seconds or milliseconds, and displays the result across multiple timezones at once so there's no guessing which conversion step went wrong.
 
 ## The short version
 

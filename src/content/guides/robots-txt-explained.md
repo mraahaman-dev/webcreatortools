@@ -86,7 +86,7 @@ Given `Disallow: /admin/` and `Allow: /admin/public-page.html`, the second rule'
 
 ## Checking a Real File Instead of Guessing
 
-Robots.txt syntax looks simple, but the interaction between multiple groups, specificity rules, and crawler-specific behavior makes it easy to write something that doesn't do what it looks like it does. The [Robots.txt Tester](/seo-tools/robots-txt-tester/) checks a live domain's actual robots.txt (or a pasted draft) against a specific crawler's user-agent and reports exactly which rule wins for a given URL. If the concern is specifically AI crawlers rather than traditional search bots, the [AI Crawler Checker](/seo-tools/ai-crawler-checker/) checks a domain's stance toward named AI crawlers directly.
+Robots.txt syntax looks simple, but the interaction between multiple groups, specificity rules, and crawler-specific behavior makes it easy to write something that doesn't do what it looks like it does. The [Robots.txt Tester](/seo-tools/robots-txt-tester/) checks a live domain's actual robots.txt (or a pasted draft) against a specific crawler's user-agent and reports exactly which rule wins for a given URL. If the concern is specifically AI crawlers rather than traditional search bots, the [AI Crawler Checker](/seo-tools/ai-crawler-access-checker/) checks a domain's stance toward named AI crawlers directly.
 
 ## The short version
 

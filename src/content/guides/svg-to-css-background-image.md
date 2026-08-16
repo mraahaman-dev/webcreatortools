@@ -58,8 +58,8 @@ Base64 inflates any input by around 33%, because it's designed for binary data w
 
 ## Step-by-Step: Converting Your SVG to a CSS Background Image
 
-1. **Clean up the SVG first.** Strip editor cruft (`xmlns:xlink` you don't use, empty `<defs>`, excess decimal precision) with the [SVG Optimizer](/svg-tools/svg-optimizer/) or [SVG Code Editor](/svg-tools/svg-code-editor/), since every byte you remove here is a byte you don't have to encode.
-2. **Validate the markup.** Run it through the [SVG Viewer & Validator](/svg-tools/svg-viewer-validator/) to confirm it has a proper `viewBox` and no malformed XML, which can otherwise fail silently once it's buried inside a CSS string.
+1. **Clean up the SVG first.** Strip editor cruft (`xmlns:xlink` you don't use, empty `<defs>`, excess decimal precision) with the [SVG Optimizer](/svg-tools/svg-optimizer/) or [SVG Code Editor](/svg-tools/svg-editor/), since every byte you remove here is a byte you don't have to encode.
+2. **Validate the markup.** Run it through the [SVG Viewer & Validator](/svg-tools/svg-viewer/) to confirm it has a proper `viewBox` and no malformed XML, which can otherwise fail silently once it's buried inside a CSS string.
 3. **Encode it.** Paste the cleaned SVG into the [SVG to CSS Data URI](/svg-tools/svg-to-css-data-uri/) tool, which handles percent-encoding the special characters correctly and gives you both URL-encoded and base64 output to compare.
 4. **Paste the result into your CSS.** Drop the generated value straight into a `background-image` declaration, as shown below.
 5. **Check it renders.** Open the page and confirm the icon appears at the expected size — data URIs still respect `background-size`, `background-position`, and `background-repeat` exactly like a normal image file.

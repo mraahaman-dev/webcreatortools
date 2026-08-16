@@ -93,7 +93,7 @@ Given the text `<b>bold</b> and <i>italic</i>`, the pattern `<.+>` greedily matc
 
 ## Testing a Pattern Without Guessing
 
-Writing regex correctly on the first try is rare even for people who use it daily, since small mistakes like a missing escape or a greedy quantifier are easy to miss just by reading the pattern. The [Regex Tester & Builder](/dev-tools/regex-tester-builder/) highlights matches live as you type, against your own sample text, so you can see immediately whether a pattern is too loose, too strict, or matching the wrong part of the string entirely.
+Writing regex correctly on the first try is rare even for people who use it daily, since small mistakes like a missing escape or a greedy quantifier are easy to miss just by reading the pattern. The [Regex Tester & Builder](/developer-tools/regex-tester-builder/) highlights matches live as you type, against your own sample text, so you can see immediately whether a pattern is too loose, too strict, or matching the wrong part of the string entirely.
 
 ## The short version
 
