@@ -60,7 +60,7 @@ Base64 inflates any input by around 33%, because it's designed for binary data w
 
 1. **Clean up the SVG first.** Strip editor cruft (`xmlns:xlink` you don't use, empty `<defs>`, excess decimal precision) with the [SVG Optimizer](/svg-tools/svg-optimizer/) or [SVG Code Editor](/svg-tools/svg-editor/), since every byte you remove here is a byte you don't have to encode.
 2. **Validate the markup.** Run it through the [SVG Viewer & Validator](/svg-tools/svg-viewer/) to confirm it has a proper `viewBox` and no malformed XML, which can otherwise fail silently once it's buried inside a CSS string.
-3. **Encode it.** Paste the cleaned SVG into the [SVG to CSS Data URI](/svg-tools/svg-to-css-data-uri/) tool, which handles percent-encoding the special characters correctly and gives you both URL-encoded and base64 output to compare.
+3. **Encode it.** Paste the cleaned SVG into the [SVG to CSS Data URI](/developer-tools/svg-to-css-data-uri/) tool, which handles percent-encoding the special characters correctly and gives you both URL-encoded and base64 output to compare.
 4. **Paste the result into your CSS.** Drop the generated value straight into a `background-image` declaration, as shown below.
 5. **Check it renders.** Open the page and confirm the icon appears at the expected size — data URIs still respect `background-size`, `background-position`, and `background-repeat` exactly like a normal image file.
 
@@ -97,4 +97,4 @@ Both approaches treat the SVG as a static, non-interactive image. If you need to
 
 ## The short version
 
-A CSS data URI lets you embed an SVG's markup directly inside a `background-image` value, skipping the extra HTTP request a separate file would need. URL-encoding is almost always the better choice over base64 for SVG since the markup is already plain text, but the special characters still need careful escaping, which is why running your SVG through an [SVG to CSS Data URI](/svg-tools/svg-to-css-data-uri/) tool beats typing the encoded string by hand. Reach for this technique on small, one-off icons that won't be reused across many pages; for anything shared site-wide, a real cacheable `.svg` file still wins.
+A CSS data URI lets you embed an SVG's markup directly inside a `background-image` value, skipping the extra HTTP request a separate file would need. URL-encoding is almost always the better choice over base64 for SVG since the markup is already plain text, but the special characters still need careful escaping, which is why running your SVG through an [SVG to CSS Data URI](/developer-tools/svg-to-css-data-uri/) tool beats typing the encoded string by hand. Reach for this technique on small, one-off icons that won't be reused across many pages; for anything shared site-wide, a real cacheable `.svg` file still wins.
