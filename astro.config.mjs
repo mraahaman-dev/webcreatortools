@@ -10,7 +10,7 @@ import sitemap from '@astrojs/sitemap';
 // https://astro.build/config
 export default defineConfig({
   trailingSlash: "always",
-  site: 'https://webcreatortools.com',
+  site: 'https://pixelquil.com',
   vite: {
     plugins: [tailwindcss()],
     server: {
