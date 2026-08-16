@@ -6,12 +6,16 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  canonicalUrl?: string;
 }
 
 const {
   title = "Pixelquil, Privacy First Web Tools",
   description = "Free browser based tools for SVG editing, developer utilities, and technical SEO checks. Nothing you upload ever leaves your browser.",
+  canonicalUrl,
 } = Astro.props;
+
+const resolvedCanonical = canonicalUrl ?? `https://pixelquil.com${Astro.url.pathname}`;
 ---
 
 <!doctype html>
@@ -24,6 +28,7 @@ const {
 
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={resolvedCanonical} />
 
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

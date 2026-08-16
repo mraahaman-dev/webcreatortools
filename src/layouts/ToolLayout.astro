@@ -76,7 +76,7 @@ const howToSchema = howTo.length > 0 ? {
 } : null;
 ---
 
-<MainLayout title={`${title} — Pixelquil`} description={description}>
+<MainLayout title={`${title} — Pixelquil`} description={description} canonicalUrl={pageUrl}>
 
   <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />

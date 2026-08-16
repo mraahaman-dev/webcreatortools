@@ -113,8 +113,7 @@ const faqJsonLd =
     : null;
 ---
 
-<MainLayout title={metaTitle || title} description={metaDescription || description}>
-  <link rel="canonical" href={canonicalUrl} slot="head" />
+<MainLayout title={metaTitle || title} description={metaDescription || description} canonicalUrl={canonicalUrl}>
   <meta property="og:type" content="article" slot="head" />
   <meta property="og:title" content={metaTitle || title} slot="head" />
   <meta property="og:description" content={metaDescription || description} slot="head" />
