@@ -14,7 +14,7 @@ export function getStaticPaths() {
 const { category } = Astro.props;
 const categoryTools = toolsData.filter((tool) => tool.category === category.slug);
 
-const siteUrl = "https://webcreatortools.com";
+const siteUrl = "https://pixelquil.com";
 const pageUrl = `${siteUrl}/${category.slug}/`;
 
 const breadcrumbSchema = {
