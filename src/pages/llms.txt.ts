@@ -42,9 +42,9 @@ export const GET: APIRoute = async () => {
 
   output += `## Guides\n`;
   for (const guide of guides) {
-    const title = guide.data.title ?? guide.slug;
+    const title = guide.data.title ?? guide.id;
     const description = guide.data.description ?? '';
-    output += `- [${title}](${siteUrl}/guides/${guide.slug}/): ${description}\n`;
+    output += `- [${title}](${siteUrl}/guides/${guide.id}/): ${description}\n`;
   }
 
   output += `\n## Optional\n- [About](${siteUrl}/about/)\n- [FAQs](${siteUrl}/faqs/)\n- [Sitemap](${siteUrl}/sitemap-index.xml)\n`;
